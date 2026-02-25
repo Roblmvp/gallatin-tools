@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServiceBridge — Rep Scorecards</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07070E; --surface:#0F0F1A; --surface2:#161625; --surface3:#1C1C30;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#EEE8FF; --muted:rgba(238,232,255,0.4); --muted2:rgba(238,232,255,0.22);
+  --purple:#5B4FE8; --purple2:#7B72F0; --red:#C8102E; --green:#22C55E;
+  --gold:#E8B84B; --orange:#F97316; --r:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+.bg-orb1{position:fixed;top:-200px;right:-150px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(91,79,232,0.12) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.bg-orb2{position:fixed;bottom:-200px;left:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,0.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(7,7,14,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;}
+nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--purple),transparent,var(--gold),transparent);}
+.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.06em;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav-link{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:7px;transition:all 0.18s;}
+.nav-link:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+
+.page{max-width:1300px;margin:0 auto;padding:28px 28px 80px;position:relative;z-index:1;}
+
+/* Page header */
+.page-header{margin-bottom:32px;}
+.page-eyebrow{font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.page-eyebrow::before{content:'';display:inline-block;width:20px;height:2px;background:var(--gold);border-radius:2px;}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:0.03em;line-height:1;margin-bottom:8px;}
+.page-sub{font-size:14px;color:var(--muted);}
+
+/* Period selector */
+.period-tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content;margin-bottom:28px;}
+.period-tab{padding:7px 18px;border-radius:7px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:'DM Sans',sans-serif;transition:all 0.18s;}
+.period-tab.active{background:var(--surface3);color:var(--text);}
+
+/* Top 3 podium */
+.podium{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px;align-items:end;}
+.podium-card{border-radius:20px;overflow:hidden;border:1px solid var(--border);transition:transform 0.25s;}
+.podium-card:hover{transform:translateY(-4px);}
+.podium-card.rank1{background:linear-gradient(160deg,#1C1810 0%,#2A2010 100%);border-color:rgba(232,184,75,0.3);box-shadow:0 20px 60px rgba(232,184,75,0.12);}
+.podium-card.rank2{background:linear-gradient(160deg,#131320 0%,#1A1A2E 100%);border-color:rgba(148,163,184,0.2);}
+.podium-card.rank3{background:linear-gradient(160deg,#1A1008 0%,#221408 100%);border-color:rgba(200,123,75,0.2);}
+
+.podium-top{padding:28px 24px 20px;text-align:center;position:relative;}
+.podium-rank-icon{font-size:32px;margin-bottom:12px;}
+.podium-avatar{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;}
+.rank1 .podium-avatar{background:linear-gradient(135deg,#E8B84B,#F59E0B);box-shadow:0 8px 20px rgba(232,184,75,0.3);}
+.rank2 .podium-avatar{background:linear-gradient(135deg,#94A3B8,#64748B);}
+.rank3 .podium-avatar{background:linear-gradient(135deg,#C87B4B,#92400E);}
+.podium-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;margin-bottom:2px;}
+.rank1 .podium-name{color:var(--gold);}
+.podium-role{font-size:11px;color:var(--muted);margin-bottom:16px;}
+.podium-score{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;}
+.rank1 .podium-score{color:var(--gold);}
+.rank2 .podium-score{color:#94A3B8;}
+.rank3 .podium-score{color:#C87B4B;}
+.podium-score-lbl{font-size:10px;color:var(--muted2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;}
+
+.podium-stats{border-top:1px solid var(--border);padding:16px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;}
+.ps-val{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;}
+.ps-lbl{font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);margin-top:2px;}
+.rank1 .ps-val{color:var(--gold);}
+
+/* Full leaderboard */
+.leaderboard{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.lb-hd{background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 24px;display:grid;grid-template-columns:44px 1fr 90px 90px 90px 90px 110px;align-items:center;gap:8px;}
+.lb-col{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted2);text-align:center;}
+.lb-col:nth-child(2){text-align:left;}
+.lb-row{padding:16px 24px;display:grid;grid-template-columns:44px 1fr 90px 90px 90px 90px 110px;align-items:center;gap:8px;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.lb-row:last-child{border-bottom:none;}
+.lb-row:hover{background:rgba(255,255,255,0.025);}
+.lb-rank-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--muted2);text-align:center;}
+.r1{color:var(--gold)!important;} .r2{color:#94A3B8!important;} .r3{color:#C87B4B!important;}
+.lb-rep{display:flex;align-items:center;gap:10px;}
+.lb-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.av1{background:linear-gradient(135deg,#E8B84B,#F59E0B);}
+.av2{background:linear-gradient(135deg,#94A3B8,#64748B);}
+.av3{background:linear-gradient(135deg,#C87B4B,#92400E);}
+.av4{background:linear-gradient(135deg,var(--purple),var(--purple2));}
+.lb-rep-name{font-size:14px;font-weight:700;}
+.lb-rep-role{font-size:10px;color:var(--muted);}
+.lb-cell{text-align:center;font-size:14px;font-weight:600;}
+.cell-hot{color:#FC8181;} .cell-sold{color:#4ADE80;}
+.conv-pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+.conv-hi{background:rgba(34,197,94,0.15);color:#4ADE80;border:1px solid rgba(34,197,94,0.2);}
+.conv-mid{background:rgba(232,184,75,0.15);color:var(--gold);border:1px solid rgba(232,184,75,0.2);}
+.conv-lo{background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border);}
+
+/* Trend bars */
+.trend-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:28px;}
+.trend-title{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.trend-title::before{content:'';display:inline-block;width:16px;height:2px;background:var(--gold);border-radius:2px;}
+.trend-rep-row{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
+.trend-rep-row:last-child{margin-bottom:0;}
+.trend-name{font-size:13px;font-weight:600;width:120px;flex-shrink:0;}
+.trend-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+.trend-bar{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
+.trend-val{font-size:12px;font-weight:700;width:40px;text-align:right;flex-shrink:0;}
+.trend-label{font-size:10px;color:var(--muted2);width:80px;flex-shrink:0;}
+
+/* Stats grid */
+.insights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;}
+.insight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.ic-gold::before{background:var(--gold);}
+.ic-purple::before{background:var(--purple);}
+.ic-green::before{background:var(--green);}
+.insight-icon{font-size:24px;margin-bottom:10px;}
+.insight-title{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;}
+.insight-val{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;margin-bottom:4px;}
+.ic-gold .insight-val{color:var(--gold);}
+.ic-purple .insight-val{color:var(--purple2);}
+.ic-green .insight-val{color:#4ADE80;}
+.insight-desc{font-size:12px;color:var(--muted);}
+
+.loading{text-align:center;padding:60px;color:var(--muted);}
+.dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--purple);margin:0 3px;animation:dotpulse 1.2s ease infinite;}
+.dots span:nth-child(2){animation-delay:0.2s;} .dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes dotpulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeUp 0.4s ease both;}
+
+@media(max-width:900px){
+  .podium{grid-template-columns:1fr;}
+  .insights-grid{grid-template-columns:1fr 1fr;}
+  .lb-hd,.lb-row{grid-template-columns:36px 1fr 70px 70px 90px;}
+  .lb-col:nth-child(4),.lb-col:nth-child(5),.lb-cell:nth-child(4),.lb-cell:nth-child(5){display:none;}
+}
+</style>
+</head>
+<body>
+<div class="bg-orb1"></div>
+<div class="bg-orb2"></div>
+
+<nav>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="nav-brand">ServiceBridge</div>
+    <span style="font-size:12px;color:var(--muted);font-weight:500;">/ Rep Scorecards</span>
+  </div>
+  <div class="nav-right">
+    <a href="manager-dashboard.html" class="nav-link">Dashboard</a>
+    <a href="login.html" class="nav-link">Rep Login</a>
+    <a href="admin-panel.html" class="nav-link">Admin</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header fade-in">
+    <div class="page-eyebrow">Gallatin CDJR · ServiceBridge</div>
+    <div class="page-title">Rep Scorecards</div>
+    <div class="page-sub">Performance leaderboard · S2S conversion rankings</div>
+  </div>
+
+  <div class="period-tabs">
+    <button class="period-tab active" onclick="setPeriod('week',this)">This Week</button>
+    <button class="period-tab" onclick="setPeriod('month',this)">This Month</button>
+    <button class="period-tab" onclick="setPeriod('all',this)">All Time</button>
+  </div>
+
+  <div id="main-content">
+    <div class="loading"><div class="dots"><span></span><span></span><span></span></div></div>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
+const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+
+const REPS = [
+  { name:'Tyler Doyle',  initials:'TD', role:'S2S Manager', avClass:'av1' },
+  { name:'Andrew Kirk',  initials:'AK', role:'Sales Rep',   avClass:'av2' },
+  { name:'DJ Rogers',    initials:'DJ', role:'Sales Rep',   avClass:'av3' },
+  { name:'Kody McCann',  initials:'KM', role:'Sales Rep',   avClass:'av4' },
+];
+
+let allEntries = [];
+let period = 'week';
+
+async function load() {
+  const res = await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc`, { headers: H });
+  allEntries = await res.json();
+  render();
+}
+
+function setPeriod(p, el) {
+  period = p;
+  document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function filterByPeriod(entries) {
+  const now = new Date();
+  return entries.filter(e => {
+    const d = new Date(e.created_at);
+    if (period === 'week') {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0,0,0,0);
+      return d >= startOfWeek;
+    }
+    if (period === 'month') {
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }
+    return true;
+  });
+}
+
+function calcStats(repName, entries) {
+  const mine = entries.filter(e => e.submitter === repName);
+  const total = mine.length;
+  const hot = mine.filter(e => parseInt(e.eng_score) >= 8).length;
+  const sold = mine.filter(e => e.outcome && (e.outcome.toLowerCase().includes('sold') || e.outcome.includes('New') || e.outcome.includes('Used'))).length;
+  const appt = mine.filter(e => e.outcome && e.outcome.includes('Appt')).length;
+  const temps = mine.filter(e => e.eng_score).map(e => parseInt(e.eng_score));
+  const avgTemp = temps.length ? (temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1) : 0;
+  const conv = total > 0 ? Math.round((sold/total)*100) : 0;
+  // Score = weighted composite
+  const score = (total * 2) + (hot * 3) + (sold * 5) + (appt * 2) + parseFloat(avgTemp);
+  return { total, hot, sold, appt, avgTemp, conv, score: Math.round(score) };
+}
+
+function convPill(conv) {
+  if (conv >= 20) return `<span class="conv-pill conv-hi">${conv}%</span>`;
+  if (conv >= 10) return `<span class="conv-pill conv-mid">${conv}%</span>`;
+  return `<span class="conv-pill conv-lo">${conv}%</span>`;
+}
+
+function render() {
+  const filtered = filterByPeriod(allEntries);
+  const repStats = REPS.map((r,i) => ({ ...r, ...calcStats(r.name, filtered), idx:i }));
+  repStats.sort((a,b) => b.score - a.score);
+
+  const maxScore = repStats[0]?.score || 1;
+  const podiumOrder = [repStats[1], repStats[0], repStats[2]].filter(Boolean);
+  const rankClasses = ['rank2','rank1','rank3'];
+  const rankIcons = ['🥈','🥇','🥉'];
+  const avClasses = ['av2','av1','av3'];
+
+  const html = `
+  <!-- Podium -->
+  <div class="podium fade-in">
+    ${podiumOrder.map((rep, pi) => {
+      const actualRank = repStats.indexOf(rep) + 1;
+      const rClass = ['rank2','rank1','rank3'][pi];
+      const icon = ['🥈','🥇','🥉'][pi];
+      return `
+      <div class="podium-card ${rClass}">
+        <div class="podium-top">
+          <div class="podium-rank-icon">${icon}</div>
+          <div class="podium-avatar">${rep.initials}</div>
+          <div class="podium-name">${rep.name}</div>
+          <div class="podium-role">${rep.role}</div>
+          <div class="podium-score">${rep.score}</div>
+          <div class="podium-score-lbl">Performance Score</div>
+        </div>
+        <div class="podium-stats">
+          <div><div class="ps-val">${rep.total}</div><div class="ps-lbl">Contacts</div></div>
+          <div><div class="ps-val">${rep.hot}</div><div class="ps-lbl">Hot Leads</div></div>
+          <div><div class="ps-val">${rep.sold}</div><div class="ps-lbl">Sold</div></div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- Full Leaderboard -->
+  <div class="leaderboard fade-in">
+    <div class="lb-hd">
+      <div class="lb-col">#</div>
+      <div class="lb-col" style="text-align:left;">Rep</div>
+      <div class="lb-col">Contacts</div>
+      <div class="lb-col">Hot Leads</div>
+      <div class="lb-col">Sold</div>
+      <div class="lb-col">Avg Temp</div>
+      <div class="lb-col">Conv Rate</div>
+    </div>
+    ${repStats.map((rep, i) => {
+      const rankNum = i+1;
+      const rClass = rankNum <= 3 ? `r${rankNum}` : '';
+      const avC = ['av1','av2','av3','av4'][i] || 'av4';
+      return `
+      <div class="lb-row">
+        <div class="lb-rank-num ${rClass}">${rankNum}</div>
+        <div class="lb-rep">
+          <div class="lb-av ${avC}">${rep.initials}</div>
+          <div><div class="lb-rep-name">${rep.name}</div><div class="lb-rep-role">${rep.role}</div></div>
+        </div>
+        <div class="lb-cell">${rep.total}</div>
+        <div class="lb-cell cell-hot">${rep.hot}</div>
+        <div class="lb-cell cell-sold">${rep.sold}</div>
+        <div class="lb-cell">${rep.avgTemp || '—'}</div>
+        <div class="lb-cell">${convPill(rep.conv)}</div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- Trend: contacts bar -->
+  <div class="trend-section fade-in">
+    <div class="trend-title">Contacts Logged</div>
+    ${repStats.map(rep => `
+    <div class="trend-rep-row">
+      <div class="trend-name">${rep.name.split(' ')[0]}</div>
+      <div class="trend-bar-wrap"><div class="trend-bar" style="width:${maxScore > 0 ? Math.round((rep.total/Math.max(...repStats.map(r=>r.total||1)))*100) : 0}%;background:linear-gradient(90deg,var(--purple),var(--purple2));"></div></div>
+      <div class="trend-val" style="color:var(--purple2);">${rep.total}</div>
+      <div class="trend-label">contacts</div>
+    </div>`).join('')}
+    <div style="height:16px;"></div>
+    <div class="trend-title">Hot Leads (8-10 Temp)</div>
+    ${repStats.map(rep => `
+    <div class="trend-rep-row">
+      <div class="trend-name">${rep.name.split(' ')[0]}</div>
+      <div class="trend-bar-wrap"><div class="trend-bar" style="width:${Math.round((rep.hot/Math.max(...repStats.map(r=>r.hot||1)))*100)}%;background:linear-gradient(90deg,var(--red),#FC8181);"></div></div>
+      <div class="trend-val" style="color:#FC8181;">${rep.hot}</div>
+      <div class="trend-label">hot leads</div>
+    </div>`).join('')}
+    <div style="height:16px;"></div>
+    <div class="trend-title">Vehicles Sold</div>
+    ${repStats.map(rep => `
+    <div class="trend-rep-row">
+      <div class="trend-name">${rep.name.split(' ')[0]}</div>
+      <div class="trend-bar-wrap"><div class="trend-bar" style="width:${Math.round((rep.sold/Math.max(...repStats.map(r=>r.sold||1)))*100)||4}%;background:linear-gradient(90deg,var(--green),#4ADE80);"></div></div>
+      <div class="trend-val" style="color:#4ADE80;">${rep.sold}</div>
+      <div class="trend-label">sold</div>
+    </div>`).join('')}
+  </div>
+
+  <!-- Insights -->
+  <div class="insights-grid fade-in">
+    <div class="insight-card ic-gold">
+      <div class="insight-icon">🏆</div>
+      <div class="insight-title">Top Performer</div>
+      <div class="insight-val" style="font-size:28px;">${repStats[0]?.name?.split(' ')[0] || '—'}</div>
+      <div class="insight-desc">${repStats[0]?.score || 0} performance score · ${repStats[0]?.total || 0} contacts</div>
+    </div>
+    <div class="insight-card ic-purple">
+      <div class="insight-icon">🔥</div>
+      <div class="insight-title">Most Hot Leads</div>
+      <div class="insight-val" style="font-size:28px;">${[...repStats].sort((a,b)=>b.hot-a.hot)[0]?.name?.split(' ')[0] || '—'}</div>
+      <div class="insight-desc">${[...repStats].sort((a,b)=>b.hot-a.hot)[0]?.hot || 0} hot leads logged this ${period}</div>
+    </div>
+    <div class="insight-card ic-green">
+      <div class="insight-icon">🚗</div>
+      <div class="insight-title">Best Conversion</div>
+      <div class="insight-val" style="font-size:28px;">${[...repStats].sort((a,b)=>b.conv-a.conv)[0]?.name?.split(' ')[0] || '—'}</div>
+      <div class="insight-desc">${[...repStats].sort((a,b)=>b.conv-a.conv)[0]?.conv || 0}% S2S conversion rate</div>
+    </div>
+  </div>
+  `;
+
+  document.getElementById('main-content').innerHTML = html;
+}
+
+load();
+</script>
+</body>
+</html>
