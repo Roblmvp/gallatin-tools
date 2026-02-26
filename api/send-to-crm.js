@@ -1,36 +1,31 @@
-// api/send-to-crm.js
-// Vercel serverless function — sends ADF/XML lead email to DriveCentric
-// Deploy to: gallatin-tools/api/send-to-crm.js
-
-const nodemailer = require('nodemailer');
-
 export default async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const {
-    first_name, last_name, phone, email,
-    veh_year, veh_make, veh_model, veh_trim, veh_miles,
-    repair_cost, eng_score, outcome, notes,
-    trade_interest, voi, submitter,
-    contact_pref, best_time, cust_emotion,
-    ro_num, svc_advisor, veh_ownership,
-    trade_acv, voi_budget, timeline,
-  } = req.body;
+  try {
+    const {
+      first_name, last_name, phone, email,
+      veh_year, veh_make, veh_model, veh_trim, veh_miles,
+      repair_cost, eng_score, outcome, notes,
+      trade_interest, trade_acv, trade_expect,
+      voi, voi_budget, timeline,
+      submitter, contact_pref, best_time, cust_emotion,
+      ro_num, svc_advisor, veh_ownership,
+    } = req.body;
 
-  // Build ADF/XML — industry standard automotive lead format
-  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
-  const prospectName = `${first_name || 'Unknown'} ${last_name || ''}`.trim();
+    const prospectName = `${first_name || 'Unknown'} ${last_name || ''}`.trim();
+    const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    const uniqueId = `SB-${Date.now()}`;
+    const vehicleStr = [veh_year, veh_make, veh_model].filter(Boolean).join(' ') || 'Unknown Vehicle';
 
-  const adfXml = `<?xml version="1.0" encoding="UTF-8"?>
+    const adfXml = `<?xml version="1.0" encoding="UTF-8"?>
 <?adf version="1.0"?>
 <adf>
   <prospect status="new">
-    <id sequence="1" source="ServiceBridge">SB-${Date.now()}</id>
+    <id sequence="1" source="ServiceBridge">${uniqueId}</id>
     <requestdate>${now}</requestdate>
     <vehicle interest="buy" status="used">
       <year>${veh_year || ''}</year>
@@ -42,27 +37,27 @@ export default async function handler(req, res) {
     <customer>
       <contact primarycontact="1">
         <name part="full">${prospectName}</name>
-        ${phone ? `<phone type="voice" time="${best_time || 'nopreference'}">${phone}</phone>` : ''}
+        ${phone ? `<phone type="voice">${phone}</phone>` : ''}
         ${email ? `<email>${email}</email>` : ''}
       </contact>
-      <comments>SERVICE DRIVE LEAD — ServiceBridge S2S
+      <comments>SERVICE DRIVE LEAD - ServiceBridge S2S
 Rep: ${submitter || 'Unknown'}
 RO #: ${ro_num || 'N/A'}
 Service Advisor: ${svc_advisor || 'N/A'}
-Current Vehicle: ${veh_year || ''} ${veh_make || ''} ${veh_model || ''} ${veh_trim || ''} (${veh_miles || 'N/A'} mi)
+Current Vehicle: ${[veh_year, veh_make, veh_model, veh_trim].filter(Boolean).join(' ')} ${veh_miles ? `(${veh_miles} mi)` : ''}
 Ownership: ${veh_ownership || 'N/A'}
 Repair Cost: ${repair_cost ? '$' + repair_cost : 'N/A'}
 Engagement Score: ${eng_score || 'N/A'}/10
 Customer Emotion: ${cust_emotion || 'N/A'}
 Trade Interest: ${trade_interest || 'N/A'}
 Trade ACV: ${trade_acv ? '$' + trade_acv : 'N/A'}
-VOI: ${voi || 'N/A'}
+Customer Expected: ${trade_expect ? '$' + trade_expect : 'N/A'}
+Vehicle of Interest: ${voi || 'N/A'}
 Budget: ${voi_budget || 'N/A'}
 Timeline: ${timeline || 'N/A'}
 Contact Preference: ${contact_pref || 'N/A'}
 Best Time: ${best_time || 'N/A'}
 Outcome: ${outcome || 'N/A'}
-
 Rep Notes: ${notes || 'None'}
       </comments>
     </customer>
@@ -81,27 +76,59 @@ Rep Notes: ${notes || 'None'}
   </prospect>
 </adf>`;
 
-  // Send via Gmail SMTP (use env vars set in Vercel dashboard)
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+    const scoreInt = parseInt(eng_score) || 0;
+    const scoreColor = scoreInt >= 8 ? '#ef4444' : scoreInt >= 5 ? '#f59e0b' : '#6366f1';
 
-  try {
-    await transporter.sendMail({
-      from: `"ServiceBridge — Gallatin CDJR" <${process.env.SMTP_USER}>`,
-      to: 'campaignleads@drivegallatincdjr.com',
-      subject: `New Service-to-Sales Lead: ${prospectName} — ${veh_year || ''} ${veh_make || ''} ${veh_model || ''}`,
-      text: adfXml,
-      html: `<pre style="font-family:monospace;font-size:12px;">${adfXml.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`,
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer re_YQ2WKxeU_3uf47V8XekvjuK9GGzQYoKHC`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'ServiceBridge <alerts@vyaxis.com>',
+        to: ['campaignleads@drivegallatincdjr.com'],
+        subject: `New S2S Lead: ${prospectName} — ${vehicleStr}`,
+        text: adfXml,
+        html: `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+  <div style="background:#1a1a2e;padding:20px;border-radius:8px 8px 0 0;">
+    <h2 style="color:#818CF8;margin:0;font-size:18px;">New Service-to-Sales Lead</h2>
+    <p style="color:#94a3b8;margin:6px 0 0;font-size:13px;">ServiceBridge &rarr; DriveCentric &middot; Source: Service to Sales</p>
+  </div>
+  <div style="background:#f8fafc;padding:20px;border:1px solid #e2e8f0;">
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tr><td style="padding:7px 0;color:#64748b;width:40%;">Customer</td><td style="padding:7px 0;font-weight:700;">${prospectName}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Phone</td><td style="padding:7px 0;">${phone || '&mdash;'}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Email</td><td style="padding:7px 0;">${email || '&mdash;'}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Vehicle</td><td style="padding:7px 0;">${vehicleStr}${veh_miles ? ' &middot; ' + veh_miles + ' mi' : ''}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Repair Cost</td><td style="padding:7px 0;">${repair_cost ? '$' + repair_cost : '&mdash;'}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Temp Score</td><td style="padding:7px 0;font-weight:700;color:${scoreColor};">${eng_score || '&mdash;'}/10</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Vehicle of Interest</td><td style="padding:7px 0;">${voi || '&mdash;'}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Trade Interest</td><td style="padding:7px 0;">${trade_interest || '&mdash;'}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Timeline</td><td style="padding:7px 0;">${timeline || '&mdash;'}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Rep</td><td style="padding:7px 0;">${submitter || '&mdash;'}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">RO #</td><td style="padding:7px 0;">${ro_num || '&mdash;'}</td></tr>
+      <tr><td style="padding:7px 0;color:#64748b;">Lead Source</td><td style="padding:7px 0;font-weight:700;color:#22c55e;">Service to Sales</td></tr>
+    </table>
+    ${notes ? `<div style="margin-top:16px;padding:12px;background:#fff;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;"><strong>Rep Notes:</strong> ${notes}</div>` : ''}
+  </div>
+  <div style="background:#0f172a;padding:14px 20px;border-radius:0 0 8px 8px;">
+    <p style="color:#475569;font-size:10px;margin:0 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">ADF/XML (auto-parsed by DriveCentric)</p>
+    <pre style="color:#64748b;font-size:10px;margin:0;white-space:pre-wrap;font-family:monospace;overflow-x:auto;">${adfXml.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+  </div>
+</div>`,
+      }),
     });
 
-    return res.status(200).json({ success: true, message: `Lead pushed to DriveCentric for ${prospectName}` });
+    const data = await response.json();
+    if (response.ok) {
+      return res.status(200).json({ success: true, id: data.id, name: prospectName });
+    } else {
+      return res.status(400).json({ success: false, error: data.message });
+    }
+
   } catch (err) {
-    console.error('Email send error:', err);
-    return res.status(500).json({ error: 'Failed to send email', detail: err.message });
+    return res.status(500).json({ success: false, error: err.message });
   }
 }
