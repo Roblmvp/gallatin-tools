@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service to Sales Log — Gallatin CDJR</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0C0C14;
+  --ink2: #15151F;
+  --surface: #F5F4F1;
+  --card: #FFFFFF;
+  --border: #E4E2DC;
+  --border-strong: #C9C5BC;
+  --muted: #8C897F;
+  --text: #18171A;
+  --subtext: #6A6760;
+  --red: #EF4444;
+  --red-dark: #9B0D22;
+  --red-light: #FEF2F3;
+  --gold: #C49A2A;
+  --gold-light: #FDF9EF;
+  --green: #14532D;
+  --green-mid: #166534;
+  --green-light: #F0FDF4;
+  --blue: #1E3A8A;
+  --blue-light: #EFF6FF;
+  --r: 10px;
+  --rsm: 6px;
+  --sh: 0 1px 3px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.05);
+  --sh-lg: 0 12px 48px rgba(0,0,0,0.12);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--ink);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  overflow: hidden;
+}
+.header-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  padding: 0 36px;
+  height: 76px;
+  gap: 24px;
+  position: relative;
+}
+/* Subtle noise texture overlay */
+.header-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+}
+.header-accent {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red) 0%, #E8421A 40%, var(--gold) 100%);
+}
+.header-logo-wrap {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  flex-shrink: 0;
+}
+.header-logo-pill {
+  background: #fff;
+  border-radius: 7px;
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+}
+.header-logo-pill img {
+  height: 34px;
+  width: auto;
+  object-fit: contain;
+}
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.header-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 14px;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.header-pill {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.38);
+  padding: 3px 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.header-date { font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.45); letter-spacing: 0.04em; }
+.header-time { font-family: 'DM Serif Display', serif; font-size: 20px; color: rgba(255,255,255,0.9); line-height: 1.1; }
+
+/* ── HERO BAND ── */
+.hero-band {
+  background: #EDECEA;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.hero-logos {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.hero-logo-pill {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.hero-logo-pill img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+.hero-logos .divider-v {
+  width: 1px;
+  height: 28px;
+  background: var(--border-strong);
+}
+.hero-tagline {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: right;
+}
+.hero-tagline span {
+  display: block;
+  font-family: 'DM Serif Display', serif;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--text);
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+/* ── PROGRESS ── */
+.progress-wrap {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 36px;
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.progress-wrap::-webkit-scrollbar { display: none; }
+.step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 20px 12px 0;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap; transition: all 0.2s;
+}
+.step.active { color: var(--red); border-bottom-color: var(--red); }
+.step.done { color: var(--green-mid); border-bottom-color: var(--green-mid); }
+.step-n {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; flex-shrink: 0; transition: all 0.2s;
+}
+.step.done .step-n { background: var(--green-mid); border-color: var(--green-mid); color: #fff; }
+
+/* ── PAGE ── */
+.page { max-width: 900px; margin: 0 auto; padding: 40px 24px 100px; }
+
+/* ── SECTION HEAD ── */
+.sh {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin: 36px 0 14px;
+}
+.sh:first-child { margin-top: 0; }
+.sh-left {}
+.sh-title { font-family: 'DM Serif Display', serif; font-size: 23px; color: var(--text); line-height: 1; }
+.sh-desc { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.sh-num { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); opacity: 0.6; }
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px 30px;
+  box-shadow: var(--sh);
+  margin-bottom: 10px;
+}
+
+/* ── SUBMITTER ── */
+.sub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px,1fr)); gap: 10px; }
+.sub-pill {
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  padding: 14px 16px 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: var(--card);
+  position: relative;
+  overflow: hidden;
+}
+.sub-pill::after { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:transparent; transition:background 0.18s; border-radius: var(--rsm) var(--rsm) 0 0; }
+.sub-pill:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: var(--sh); }
+.sub-pill.sel { border-color: var(--red); background: var(--red-light); }
+.sub-pill.sel::after { background: var(--red); }
+.sub-pill.mgr.sel { border-color: var(--gold); background: var(--gold-light); }
+.sub-pill.mgr.sel::after { background: var(--gold); }
+.sub-name { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text); line-height: 1.2; }
+.sub-role { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.sub-pill.sel .sub-role { color: var(--red); }
+.sub-pill.mgr.sel .sub-role { color: var(--gold); }
+.sub-chk { position:absolute; top:10px; right:10px; width:17px; height:17px; border-radius:50%; background:var(--red); display:none; align-items:center; justify-content:center; }
+.sub-pill.mgr .sub-chk { background: var(--gold); }
+.sub-pill.sel .sub-chk { display: flex; }
+.sub-chk svg { width:9px; height:9px; }
+
+/* ── TIMESTAMP ── */
+.ts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ts-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rsm); padding: 14px 18px; }
+.ts-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.ts-val { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--text); line-height: 1; }
+.ts-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* ── FORM ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 18px; }
+.s2 { grid-column: span 2; }
+.sf { grid-column: 1/-1; }
+.mt { margin-top: 18px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: var(--subtext); display: flex; align-items: center; gap: 4px; }
+.req { color: var(--red); font-size: 14px; line-height: 1; }
+.hint { font-size: 11px; color: var(--muted); margin-top: -2px; font-style: italic; }
+
+input[type=text], input[type=tel], input[type=email],
+input[type=number], input[type=date], select, textarea {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 11px 14px;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  outline: none;
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--red);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(200,16,46,0.09);
+}
+input::placeholder, textarea::placeholder { color: #C2BFB9; }
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238C897F' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+textarea { resize: vertical; min-height: 88px; line-height: 1.65; }
+
+.ro-display {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  padding: 11px 14px;
+  font-size: 14px;
+  color: var(--muted);
+  font-style: italic;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.ro-display.filled { font-style: normal; color: var(--text); font-weight: 500; background: var(--gold-light); border-color: #E2C06E; }
+
+/* ── PILLS ── */
+.pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+.pill {
+  padding: 8px 16px; border-radius: 20px;
+  border: 1.5px solid var(--border);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.03em;
+  color: var(--muted); cursor: pointer;
+  transition: all 0.15s; user-select: none;
+  background: var(--card);
+}
+.pill:hover { border-color: var(--border-strong); color: var(--text); }
+.p-red { border-color: var(--red)!important; background: var(--red)!important; color: #fff!important; }
+.p-green { border-color: var(--green-mid)!important; background: var(--green-mid)!important; color: #fff!important; }
+.p-blue { border-color: var(--blue)!important; background: var(--blue)!important; color: #fff!important; }
+.p-gold { border-color: var(--gold)!important; background: var(--gold)!important; color: #fff!important; }
+
+/* ── TOGGLE ── */
+.tog-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+.tog-row:hover { border-color: var(--border-strong); }
+.tog-row.on { border-color: var(--red); background: var(--red-light); }
+.tog { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+.tog input { opacity: 0; width: 0; height: 0; position: absolute; }
+.tog-track { position: absolute; inset: 0; background: var(--border-strong); border-radius: 24px; transition: background 0.2s; }
+.tog input:checked ~ .tog-track { background: var(--red); }
+.tog-knob { position: absolute; width: 18px; height: 18px; top: 3px; left: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.tog input:checked ~ .tog-knob { transform: translateX(18px); }
+.tog-txt { font-size: 14px; font-weight: 500; color: var(--text); }
+.tog-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.expand { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.expand.open { display: block; }
+
+/* ── SCORE ── */
+.score-wrap { display: flex; gap: 5px; }
+.s-btn {
+  flex: 1; aspect-ratio: 1; max-width: 46px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  background: var(--card);
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+}
+.s-btn:hover { border-color: var(--border-strong); color: var(--text); }
+.a1,.a2 { background:#FEE2E2!important; border-color:#EF4444!important; color:#991B1B!important; }
+.a3,.a4 { background:#FEF3C7!important; border-color:#F59E0B!important; color:#78350F!important; }
+.a5,.a6,.a7 { background:#DBEAFE!important; border-color:#3B82F6!important; color:#1E3A8A!important; }
+.a8,.a9,.a10 { background:#DCFCE7!important; border-color:#22C55E!important; color:#14532D!important; }
+.score-labels { font-size: 11px; color: var(--muted); margin-top: 7px; display: flex; justify-content: space-between; }
+
+/* ── DIVIDER ── */
+.div { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+
+/* ── CALLOUT ── */
+.callout {
+  background: var(--blue-light);
+  border: 1px solid #BFDBFE;
+  border-radius: var(--rsm);
+  padding: 12px 16px;
+  font-size: 12px; color: #1E40AF; font-weight: 500;
+  margin-bottom: 18px;
+  display: flex; gap: 10px; align-items: flex-start; line-height: 1.6;
+}
+
+/* ── SUBMIT BAR ── */
+.submit-bar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px 30px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: var(--sh); margin-top: 28px; gap: 20px;
+}
+.submit-bar-left {}
+.submit-bar-title { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--text); }
+.submit-bar-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.submit-bar-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.btn-p {
+  background: var(--red); color: #fff; border: none;
+  border-radius: var(--rsm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+  padding: 12px 30px; cursor: pointer;
+  transition: background 0.18s, transform 0.1s, box-shadow 0.18s;
+  box-shadow: 0 2px 10px rgba(200,16,46,0.28);
+}
+.btn-p:hover { background: var(--red-dark); box-shadow: 0 4px 18px rgba(200,16,46,0.32); }
+.btn-p:active { transform: scale(0.98); }
+.btn-g {
+  background: transparent; color: var(--muted);
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  padding: 12px 22px; cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-g:hover { border-color: var(--border-strong); color: var(--text); }
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--card);
+  margin-top: 60px;
+  padding: 28px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid var(--border);
+}
+.footer-logos { display: flex; align-items: center; gap: 14px; }
+.footer-logo-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
+}
+.footer-logo-pill:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.footer-logo-pill img { height: 28px; width: auto; object-fit: contain; }
+.footer-logos .fv { width: 1px; height: 24px; background: var(--border-strong); }
+.footer-copy { font-size: 11px; color: var(--muted); letter-spacing: 0.04em; text-align: right; line-height: 1.8; }
+.footer-copy strong { color: var(--subtext); font-weight: 600; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--ink2);
+  color: rgba(255,255,255,0.9);
+  padding: 13px 24px; border-radius: 40px;
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--sh-lg);
+  transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 999; white-space: nowrap;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; flex-shrink: 0; animation: pulse 1.4s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+/* ── PREVIEW ── */
+.preview-wrap { display: none; margin-top: 14px; }
+.preview-wrap.open { display: block; }
+.preview-card {
+  background: var(--ink);
+  border-radius: var(--r);
+  padding: 26px 30px;
+  position: relative; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.preview-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--red), #E8421A 40%, var(--gold));
+}
+.preview-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.preview-header-left { display: flex; align-items: center; gap: 14px; }
+.preview-header-logo img { height: 28px; width: auto; opacity: 0.55; filter: brightness(1.2); }
+.preview-label { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+.preview-badge { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.35); }
+.preview-grid { display: grid; grid-template-columns: 160px 1fr; gap: 7px 16px; }
+.pk { font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.32); letter-spacing: 0.05em; align-self: center; }
+.pv { font-size: 13px; color: rgba(255,255,255,0.80); font-weight: 500; }
+.pv.hl { color: #FCD34D; font-weight: 600; }
+.pdiv { grid-column: 1/-1; border-top: 1px solid rgba(255,255,255,0.06); margin: 3px 0; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+.card { animation: fadeUp 0.45s ease both; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:680px){
+  .header-inner{padding:0 18px; grid-template-columns: auto 1fr; gap:14px;}
+  .header-center{display:none;}
+  .hero-band{padding:12px 18px;}
+  .hero-tagline{display:none;}
+  .progress-wrap{padding:0 18px;}
+  .page{padding:28px 16px 80px;}
+  .card{padding:20px 18px;}
+  .g2,.g3,.g4{grid-template-columns:1fr;}
+  .s2,.sf{grid-column:1;}
+  .submit-bar{flex-direction:column;}
+  .submit-bar-actions{flex-direction:column; width:100%;}
+  .btn-p,.btn-g{width:100%;text-align:center;}
+  .footer{flex-direction:column;align-items:flex-start;gap:16px;}
+  .footer-copy{text-align:left;}
+  .ts-grid{grid-template-columns:1fr;}
+}
+
+/* ── Edit Modal ─────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#0F0F1A;border:1px solid rgba(255,255,255,0.13);border-radius:18px;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;position:relative;}
+.modal-header{padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;color:#EEE8FF;}
+.modal-close{background:none;border:none;color:rgba(238,232,255,0.4);font-size:22px;cursor:pointer;padding:4px 8px;border-radius:6px;}
+.modal-close:hover{color:#EEE8FF;}
+.modal-body{padding:0 24px 24px;}
+.modal-field{margin-bottom:14px;}
+.modal-label{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(238,232,255,0.22);display:block;margin-bottom:6px;}
+.modal-input,.modal-select,.modal-textarea{width:100%;background:#161625;border:1.5px solid rgba(255,255,255,0.13);border-radius:9px;color:#EEE8FF;font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 14px;transition:border-color 0.18s;-webkit-appearance:none;}
+.modal-input:focus,.modal-select:focus,.modal-textarea:focus{outline:none;border-color:#5B4FE8;box-shadow:0 0 0 3px rgba(91,79,232,0.12);}
+.modal-textarea{resize:none;min-height:72px;}
+.modal-select option{background:#161625;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-footer{display:flex;gap:10px;margin-top:20px;}
+.modal-save{flex:1;padding:13px;border-radius:10px;background:linear-gradient(135deg,#5B4FE8,#7B72F0);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s;}
+.modal-save:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(91,79,232,0.35);}
+.modal-cancel{padding:13px 20px;border-radius:10px;background:#0F0F1A;border:1.5px solid rgba(255,255,255,0.13);color:rgba(238,232,255,0.4);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+.modal-cancel:hover{color:#EEE8FF;}
+.modal-del{padding:13px 14px;border-radius:10px;background:rgba(200,16,46,0.12);border:1px solid rgba(200,16,46,0.3);color:#FC8181;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.modal-del:hover{background:rgba(200,16,46,0.2);}
+.edit-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#0F0F1A;border:1px solid rgba(255,255,255,0.13);border-radius:12px;padding:12px 22px;font-size:13px;font-weight:600;color:#EEE8FF;z-index:999;transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);box-shadow:0 12px 32px rgba(0,0,0,0.4);white-space:nowrap;}
+.edit-toast.show{transform:translateX(-50%) translateY(0);}
+.edit-toast.green{border-color:rgba(34,197,94,0.4);color:#4ADE80;}
+.recent-entry{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#0F0F1A;border:1px solid rgba(255,255,255,0.09);border-radius:10px;margin-bottom:8px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <div class="header-logo-pill">
+        <img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868303/TAA062407W-GallatinLogos-Web-CDJR-2_yn1fwh.png" alt="Gallatin CDJR">
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="header-title">Service → Sales Log</div>
+      <div class="header-pill">Service Drive Operations</div>
+    </div>
+    <div class="header-right">
+      <div class="header-date" id="hdr-date"></div>
+      <div class="header-time" id="hdr-time"></div>
+    </div>
+    <div class="header-accent"></div>
+  </div>
+</header>
+
+<!-- HERO BAND -->
+<div class="hero-band">
+  <div class="hero-logos">
+    <div class="hero-logo-pill">
+      <img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868289/WE_Auto_Badge_1_f5djzq.png" alt="WeAuto">
+    </div>
+    <div class="divider-v"></div>
+    <div class="hero-logo-pill">
+      <img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868289/MSG-CDJR_cfgryx.png" alt="Worry Free Guarantee">
+    </div>
+  </div>
+  <div class="hero-tagline">
+    WeAuto Dealer Group
+    <span>Gallatin, Tennessee</span>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="step active" id="s1"><div class="step-n">1</div>Submitter</div>
+  <div class="step" id="s2"><div class="step-n">2</div>Customer</div>
+  <div class="step" id="s3"><div class="step-n">3</div>Vehicle</div>
+  <div class="step" id="s4"><div class="step-n">4</div>Service Visit</div>
+  <div class="step" id="s5"><div class="step-n">5</div>Sales Activity</div>
+  <div class="step" id="s6"><div class="step-n">6</div>Outcome</div>
+</div>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- 01 SUBMITTER -->
+  <div class="sh">
+    <div class="sh-left">
+      <div class="sh-title">Who's Logging This Entry?</div>
+      <div class="sh-desc">Select your name — the form auto-assigns and timestamps on submit</div>
+    </div>
+    <div class="sh-num">01 / 06</div>
+  </div>
+  <div class="card">
+    <div class="sub-grid">
+      <div class="sub-pill mgr" onclick="selectSub(this,'Tyler Doyle','S2S Manager','manager')">
+        <div class="sub-chk"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="sub-name">Tyler Doyle</div><div class="sub-role">S2S Manager</div>
+      </div>
+      <div class="sub-pill" onclick="selectSub(this,'Andrew Kirk','Sales Consultant','sales')">
+        <div class="sub-chk"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="sub-name">Andrew Kirk</div><div class="sub-role">Sales</div>
+      </div>
+      <div class="sub-pill" onclick="selectSub(this,'DJ Rogers','Sales Consultant','sales')">
+        <div class="sub-chk"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="sub-name">DJ Rogers</div><div class="sub-role">Sales</div>
+      </div>
+      <div class="sub-pill" onclick="selectSub(this,'Kody McCann','Sales Consultant','sales')">
+        <div class="sub-chk"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="sub-name">Kody McCann</div><div class="sub-role">Sales</div>
+      </div>
+    </div>
+    <input type="hidden" id="sub-name"><input type="hidden" id="sub-role">
+  </div>
+
+  <!-- TIMESTAMP -->
+  <div class="card">
+    <div class="ts-grid">
+      <div class="ts-block"><div class="ts-lbl">Date</div><div class="ts-val" id="ts-date">—</div><div class="ts-sub" id="ts-day">Loading...</div></div>
+      <div class="ts-block"><div class="ts-lbl">Time (CT)</div><div class="ts-val" id="ts-time">—</div><div class="ts-sub">Auto-captured on submit</div></div>
+    </div>
+  </div>
+
+  <!-- 02 CUSTOMER -->
+  <div class="sh">
+    <div class="sh-left"><div class="sh-title">Customer Information</div><div class="sh-desc">Contact details for follow-up and CRM entry</div></div>
+    <div class="sh-num">02 / 06</div>
+  </div>
+  <div class="card">
+    <div class="g2">
+      <div class="field"><label class="lbl">First Name <span class="req">*</span></label><input type="text" id="fname" placeholder="First name"></div>
+      <div class="field"><label class="lbl">Last Name <span class="req">*</span></label><input type="text" id="lname" placeholder="Last name"></div>
+      <div class="field"><label class="lbl">Phone Number</label><input type="tel" id="phone" placeholder="(615) 000-0000"></div>
+      <div class="field"><label class="lbl">Email Address</label><input type="email" id="email" placeholder="customer@email.com"></div>
+      <div class="field"><label class="lbl">Preferred Contact Method</label>
+        <select id="cpref"><option value="">Select...</option><option>Phone Call</option><option>Text Message</option><option>Email</option><option>No Preference</option></select>
+      </div>
+      <div class="field"><label class="lbl">Best Time to Reach</label>
+        <select id="ctime"><option value="">Select...</option><option>Morning (8am–12pm)</option><option>Afternoon (12pm–5pm)</option><option>Evening (5pm–7pm)</option><option>Anytime</option></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 VEHICLE -->
+  <div class="sh">
+    <div class="sh-left"><div class="sh-title">Customer's Current Vehicle</div><div class="sh-desc">The vehicle they drove in for service today</div></div>
+    <div class="sh-num">03 / 06</div>
+  </div>
+  <div class="card">
+    <div class="g4">
+      <div class="field"><label class="lbl">Year</label><select id="vy"><option value="">Year</option></select></div>
+      <div class="field"><label class="lbl">Make</label><select id="vmk"><option value="">Make</option></select></div>
+      <div class="field"><label class="lbl">Model</label><select id="vmd"><option value="">Model</option></select></div>
+      <div class="field"><label class="lbl">Mileage</label><input type="number" id="vmi" placeholder="e.g. 72000"></div>
+    </div>
+    <div class="g3 mt">
+      <div class="field"><label class="lbl">Trim / Package</label><input type="text" id="vtr" placeholder="e.g. Laramie, Sport"></div>
+      <div class="field"><label class="lbl">Color</label><input type="text" id="vcl" placeholder="e.g. Bright White"></div>
+      <div class="field"><label class="lbl">Ownership Status</label>
+        <select id="vow"><option value="">Select...</option><option>Paid Off / Own Outright</option><option>Financing</option><option>Leasing</option><option>Unknown</option></select>
+      </div>
+    </div>
+    <hr class="div">
+    <div class="g3">
+      <div class="field"><label class="lbl">Est. Payoff Balance</label><input type="text" id="vpay" placeholder="$0,000"><div class="hint">If financing — approx. amount owed</div></div>
+      <div class="field"><label class="lbl">Lease End Date</label><input type="text" id="vlease" placeholder="MM/YYYY"><div class="hint">If leasing — when does it expire?</div></div>
+      <div class="field"><label class="lbl">Vehicle Condition</label>
+        <select id="vcond"><option value="">Select...</option><option>Excellent</option><option>Good</option><option>Fair</option><option>Poor</option></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 SERVICE VISIT -->
+  <div class="sh">
+    <div class="sh-left"><div class="sh-title">Service Visit Details</div><div class="sh-desc">Capture the reason for today's visit — this is your S2S conversation anchor</div></div>
+    <div class="sh-num">04 / 06</div>
+  </div>
+  <div class="card">
+    <div class="callout"><span>ℹ</span><span>High-opportunity triggers: repair estimates over $1,500, high-mileage vehicles, repeat failures, or customers expressing frustration with their vehicle. Document accurately — this opens the door.</span></div>
+    <div class="g2">
+      <div class="field"><label class="lbl">Repair Order (RO) #</label><input type="text" id="ro" placeholder="e.g. RO-24871"></div>
+      <div class="field"><label class="lbl">Service Advisor</label><input type="text" id="sva" placeholder="Advisor name"></div>
+      <div class="field s2"><label class="lbl">Primary Reason for Visit</label>
+        <select id="vreason"><option value="">Select...</option><option>Routine Maintenance (Oil, Tires, Filters)</option><option>Scheduled Service / Recall</option><option>Major Mechanical Repair</option><option>Transmission / Drivetrain</option><option>Engine Concern</option><option>Electrical / Technology Issue</option><option>Body / Collision</option><option>High Mileage Service</option><option>Safety — Brakes / Suspension</option><option>Customer Pay — Other</option><option>Warranty Claim</option></select>
+      </div>
+    </div>
+    <hr class="div">
+    <div class="g3">
+      <div class="field"><label class="lbl">Estimated Repair Cost</label><input type="text" id="rcost" placeholder="$0,000"></div>
+      <div class="field"><label class="lbl">Cost vs. Vehicle Value</label>
+        <select id="rratio"><option value="">Select...</option><option>Low — Under 20% of vehicle value</option><option>Moderate — 20–40%</option><option>High — 40–75%</option><option>Exceeds vehicle value</option></select>
+      </div>
+      <div class="field"><label class="lbl">Customer's Emotional State</label>
+        <select id="cemo"><option value="">Select...</option><option>Satisfied / Neutral</option><option>Frustrated with Repair Cost</option><option>Frustrated with Reliability</option><option>Anxious / Stressed</option><option>Open &amp; Receptive</option><option>Excited / Already Considering Upgrade</option></select>
+      </div>
+    </div>
+    <hr class="div">
+    <div class="field"><label class="lbl">Sales Introduction Made in Service Drive?</label>
+      <div class="pill-group">
+        <div class="pill" onclick="ps(this,'intro','Yes — by Service Advisor','p-green')">Yes — by Service Advisor</div>
+        <div class="pill" onclick="ps(this,'intro','Yes — by Sales Team','p-green')">Yes — by Sales Team</div>
+        <div class="pill" onclick="ps(this,'intro','No — walked to showroom','p-blue')">No — walked to showroom</div>
+        <div class="pill" onclick="ps(this,'intro','No — phone/follow-up only','p-gold')">No — phone/follow-up only</div>
+      </div>
+      <input type="hidden" id="intro">
+    </div>
+  </div>
+
+  <!-- 05 SALES ACTIVITY -->
+  <div class="sh">
+    <div class="sh-left"><div class="sh-title">Sales Activity & Engagement</div><div class="sh-desc">Document what happened during the sales interaction</div></div>
+    <div class="sh-num">05 / 06</div>
+  </div>
+  <div class="card">
+    <div class="field" style="margin-bottom:18px;">
+      <label class="lbl">Trade-In Interest</label>
+      <div class="tog-row" id="tr-row" onclick="tog('tr-cb','tr-exp','tr-row')">
+        <label class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="tr-cb" onchange="tog('tr-cb','tr-exp','tr-row')"><div class="tog-track"></div><div class="tog-knob"></div></label>
+        <div><div class="tog-txt">Customer is interested in trading their vehicle</div><div class="tog-sub">Enable to capture trade details</div></div>
+      </div>
+      <div class="expand" id="tr-exp">
+        <div class="g3">
+          <div class="field"><label class="lbl">Estimated ACV</label><input type="text" id="tacv" placeholder="$0,000"></div>
+          <div class="field"><label class="lbl">Customer's Expected Value</label><input type="text" id="texp" placeholder="$0,000"><div class="hint">What does the customer think it's worth?</div></div>
+          <div class="field"><label class="lbl">Equity Position</label>
+            <select id="teq"><option value="">Select...</option><option>Positive Equity</option><option>At or Near Breakeven</option><option>Negative Equity (Upside Down)</option><option>Unknown / Not Disclosed</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:18px;">
+      <label class="lbl">Vehicle Shown or Discussed?</label>
+      <div class="tog-row" id="vh-row" onclick="tog('vh-cb','vh-exp','vh-row')">
+        <label class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="vh-cb" onchange="tog('vh-cb','vh-exp','vh-row')"><div class="tog-track"></div><div class="tog-knob"></div></label>
+        <div><div class="tog-txt">Yes — a vehicle was presented or discussed</div><div class="tog-sub">Enable to capture vehicle of interest</div></div>
+      </div>
+      <div class="expand" id="vh-exp">
+        <div class="g3">
+          <div class="field"><label class="lbl">Vehicle of Interest</label><input type="text" id="voi" placeholder="e.g. 2024 Ram 1500 Laramie"></div>
+          <div class="field"><label class="lbl">New or Used?</label>
+            <select id="voity"><option value="">Select...</option><option>New</option><option>Used / CPO</option><option>Either / Open</option></select>
+          </div>
+          <div class="field"><label class="lbl">Monthly Budget</label><input type="text" id="voibdg" placeholder="e.g. $500/mo"></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="div">
+    <div class="g2" style="margin-bottom:18px;">
+      <div class="field"><label class="lbl">Finance / Credit Conversation</label>
+        <select id="finconv"><option value="">Select...</option><option>Not Discussed</option><option>Customer Mentioned Good Credit</option><option>Customer Mentioned Credit Concerns</option><option>Pre-Approval Discussion Initiated</option><option>Customer Has Outside Financing</option><option>Cash Buyer</option></select>
+      </div>
+      <div class="field"><label class="lbl">Purchase Timeline</label>
+        <select id="timeline"><option value="">Select...</option><option>Immediate — Ready Now</option><option>Within 30 Days</option><option>1–3 Months</option><option>3–6 Months</option><option>6+ Months / Just Looking</option><option>Unknown</option></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Customer Buying Temperature</label>
+      <div class="hint" style="margin-bottom:8px;">Rate 1 (cold) to 10 (ready to sign)</div>
+      <div class="score-wrap" id="score-wrap"></div>
+      <div class="score-labels"><span>Cold</span><span>Warm</span><span>Hot 🔥</span></div>
+      <input type="hidden" id="escore">
+    </div>
+  </div>
+
+  <!-- 06 OUTCOME -->
+  <div class="sh">
+    <div class="sh-left"><div class="sh-title">Outcome & Next Steps</div><div class="sh-desc">Record the disposition and assign follow-up responsibility</div></div>
+    <div class="sh-num">06 / 06</div>
+  </div>
+  <div class="card">
+    <div class="field" style="margin-bottom:20px;">
+      <label class="lbl">Disposition / Outcome <span class="req">*</span></label>
+      <div class="pill-group">
+        <div class="pill" onclick="ps(this,'outcome','New Vehicle Sold','p-green')">🏆 New Vehicle Sold</div>
+        <div class="pill" onclick="ps(this,'outcome','Used Vehicle Sold','p-green')">🏆 Used Vehicle Sold</div>
+        <div class="pill" onclick="ps(this,'outcome','Appointment Set','p-blue')">📅 Appointment Set</div>
+        <div class="pill" onclick="ps(this,'outcome','Follow-Up Required','p-gold')">🔔 Follow-Up Required</div>
+        <div class="pill" onclick="ps(this,'outcome','Not Interested','p-red')">✗ Not Interested</div>
+      </div>
+      <input type="hidden" id="outcome">
+    </div>
+    <div class="g2">
+      <div class="field"><label class="lbl">Assigned Salesperson</label><div class="ro-display" id="sp-disp">Select your name above to auto-assign</div><input type="hidden" id="sp"></div>
+      <div class="field"><label class="lbl">Follow-Up Date</label><input type="date" id="fdate"></div>
+      <div class="field"><label class="lbl">Follow-Up Method</label>
+        <select id="fmeth"><option value="">Select...</option><option>Phone Call</option><option>Text Message</option><option>Email</option><option>In-Person at Next Service Visit</option></select>
+      </div>
+      <div class="field"><label class="lbl">CRM / DMS Entry Made?</label>
+        <select id="crm"><option value="">Select...</option><option>Yes — entered in CRM</option><option>Pending — will enter after this log</option><option>No — customer declined data entry</option></select>
+      </div>
+      <div class="field sf"><label class="lbl">Notes & Additional Context</label>
+        <textarea id="notes" placeholder="Key objections, specific preferences, personal details to remember, agreed talking points for follow-up..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-bar">
+    <div class="submit-bar-left">
+      <div class="submit-bar-title">Ready to submit?</div>
+      <div class="submit-bar-sub">Logs to spreadsheet and posts to the Sales Team channel in Teams.</div>
+    </div>
+    <div class="submit-bar-actions">
+      <button class="btn-g" onclick="resetForm()">Clear Form</button>
+      <button class="btn-p" onclick="submitLog()">Submit Entry →</button>
+    </div>
+  </div>
+
+  <div class="preview-wrap" id="preview-wrap">
+    <div class="preview-card">
+      <div class="preview-header">
+        <div class="preview-header-left">
+          <div class="preview-header-logo"><img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868303/TAA062407W-GallatinLogos-Web-CDJR-2_yn1fwh.png" alt="Gallatin CDJR"></div>
+          <div class="preview-label">Teams Channel Preview</div>
+        </div>
+        <div class="preview-badge">Sales Team Channel</div>
+      </div>
+      <div class="preview-grid" id="preview-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-logos">
+    <div class="footer-logo-pill">
+      <img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868289/WE_Auto_Badge_1_f5djzq.png" alt="WeAuto">
+    </div>
+    <div class="fv"></div>
+    <div class="footer-logo-pill">
+      <img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868289/MSG-CDJR_cfgryx.png" alt="Worry Free Guarantee">
+    </div>
+  </div>
+  <div class="footer-copy">
+    <strong>Gallatin Chrysler Dodge Jeep Ram</strong><br>
+    WeAuto Dealer Group · Service Drive Operations<br>
+    Internal use only — confidential customer data
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><div class="toast-dot"></div>Entry logged — Teams notification sent ✓</div>
+
+<script>
+// ── CLOCK
+function tick(){
+  const n=new Date(),mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+  da=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('hdr-date').textContent=`${da[n.getDay()]}, ${mo[n.getMonth()]} ${n.getDate()}`;
+  document.getElementById('hdr-time').textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})+' CT';
+  document.getElementById('ts-date').textContent=`${mo[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()}`;
+  document.getElementById('ts-day').textContent=da[n.getDay()];
+  document.getElementById('ts-time').textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+}
+tick(); setInterval(tick,1000);
+
+// ── YEARS
+const vy=document.getElementById('vy');
+for(let y=new Date().getFullYear()+1;y>=2000;y--) vy.innerHTML+=`<option value="${y}">${y}</option>`;
+
+// ── MAKES / MODELS
+const vd={"Acura":["ILX","MDX","RDX","TLX","RLX"],"BMW":["3 Series","5 Series","X3","X5","X7","7 Series"],"Buick":["Enclave","Encore","Encore GX","Envision"],"Cadillac":["CT4","CT5","Escalade","XT4","XT5","XT6"],"Chevrolet":["Colorado","Silverado 1500","Silverado 2500","Equinox","Traverse","Tahoe","Suburban","Malibu","Blazer","Trailblazer"],"Chrysler":["300","Pacifica","Voyager"],"Dodge":["Challenger","Charger","Durango","Grand Caravan"],"Ford":["F-150","F-250","F-350","Explorer","Edge","Escape","Expedition","Mustang","Bronco","Ranger","Maverick"],"GMC":["Sierra 1500","Sierra 2500","Canyon","Terrain","Acadia","Yukon","Yukon XL"],"Honda":["Accord","Civic","CR-V","HR-V","Odyssey","Pilot","Ridgeline","Passport"],"Hyundai":["Elantra","Tucson","Santa Fe","Palisade","Sonata","Kona"],"Jeep":["Wrangler","Grand Cherokee","Cherokee","Compass","Renegade","Gladiator","Wagoneer","Grand Wagoneer"],"Kia":["Sorento","Telluride","Sportage","Forte","K5","Carnival"],"Lexus":["ES","RX","NX","GX","LX","IS"],"Lincoln":["Navigator","Aviator","Corsair","Nautilus"],"Mazda":["CX-5","CX-9","Mazda3","Mazda6","CX-30","MX-5 Miata"],"Mercedes-Benz":["C-Class","E-Class","GLC","GLE","GLS","S-Class"],"Nissan":["Altima","Sentra","Maxima","Rogue","Pathfinder","Frontier","Titan","Murano","Armada"],"Ram":["1500","2500","3500","ProMaster","ProMaster City"],"Subaru":["Outback","Forester","Crosstrek","Ascent","Impreza","Legacy"],"Tesla":["Model 3","Model Y","Model S","Model X"],"Toyota":["Camry","Corolla","RAV4","Highlander","Tacoma","Tundra","4Runner","Sequoia","Sienna","Venza","Prius","Avalon"],"Volkswagen":["Jetta","Tiguan","Atlas","Passat","ID.4"],"Volvo":["XC40","XC60","XC90","S60","V60"]};
+const vmk=document.getElementById('vmk'),vmd=document.getElementById('vmd');
+Object.keys(vd).sort().forEach(m=>vmk.innerHTML+=`<option value="${m}">${m}</option>`);
+vmk.addEventListener('change',()=>{vmd.innerHTML='<option value="">Model</option>';(vd[vmk.value]||[]).forEach(m=>vmd.innerHTML+=`<option value="${m}">${m}</option>`);});
+
+// ── SUBMITTER
+function selectSub(el,name,role,type){
+  document.querySelectorAll('.sub-pill').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('sub-name').value=name;
+  document.getElementById('sub-role').value=type;
+  document.getElementById('sp').value=name;
+  const d=document.getElementById('sp-disp');
+  d.textContent=name+' — '+role; d.classList.add('filled');
+  mark(1);
+}
+
+// ── PILL SELECT
+function ps(el,fid,val,cls){
+  el.closest('.pill-group').querySelectorAll('.pill').forEach(p=>{p.className='pill';});
+  el.classList.add(cls);
+  document.getElementById(fid).value=val;
+  if(fid==='outcome') mark(6);
+}
+
+// ── TOGGLE
+function tog(cbId,expId,rowId){
+  const cb=document.getElementById(cbId),exp=document.getElementById(expId),row=document.getElementById(rowId);
+  cb.checked?(exp.classList.add('open'),row.classList.add('on')):(exp.classList.remove('open'),row.classList.remove('on'));
+}
+
+// ── SCORE
+const sw=document.getElementById('score-wrap');
+for(let i=1;i<=10;i++){
+  const b=document.createElement('button');
+  b.type='button'; b.className='s-btn'; b.textContent=i;
+  b.onclick=function(){
+    document.querySelectorAll('.s-btn').forEach(x=>{x.className='s-btn';});
+    this.classList.add(`a${i}`);
+    document.getElementById('escore').value=i;
+    mark(5);
+  };
+  sw.appendChild(b);
+}
+
+// ── PHONE FORMAT
+document.getElementById('phone').addEventListener('input',function(){
+  let v=this.value.replace(/\D/g,'');
+  if(v.length>=6) v=`(${v.slice(0,3)}) ${v.slice(3,6)}-${v.slice(6,10)}`;
+  else if(v.length>=3) v=`(${v.slice(0,3)}) ${v.slice(3)}`;
+  this.value=v;
+});
+
+// ── PROGRESS
+function mark(n){const s=document.getElementById(`s${n}`);if(!s)return;s.classList.add('done');s.classList.remove('active');s.querySelector('.step-n').textContent='✓';}
+['fname','lname'].forEach(id=>document.getElementById(id).addEventListener('input',()=>mark(2)));
+['vy','vmk','vmd'].forEach(id=>document.getElementById(id).addEventListener('change',()=>mark(3)));
+document.getElementById('vreason').addEventListener('change',()=>mark(4));
+
+// ── GET VALUE
+const gv=id=>{const e=document.getElementById(id);return e?(e.value||'—'):'—';};
+
+// ── SUBMIT
+function submitLog(){
+  const n=new Date(),mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const ts=`${mo[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()} at ${n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})} CT`;
+  const veh=[gv('vy'),gv('vmk'),gv('vmd')].filter(v=>v&&v!='—').join(' ')||'—';
+  const cust=(gv('fname')+' '+gv('lname')).trim()||'—';
+  const score=gv('escore');
+  const role=gv('sub-role');
+
+  // ── SAVE TO SUPABASE
+  const entry = {
+    timestamp:       ts,
+    entry_type:      role==='manager'?'Manager Entry':'Sales Entry',
+    submitter:       gv('sub-name'),
+    first_name:      gv('fname'),
+    last_name:       gv('lname'),
+    phone:           gv('phone'),
+    email:           gv('email'),
+    contact_pref:    gv('cpref'),
+    best_time:       gv('ctime'),
+    veh_year:        gv('vy')||null,
+    veh_make:        gv('vmk'),
+    veh_model:       gv('vmd'),
+    veh_miles:       gv('vmi')||null,
+    veh_trim:        gv('vtr'),
+    veh_color:       gv('vcl'),
+    veh_ownership:   gv('vow'),
+    veh_payoff:      gv('vpay'),
+    veh_lease:       gv('vlease'),
+    veh_condition:   gv('vcond'),
+    ro_num:          gv('ro'),
+    svc_advisor:     gv('sva'),
+    visit_reason:    gv('vreason'),
+    repair_cost:     gv('rcost'),
+    repair_ratio:    gv('rratio'),
+    cust_emotion:    gv('cemo'),
+    intro_made:      gv('intro'),
+    trade_interest:  document.getElementById('tr-cb').checked?'Yes':'No',
+    trade_acv:       gv('tacv'),
+    trade_expect:    gv('texp'),
+    trade_equity:    gv('teq'),
+    voi:             gv('voi'),
+    voi_type:        gv('voity'),
+    voi_budget:      gv('voibdg'),
+    finance_conv:    gv('finconv'),
+    timeline:        gv('timeline'),
+    eng_score:       score!=='—'?parseInt(score):null,
+    outcome:         gv('outcome'),
+    salesperson:     gv('sp'),
+    followup_date:   gv('fdate')||null,
+    followup_method: gv('fmeth'),
+    crm_entry:       gv('crm'),
+    notes:           gv('notes'),
+  };
+  // Fire and forget — post to Supabase
+  fetch('https://jbkgwtohwsbaorhvuuqb.supabase.co/rest/v1/s2s_entries', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU',
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(entry)
+  }).catch(err => console.warn('Supabase save failed:', err));
+
+  // ── HOT LEAD EMAIL ALERT (temp 8-10)
+  if(parseInt(score) >= 8) {
+    const recipients = [
+      'Rob.l@gallatincdjr.com',
+      'Tyler.d@gallatincdjr.com',
+      'Joe.s@gallatincdjr.com',
+      'Jbarba@weauto.us',
+      'dominick.f@gallatincdjr.com',
+      'Mich.s@gallatincdjr.com'
+    ];
+    const tempColor = parseInt(score)>=9?'#C8102E':'#C49A2A';
+    const emailHtml = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F5F4F1;font-family:Arial,sans-serif;">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px;">
+  <div style="background:#0C0C14;border-radius:12px 12px 0 0;padding:24px 28px;">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Vyaxis · ServiceBridge</div>
+    <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">🔥 Hot Lead Alert</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.5);">Gallatin CDJR · Service Drive</div>
+  </div>
+  <div style="background:#fff;padding:28px;border-left:1px solid #E4E2DC;border-right:1px solid #E4E2DC;">
+    <div style="display:inline-block;background:${tempColor};color:#fff;border-radius:6px;padding:6px 16px;font-size:14px;font-weight:700;margin-bottom:20px;">🌡 Buying Temperature: ${score}/10</div>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;width:35%;">Customer</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;font-weight:600;">${entry.first_name} ${entry.last_name}</td></tr>
+      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Phone</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.phone||'—'}</td></tr>
+      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Vehicle</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.veh_year||''} ${entry.veh_make||''} ${entry.veh_model||''}</td></tr>
+      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Visit Reason</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.visit_reason||'—'}</td></tr>
+      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Repair Cost</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.repair_cost||'—'}</td></tr>
+      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Equity</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.trade_equity||'—'}</td></tr>
+      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Timeline</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.timeline||'—'}</td></tr>
+      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Logged By</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.submitter||'—'}</td></tr>
+      <tr><td style="padding:8px 0;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Outcome</td><td style="padding:8px 0;font-size:13px;font-weight:600;color:#C49A2A;">${entry.outcome||'—'}</td></tr>
+    </table>
+    ${entry.notes?`<div style="background:#F5F4F1;border-radius:6px;padding:14px 16px;margin-top:16px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;margin-bottom:6px;">Notes</div><div style="font-size:13px;">${entry.notes}</div></div>`:''}
+    <div style="margin-top:20px;"><a href="https://servicebridge.vyaxis.com/manager-dashboard.html" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;border-radius:6px;padding:12px 24px;font-size:13px;font-weight:600;">View in Dashboard →</a></div>
+  </div>
+  <div style="background:#EDECEA;border:1px solid #E4E2DC;border-top:none;border-radius:0 0 12px 12px;padding:16px 28px;text-align:center;">
+    <div style="font-size:11px;color:#8C897F;">ServiceBridge by Vyaxis · Gallatin CDJR · ${ts}</div>
+  </div>
+</div>`;
+  }
+}
+</script>
+
+<div style="max-width:760px;margin:0 auto;padding:0 24px 60px;position:relative;z-index:1;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07);">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(238,232,255,0.22);">Recent Submissions</div>
+    <button onclick="loadS2SRecent()" style="font-size:11px;font-weight:600;color:rgba(238,232,255,0.4);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">↻ Refresh</button>
+  </div>
+  <div id="s2s-recent-entries"><p style="color:rgba(238,232,255,0.4);font-size:13px;">Loading...</p></div>
+</div>
+
+<!-- S2S Edit Modal -->
+<div class="modal-overlay" id="s2s-edit-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Edit S2S Entry</div>
+      <button class="modal-close" onclick="closeS2SModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="s2s-edit-id">
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Submitter</label>
+          <select class="modal-select" id="s2s-submitter">
+            <option>Tyler Doyle</option><option>Andrew Kirk</option><option>DJ Rogers</option><option>Kody McCann</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Customer First Name</label>
+          <input class="modal-input" id="s2s-first" type="text">
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Customer Last Name</label>
+          <input class="modal-input" id="s2s-last" type="text">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Phone</label>
+          <input class="modal-input" id="s2s-phone" type="text">
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Vehicle Year</label>
+          <input class="modal-input" id="s2s-year" type="text">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Make</label>
+          <input class="modal-input" id="s2s-make" type="text">
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Model</label>
+          <input class="modal-input" id="s2s-model" type="text">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Repair Cost ($)</label>
+          <input class="modal-input" id="s2s-repair" type="text">
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Outcome</label>
+          <select class="modal-select" id="s2s-outcome">
+            <option>Sold New</option><option>Sold Used</option><option>Appointment Set</option>
+            <option>Working Deal</option><option>Follow-Up Required</option><option>Not Interested</option><option>No Show</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Engagement Score (1-10)</label>
+          <input class="modal-input" id="s2s-score" type="number" min="1" max="10">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Notes</label>
+        <textarea class="modal-textarea" id="s2s-notes"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-cancel" onclick="closeS2SModal()">Cancel</button>
+        <button class="modal-del" onclick="deleteS2SEntry()">🗑 Delete</button>
+        <button class="modal-save" onclick="saveS2SEdit()">✓ Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="edit-toast" id="s2s-edit-toast"></div>
+
+
+
+</body></html>`;
+
+    fetch('/api/send-email', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        to: recipients,
+        subject: `🔥 Hot Lead Alert — ${entry.first_name} ${entry.last_name} · Temp ${score}/10 · ${entry.veh_year||''} ${entry.veh_make||''} ${entry.veh_model||''}`,
+        html: emailHtml
+      })
+    }).catch(err => console.warn('Email send failed:', err));
+  }
+
+  // ── TEAMS PREVIEW
+  const rows=[
+    ['🏷 Entry Type',role==='manager'?'🟡 Manager Entry':'🔴 Sales Entry',true],
+    ['👤 Submitted By',gv('sub-name'),false],['📅 Timestamp',ts,false],null,
+    ['👤 Customer',cust,false],['📞 Phone',gv('phone'),false],['✉ Email',gv('email'),false],
+    ['📲 Contact Pref.',gv('cpref'),false],['⏰ Best Time',gv('ctime'),false],null,
+    ['🚗 Vehicle',veh,false],
+    ['📍 Mileage',gv('vmi')?Number(gv('vmi')).toLocaleString()+' mi':'—',false],
+    ['🔑 Ownership',gv('vow'),false],['💳 Equity',gv('teq'),false],['⚙️ Condition',gv('vcond'),false],null,
+    ['🔧 Visit Reason',gv('vreason'),false],['💰 Repair Cost',gv('rcost'),false],
+    ['📊 Cost vs. Value',gv('rratio'),false],['😐 Customer Mood',gv('cemo'),false],
+    ['🤝 Intro Made',gv('intro'),false],null,
+    ['🔥 Buying Temp.',score!=='—'?`${score}/10`:'—',false],
+    ['⏱ Timeline',gv('timeline'),false],['🏦 Finance Status',gv('finconv'),false],null,
+    ['✅ Outcome',gv('outcome'),true],['👨‍💼 Salesperson',gv('sp'),false],
+    ['📆 Follow-Up',gv('fdate'),false],['📞 Follow-Up Via',gv('fmeth'),false],
+    ['💾 CRM Entry',gv('crm'),false],['📝 Notes',gv('notes'),false],
+  ];
+
+  let html='';
+  rows.forEach(r=>{
+    if(!r){html+='<div class="pdiv"></div><div></div>';}
+    else html+=`<div class="pk">${r[0]}</div><div class="pv${r[2]?' hl':''}">${r[1]}</div>`;
+  });
+  document.getElementById('preview-grid').innerHTML=html;
+  document.getElementById('preview-wrap').classList.add('open');
+  const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);
+  document.getElementById('preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+  for(let i=1;i<=6;i++) mark(i);
+}
+
+// ── RESET
+function resetForm(){
+  document.querySelectorAll('input:not([type=checkbox])').forEach(i=>i.value='');
+  document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
+  document.querySelectorAll('textarea').forEach(t=>t.value='');
+  document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
+  document.querySelectorAll('.expand').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('.tog-row').forEach(r=>r.classList.remove('on'));
+  document.querySelectorAll('.pill').forEach(p=>p.className='pill');
+  document.querySelectorAll('.sub-pill').forEach(p=>p.classList.remove('sel'));
+  document.querySelectorAll('.s-btn').forEach(b=>b.className='s-btn');
+  vmd.innerHTML='<option value="">Model</option>';
+  const d=document.getElementById('sp-disp');d.textContent='Select your name above to auto-assign';d.classList.remove('filled');
+  document.getElementById('preview-wrap').classList.remove('open');
+  for(let i=1;i<=6;i++){const s=document.getElementById(`s${i}`);if(s){s.classList.remove('done','active');s.querySelector('.step-n').textContent=i;}}
+  document.getElementById('s1').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+<div style="max-width:760px;margin:0 auto;padding:0 24px 60px;position:relative;z-index:1;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07);">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(238,232,255,0.22);">Recent Submissions</div>
+    <button onclick="loadS2SRecent()" style="font-size:11px;font-weight:600;color:rgba(238,232,255,0.4);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">↻ Refresh</button>
+  </div>
+  <div id="s2s-recent-entries"><p style="color:rgba(238,232,255,0.4);font-size:13px;">Loading...</p></div>
+</div>
+
+<!-- S2S Edit Modal -->
+<div class="modal-overlay" id="s2s-edit-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Edit S2S Entry</div>
+      <button class="modal-close" onclick="closeS2SModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="s2s-edit-id">
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Submitter</label>
+          <select class="modal-select" id="s2s-submitter">
+            <option>Tyler Doyle</option><option>Andrew Kirk</option><option>DJ Rogers</option><option>Kody McCann</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Customer First Name</label>
+          <input class="modal-input" id="s2s-first" type="text">
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Customer Last Name</label>
+          <input class="modal-input" id="s2s-last" type="text">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Phone</label>
+          <input class="modal-input" id="s2s-phone" type="text">
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Vehicle Year</label>
+          <input class="modal-input" id="s2s-year" type="text">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Make</label>
+          <input class="modal-input" id="s2s-make" type="text">
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Model</label>
+          <input class="modal-input" id="s2s-model" type="text">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Repair Cost ($)</label>
+          <input class="modal-input" id="s2s-repair" type="text">
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label class="modal-label">Outcome</label>
+          <select class="modal-select" id="s2s-outcome">
+            <option>Sold New</option><option>Sold Used</option><option>Appointment Set</option>
+            <option>Working Deal</option><option>Follow-Up Required</option><option>Not Interested</option><option>No Show</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Engagement Score (1-10)</label>
+          <input class="modal-input" id="s2s-score" type="number" min="1" max="10">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Notes</label>
+        <textarea class="modal-textarea" id="s2s-notes"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-cancel" onclick="closeS2SModal()">Cancel</button>
+        <button class="modal-del" onclick="deleteS2SEntry()">🗑 Delete</button>
+        <button class="modal-save" onclick="saveS2SEdit()">✓ Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="edit-toast" id="s2s-edit-toast"></div>
+
+<script>
+const S2S_SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
+const S2S_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
+const S2S_H = {'apikey':S2S_SB_KEY,'Authorization':'Bearer '+S2S_SB_KEY,'Content-Type':'application/json'};
+
+function showS2SToast(msg, type='') {
+  const el = document.getElementById('s2s-edit-toast');
+  el.textContent = msg;
+  el.className = 'edit-toast show ' + type;
+  setTimeout(() => el.className = 'edit-toast', 3000);
+}
+
+async function openS2SEditModal(id) {
+  const res = await fetch(`${S2S_SB_URL}/rest/v1/s2s_entries?id=eq.${id}`, {headers: S2S_H});
+  const data = await res.json();
+  if (!data.length) return;
+  const e = data[0];
+  document.getElementById('s2s-edit-id').value = e.id;
+  document.getElementById('s2s-submitter').value = e.submitter || '';
+  document.getElementById('s2s-first').value = e.first_name || '';
+  document.getElementById('s2s-last').value = e.last_name || '';
+  document.getElementById('s2s-phone').value = e.phone || '';
+  document.getElementById('s2s-year').value = e.veh_year || '';
+  document.getElementById('s2s-make').value = e.veh_make || '';
+  document.getElementById('s2s-model').value = e.veh_model || '';
+  document.getElementById('s2s-repair').value = e.repair_cost || '';
+  document.getElementById('s2s-outcome').value = e.outcome || '';
+  document.getElementById('s2s-score').value = e.eng_score || '';
+  document.getElementById('s2s-notes').value = e.notes || '';
+  document.getElementById('s2s-edit-modal').classList.add('open');
+}
+
+function closeS2SModal() {
+  document.getElementById('s2s-edit-modal').classList.remove('open');
+}
+
+async function saveS2SEdit() {
+  const id = document.getElementById('s2s-edit-id').value;
+  const payload = {
+    submitter: document.getElementById('s2s-submitter').value,
+    first_name: document.getElementById('s2s-first').value,
+    last_name: document.getElementById('s2s-last').value,
+    phone: document.getElementById('s2s-phone').value,
+    veh_year: document.getElementById('s2s-year').value,
+    veh_make: document.getElementById('s2s-make').value,
+    veh_model: document.getElementById('s2s-model').value,
+    repair_cost: document.getElementById('s2s-repair').value,
+    outcome: document.getElementById('s2s-outcome').value,
+    eng_score: document.getElementById('s2s-score').value,
+    notes: document.getElementById('s2s-notes').value,
+  };
+  await fetch(`${S2S_SB_URL}/rest/v1/s2s_entries?id=eq.${id}`, {method:'PATCH', headers: S2S_H, body: JSON.stringify(payload)});
+  closeS2SModal();
+  showS2SToast('✓ Entry updated', 'green');
+  loadS2SRecent();
+}
+
+async function deleteS2SEntry() {
+  if (!confirm('Delete this entry? Cannot be undone.')) return;
+  const id = document.getElementById('s2s-edit-id').value;
+  await fetch(`${S2S_SB_URL}/rest/v1/s2s_entries?id=eq.${id}`, {method:'DELETE', headers: S2S_H});
+  closeS2SModal();
+  showS2SToast('Entry deleted');
+  loadS2SRecent();
+}
+
+async function loadS2SRecent() {
+  const container = document.getElementById('s2s-recent-entries');
+  if (!container) return;
+  const res = await fetch(`${S2S_SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=10`, {headers: S2S_H});
+  const data = await res.json();
+  if (!data.length) { container.innerHTML = '<p style="color:rgba(238,232,255,0.4);font-size:13px;padding:12px 0;">No entries yet.</p>'; return; }
+  container.innerHTML = data.map(e => `
+    <div class="recent-entry">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#EEE8FF;">${e.submitter||'—'} <span style="color:rgba(238,232,255,0.4);font-weight:400;">· ${e.first_name||''} ${e.last_name||''}</span></div>
+        <div style="font-size:11px;color:rgba(238,232,255,0.25);margin-top:2px;">${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''} · ${e.outcome||'—'} · Score: ${e.eng_score||'—'} · ${e.created_at ? new Date(e.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '—'}</div>
+      </div>
+      <button onclick="openS2SEditModal(${e.id})" style="padding:6px 14px;border-radius:8px;background:rgba(91,79,232,0.15);border:1px solid rgba(91,79,232,0.3);color:#7B72F0;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Edit</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('s2s-edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeS2SModal();
+});
+
+loadS2SRecent();
+</script>
+
+</body>
+</html>
