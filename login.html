@@ -317,7 +317,11 @@ async function authenticate() {
   try {
     const res = await fetch(AUTH_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON,
+        'Authorization': 'Bearer ' + SUPABASE_ANON
+      },
       body: JSON.stringify({
         name: selectedRep.name,
         pin: pinEntry
