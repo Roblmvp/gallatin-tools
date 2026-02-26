@@ -28,16 +28,12 @@
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-serif; overflow: hidden; }
-
   .screen { position: fixed; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .screen.active { opacity: 1; pointer-events: all; }
-
   .bg-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
   .bg-glow { position: fixed; width: 600px; height: 600px; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
   .bg-glow-red  { background: radial-gradient(circle, rgba(200,16,46,0.12) 0%, transparent 70%); top: -200px; left: -100px; }
   .bg-glow-blue { background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%); bottom: -200px; right: -100px; }
-
-  /* NAV BAR */
   .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(8,11,20,0.95); border-top: 1px solid var(--border); padding: 12px 0 max(12px, env(safe-area-inset-bottom)); display: none; justify-content: space-around; align-items: center; z-index: 100; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
   .nav-bar.visible { display: flex; }
   .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 6px 16px; border-radius: 12px; transition: all 0.15s; min-width: 60px; }
@@ -45,23 +41,44 @@
   .nav-item.active .nav-label { color: var(--text); }
   .nav-icon  { font-size: 20px; color: var(--muted); transition: color 0.15s; line-height: 1; }
   .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); transition: color 0.15s; }
-
-  /* HEADER */
   .app-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; padding-top: max(16px, env(safe-area-inset-top)); border-bottom: 1px solid var(--border); background: rgba(8,11,20,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 50; }
   .header-left  { display: flex; align-items: center; gap: 10px; }
   .header-logo  { width: 32px; height: 32px; background: var(--red); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
   .header-title { font-family: 'DM Serif Display', serif; font-size: 17px; letter-spacing: -0.01em; }
-  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-right { display: flex; align-items: center; gap: 10px; position: relative; }
   .header-user  { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
   .header-logout { width: 32px; height: 32px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.15s; }
   .header-logout:active { background: var(--card2); }
-
+  /* HAMBURGER */
+  .hamburger { background: none; border: 1px solid var(--border2); border-radius: 8px; width: 32px; height: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: all 0.18s; padding: 0; flex-shrink: 0; }
+  .hamburger:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
+  .hamburger span { display: block; width: 14px; height: 1.5px; background: rgba(255,255,255,0.7); border-radius: 2px; transition: all 0.2s; }
+  .hamburger.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+  .nav-overlay { position: fixed; inset: 0; z-index: 190; display: none; }
+  .nav-overlay.open { display: block; }
+  .nav-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: #0F1628; border: 1px solid var(--border2); border-radius: 14px; min-width: 220px; padding: 6px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); z-index: 201; opacity: 0; transform: translateY(-8px) scale(0.97); pointer-events: none; transition: all 0.18s cubic-bezier(0.16,1,0.3,1); }
+  .nav-dropdown.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+  .dd-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: none; cursor: pointer; transition: all 0.15s; }
+  .dd-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+  .dd-item.active-page { background: rgba(200,16,46,0.12); color: #FC8181; }
+  .dd-icon { font-size: 15px; width: 20px; text-align: center; }
+  .dd-divider { height: 1px; background: var(--border); margin: 4px 0; }
+  .dd-admin { display: none; }
+  .dd-admin.show { display: flex; }
+  .dd-divider.dd-admin.show { display: block; }
+  .nav-user-info { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px 4px; }
+  .nav-user-display { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; }
+  .nav-role-pill { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; }
+  .role-admin { background: rgba(99,102,241,0.2); color: #818CF8; border: 1px solid rgba(99,102,241,0.3); }
+  .role-manager { background: rgba(196,154,42,0.15); color: var(--gold); border: 1px solid rgba(196,154,42,0.25); }
+  .role-sales { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15); }
   /* HOME */
   .home-content { padding: 20px 20px 100px; flex: 1; position: relative; z-index: 1; }
   .home-greeting { margin-bottom: 28px; }
   .home-greeting-sub  { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
   .home-greeting-name { font-family: 'DM Serif Display', serif; font-size: 30px; letter-spacing: -0.02em; line-height: 1.1; }
-
   .cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
   .cta-card { background: var(--ink2); border: 1px solid var(--border); border-radius: var(--r); padding: 20px 18px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; }
   .cta-card::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.2s; }
@@ -85,8 +102,6 @@
   .cta-card.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; padding: 18px 20px; gap: 16px; }
   .cta-card.wide .cta-text { flex: 1; }
   .cta-arrow { font-size: 16px; color: var(--muted); }
-
-  /* ADMIN */
   #screen-admin .home-content { padding-top: 0; }
   .admin-section { margin-bottom: 28px; }
   .admin-section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; padding: 0 2px; }
@@ -113,17 +128,12 @@
   .log-info { flex: 1; }
   .log-name { font-size: 13px; font-weight: 600; }
   .log-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  /* STAT CARDS */
   .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
   .stat-card { background: var(--ink2); border: 1px solid var(--border); border-radius: 14px; padding: 14px 12px; text-align: center; }
   .stat-val { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--text); line-height: 1; margin-bottom: 4px; }
   .stat-lbl { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
-
-  /* TOAST */
   .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink3); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 20px; font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; z-index: 999; opacity: 0; transition: all 0.3s; pointer-events: none; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
   .safe-bottom { padding-bottom: max(90px, calc(70px + env(safe-area-inset-bottom))); }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -131,12 +141,11 @@
 </style>
 </head>
 <body>
-
 <div class="bg-grid"></div>
 <div class="bg-glow bg-glow-red"></div>
 <div class="bg-glow bg-glow-blue"></div>
 
-<!-- ══ HOME ══ -->
+<!-- HOME SCREEN -->
 <div class="screen" id="screen-home">
   <div class="app-header">
     <div class="header-left">
@@ -146,12 +155,28 @@
     <div class="header-right">
       <span class="header-user" id="header-user-name"></span>
       <div class="header-logout" onclick="logout()" title="Sign Out">↩</div>
+      <button class="hamburger" id="home-hamburger" onclick="toggleAppMenu('home')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-dropdown" id="home-dropdown">
+        <div class="nav-user-info">
+          <span class="nav-user-display" id="home-nav-user"></span>
+          <span class="nav-role-pill" id="home-nav-pill"></span>
+        </div>
+        <div class="dd-divider"></div>
+        <a href="app.html" class="dd-item active-page"><span class="dd-icon">🏠</span> Home</a>
+        <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
+        <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Performance Dashboard</a>
+        <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
+        <div class="dd-divider dd-admin" id="home-admin-divider"></div>
+        <a href="admin-panel.html" class="dd-item dd-admin" id="home-admin-link"><span class="dd-icon">⚙️</span> Admin Panel</a>
+      </div>
     </div>
   </div>
   <div class="home-content safe-bottom" id="home-content"></div>
 </div>
 
-<!-- ══ ADMIN ══ -->
+<!-- ADMIN SCREEN -->
 <div class="screen" id="screen-admin">
   <div class="app-header">
     <div class="header-left">
@@ -161,13 +186,29 @@
     <div class="header-right">
       <div class="header-logout" onclick="showScreen('screen-home')" title="Back">←</div>
       <div class="header-logout" onclick="logout()" title="Sign Out">↩</div>
+      <button class="hamburger" id="admin-hamburger" onclick="toggleAppMenu('admin')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-dropdown" id="admin-dropdown">
+        <div class="nav-user-info">
+          <span class="nav-user-display" id="admin-nav-user"></span>
+          <span class="nav-role-pill" id="admin-nav-pill"></span>
+        </div>
+        <div class="dd-divider"></div>
+        <a href="app.html" class="dd-item"><span class="dd-icon">🏠</span> Home</a>
+        <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
+        <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Performance Dashboard</a>
+        <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
+        <div class="dd-divider dd-admin show" id="admin-admin-divider"></div>
+        <a href="admin-panel.html" class="dd-item dd-admin show" id="admin-admin-link"><span class="dd-icon">⚙️</span> Admin Panel</a>
+      </div>
     </div>
   </div>
   <div class="home-content safe-bottom" id="admin-content"></div>
 </div>
 
-<!-- NAV BAR -->
 <div class="nav-bar" id="nav-bar"></div>
+<div class="nav-overlay" id="app-nav-overlay" onclick="closeAllMenus()"></div>
 <div class="toast" id="app-toast"></div>
 
 <script>
@@ -178,384 +219,192 @@ const USERS = [
   { id: 'dj', name: 'DJ Rogers',       first: 'DJ',     role: 'sales',   pin: '1234' },
   { id: 'km', name: 'Kody McCann',     first: 'Kody',   role: 'sales',   pin: '1234' },
 ];
-
 let currentUser = null;
 
-// ── SESSION ────────────────────────────────────────────────────────────────
-function saveSession(user) {
-  sessionStorage.setItem('sb_session', JSON.stringify({ id: user.id, time: Date.now() }));
-}
+function saveSession(user) { sessionStorage.setItem('sb_session', JSON.stringify({ id: user.id, time: Date.now() })); }
 function loadSession() {
   try {
     const s = JSON.parse(sessionStorage.getItem('sb_session') || 'null');
-    if (!s) return null;
-    if (Date.now() - s.time > 8 * 60 * 60 * 1000) return null;
+    if (!s || Date.now() - s.time > 8*60*60*1000) return null;
     return USERS.find(u => u.id === s.id) || null;
   } catch { return null; }
 }
-function clearSession() {
-  sessionStorage.removeItem('sb_session');
-  sessionStorage.removeItem('sb_rep');
-}
-
-// ── ACTIVITY LOG ───────────────────────────────────────────────────────────
+function clearSession() { sessionStorage.removeItem('sb_session'); sessionStorage.removeItem('sb_rep'); }
 function addLoginLog(user) {
   const logs = getLoginLogs();
   logs.unshift({ name: user.name, role: user.role, time: new Date().toISOString(), id: user.id });
   localStorage.setItem('sb_login_log', JSON.stringify(logs.slice(0, 50)));
 }
-function getLoginLogs() {
-  try { return JSON.parse(localStorage.getItem('sb_login_log') || '[]'); } catch { return []; }
-}
-
-// ── ACTIVE STATE ───────────────────────────────────────────────────────────
-function getUserActive(id) {
-  const stored = localStorage.getItem('sb_active_' + id);
-  return stored === null ? true : stored === 'true';
-}
+function getLoginLogs() { try { return JSON.parse(localStorage.getItem('sb_login_log') || '[]'); } catch { return []; } }
+function getUserActive(id) { const s = localStorage.getItem('sb_active_' + id); return s === null ? true : s === 'true'; }
 function setUserActive(id, val) { localStorage.setItem('sb_active_' + id, val); }
 
-// ── SCREENS ────────────────────────────────────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.pointerEvents = 'none'; });
   const el = document.getElementById(id);
   if (el) { el.classList.add('active'); el.style.pointerEvents = 'all'; el.scrollTop = 0; }
-  const nav = document.getElementById('nav-bar');
-  nav.classList.toggle('visible', id === 'screen-home' || id === 'screen-admin');
+  document.getElementById('nav-bar').classList.toggle('visible', id === 'screen-home' || id === 'screen-admin');
   updateNav(id);
 }
-
-// ── NAV ────────────────────────────────────────────────────────────────────
 function buildNav() {
   const nav = document.getElementById('nav-bar');
   if (!currentUser) { nav.innerHTML = ''; return; }
   const items = [{ icon: '🏠', label: 'Home', screen: 'screen-home' }];
-  if (currentUser.role === 'admin' || currentUser.role === 'manager') {
-    items.push({ icon: '⚙️', label: 'Admin', screen: 'screen-admin' });
-  }
-  nav.innerHTML = items.map(item => `
-    <div class="nav-item" onclick="navGo('${item.screen}')" data-screen="${item.screen}">
-      <div class="nav-icon">${item.icon}</div>
-      <div class="nav-label">${item.label}</div>
-    </div>`).join('');
+  if (currentUser.role === 'admin' || currentUser.role === 'manager') items.push({ icon: '⚙️', label: 'Admin', screen: 'screen-admin' });
+  nav.innerHTML = items.map(i => `<div class="nav-item" onclick="navGo('${i.screen}')" data-screen="${i.screen}"><div class="nav-icon">${i.icon}</div><div class="nav-label">${i.label}</div></div>`).join('');
 }
-function navGo(screen) {
-  if (screen === 'screen-admin') buildAdminPanel();
-  showScreen(screen);
+function navGo(screen) { if (screen === 'screen-admin') buildAdminPanel(); showScreen(screen); }
+function updateNav(activeScreen) { document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.screen === activeScreen)); }
+
+// HAMBURGER
+function toggleAppMenu(which) {
+  const hb = document.getElementById(which + '-hamburger');
+  const dd = document.getElementById(which + '-dropdown');
+  const ov = document.getElementById('app-nav-overlay');
+  const isOpen = dd.classList.contains('open');
+  closeAllMenus();
+  if (!isOpen) { hb.classList.add('open'); dd.classList.add('open'); ov.classList.add('open'); }
 }
-function updateNav(activeScreen) {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.toggle('active', item.dataset.screen === activeScreen);
+function closeAllMenus() {
+  ['home','admin'].forEach(w => {
+    const hb = document.getElementById(w+'-hamburger'); const dd = document.getElementById(w+'-dropdown');
+    if (hb) hb.classList.remove('open'); if (dd) dd.classList.remove('open');
+  });
+  document.getElementById('app-nav-overlay').classList.remove('open');
+}
+function initAppNav() {
+  if (!currentUser) return;
+  const role = currentUser.role;
+  const rc = role==='admin'?'role-admin':role==='manager'?'role-manager':'role-sales';
+  const rl = role.charAt(0).toUpperCase()+role.slice(1);
+  ['home','admin'].forEach(w => {
+    const ne = document.getElementById(w+'-nav-user'); const pe = document.getElementById(w+'-nav-pill');
+    if (ne) ne.textContent = currentUser.first;
+    if (pe) { pe.textContent = rl; pe.className = 'nav-role-pill ' + rc; }
+    if (role === 'admin') {
+      const lnk = document.getElementById(w+'-admin-link'); const div = document.getElementById(w+'-admin-divider');
+      if (lnk) lnk.classList.add('show'); if (div) div.classList.add('show');
+    }
   });
 }
 
-// ── HOME ───────────────────────────────────────────────────────────────────
 function buildHome() {
   document.getElementById('header-user-name').textContent = currentUser.first;
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   let cards = '';
-
   if (currentUser.role === 'sales') {
-    cards = `
-      <div class="cta-grid">
-        <div class="cta-card red" onclick="goTo('https://servicebridge.vyaxis.com/service-to-sales-log.html')">
-          <div class="cta-icon red">📋</div>
-          <div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div>
-        </div>
-        <div class="cta-card blue" onclick="goTo('https://servicebridge.vyaxis.com/scorecards.html')">
-          <div class="cta-icon blue">🏆</div>
-          <div><div class="cta-label">Scoreboard</div><div class="cta-sub">Team standings</div></div>
-        </div>
+    cards = `<div class="cta-grid">
+        <div class="cta-card red" onclick="goTo('https://servicebridge.vyaxis.com/service-to-sales-log.html')"><div class="cta-icon red">📋</div><div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div></div>
+        <div class="cta-card blue" onclick="goTo('https://servicebridge.vyaxis.com/scorecards.html')"><div class="cta-icon blue">🏆</div><div><div class="cta-label">Scoreboard</div><div class="cta-sub">Team standings</div></div></div>
       </div>
-      <div class="cta-card wide green" onclick="goTo('https://servicebridge.vyaxis.com/manager-dashboard.html')">
-        <div class="cta-icon green">📊</div>
-        <div class="cta-text"><div class="cta-label">View Dashboard</div><div class="cta-sub">All entries & analytics</div></div>
-        <div class="cta-arrow">→</div>
-      </div>`;
+      <div class="cta-card wide green" onclick="goTo('https://servicebridge.vyaxis.com/manager-dashboard.html')"><div class="cta-icon green">📊</div><div class="cta-text"><div class="cta-label">View Dashboard</div><div class="cta-sub">All entries & analytics</div></div><div class="cta-arrow">→</div></div>`;
   }
-
   if (currentUser.role === 'manager') {
-    cards = `
-      <div class="cta-grid">
-        <div class="cta-card gold" onclick="goTo('https://servicebridge.vyaxis.com/manager-dashboard.html')">
-          <div class="cta-icon gold">📊</div>
-          <div><div class="cta-label">Dashboard</div><div class="cta-sub">All entries</div></div>
-        </div>
-        <div class="cta-card blue" onclick="goTo('https://servicebridge.vyaxis.com/scorecards.html')">
-          <div class="cta-icon blue">🏆</div>
-          <div><div class="cta-label">Scoreboard</div><div class="cta-sub">Leaderboard</div></div>
-        </div>
-        <div class="cta-card red" onclick="goTo('https://servicebridge.vyaxis.com/service-to-sales-log.html')">
-          <div class="cta-icon red">📋</div>
-          <div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div>
-        </div>
-        <div class="cta-card teal" onclick="goTo('https://servicebridge.vyaxis.com/upboard.html')">
-          <div class="cta-icon teal">🔄</div>
-          <div><div class="cta-label">UP Board</div><div class="cta-sub">Floor rotation</div></div>
-        </div>
+    cards = `<div class="cta-grid">
+        <div class="cta-card gold" onclick="goTo('https://servicebridge.vyaxis.com/manager-dashboard.html')"><div class="cta-icon gold">📊</div><div><div class="cta-label">Dashboard</div><div class="cta-sub">All entries</div></div></div>
+        <div class="cta-card blue" onclick="goTo('https://servicebridge.vyaxis.com/scorecards.html')"><div class="cta-icon blue">🏆</div><div><div class="cta-label">Scoreboard</div><div class="cta-sub">Leaderboard</div></div></div>
+        <div class="cta-card red" onclick="goTo('https://servicebridge.vyaxis.com/service-to-sales-log.html')"><div class="cta-icon red">📋</div><div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div></div>
+        <div class="cta-card teal" onclick="goTo('https://servicebridge.vyaxis.com/upboard.html')"><div class="cta-icon teal">🔄</div><div><div class="cta-label">UP Board</div><div class="cta-sub">Floor rotation</div></div></div>
       </div>
-      <div class="cta-card wide purple" onclick="navGo('screen-admin')">
-        <div class="cta-icon purple">⚙️</div>
-        <div class="cta-text"><div class="cta-label">Admin Panel</div><div class="cta-sub">Manage users & access</div></div>
-        <div class="cta-arrow">→</div>
-      </div>`;
+      <div class="cta-card wide purple" onclick="navGo('screen-admin')"><div class="cta-icon purple">⚙️</div><div class="cta-text"><div class="cta-label">Admin Panel</div><div class="cta-sub">Manage users & access</div></div><div class="cta-arrow">→</div></div>`;
   }
-
   if (currentUser.role === 'admin') {
-    cards = `
-      <div class="cta-grid">
-        <div class="cta-card gold" onclick="goTo('https://servicebridge.vyaxis.com/manager-dashboard.html')">
-          <div class="cta-icon gold">📊</div>
-          <div><div class="cta-label">Dashboard</div><div class="cta-sub">All entries</div></div>
-        </div>
-        <div class="cta-card blue" onclick="goTo('https://servicebridge.vyaxis.com/scorecards.html')">
-          <div class="cta-icon blue">🏆</div>
-          <div><div class="cta-label">Scoreboard</div><div class="cta-sub">Leaderboard</div></div>
-        </div>
-        <div class="cta-card red" onclick="goTo('https://servicebridge.vyaxis.com/service-to-sales-log.html')">
-          <div class="cta-icon red">📋</div>
-          <div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div>
-        </div>
-        <div class="cta-card teal" onclick="goTo('https://servicebridge.vyaxis.com/upboard.html')">
-          <div class="cta-icon teal">🔄</div>
-          <div><div class="cta-label">UP Board</div><div class="cta-sub">Floor rotation</div></div>
-        </div>
+    cards = `<div class="cta-grid">
+        <div class="cta-card gold" onclick="goTo('https://servicebridge.vyaxis.com/manager-dashboard.html')"><div class="cta-icon gold">📊</div><div><div class="cta-label">Dashboard</div><div class="cta-sub">All entries</div></div></div>
+        <div class="cta-card blue" onclick="goTo('https://servicebridge.vyaxis.com/scorecards.html')"><div class="cta-icon blue">🏆</div><div><div class="cta-label">Scoreboard</div><div class="cta-sub">Leaderboard</div></div></div>
+        <div class="cta-card red" onclick="goTo('https://servicebridge.vyaxis.com/service-to-sales-log.html')"><div class="cta-icon red">📋</div><div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div></div>
+        <div class="cta-card teal" onclick="goTo('https://servicebridge.vyaxis.com/upboard.html')"><div class="cta-icon teal">🔄</div><div><div class="cta-label">UP Board</div><div class="cta-sub">Floor rotation</div></div></div>
       </div>
-      <div class="cta-card wide purple" onclick="goTo('https://servicebridge.vyaxis.com/admin-panel.html')">
-        <div class="cta-icon purple">⚙️</div>
-        <div class="cta-text"><div class="cta-label">Admin Console</div><div class="cta-sub">Users, data & email settings</div></div>
-        <div class="cta-arrow">→</div>
-      </div>`;
+      <div class="cta-card wide purple" onclick="goTo('https://servicebridge.vyaxis.com/admin-panel.html')"><div class="cta-icon purple">⚙️</div><div class="cta-text"><div class="cta-label">Admin Console</div><div class="cta-sub">Users, data & email settings</div></div><div class="cta-arrow">→</div></div>`;
   }
-
   document.getElementById('home-content').innerHTML = `
-    <div class="home-greeting">
-      <div class="home-greeting-sub">${greet}</div>
-      <div class="home-greeting-name">${currentUser.first}.</div>
-    </div>
+    <div class="home-greeting"><div class="home-greeting-sub">${greet}</div><div class="home-greeting-name">${currentUser.first}.</div></div>
     ${cards}
     <div style="margin-top:12px;">
-      <button id="notif-toggle-btn" onclick="toggleNotifications()"
-        style="background:var(--card);border:1px solid var(--border);border-radius:12px;
-               padding:12px 24px;font-size:13px;font-weight:600;color:var(--muted);
-               cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;transition:all 0.18s;">
-        🔕 Enable Notifications
-      </button>
+      <button id="notif-toggle-btn" onclick="toggleNotifications()" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 24px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;transition:all 0.18s;">🔕 Enable Notifications</button>
     </div>`;
   initNotifButton();
 }
 
-// ── NAVIGATION ─────────────────────────────────────────────────────────────
-// Direct page navigation — sessionStorage is preserved, no iframe issues
-function goTo(url) {
-  window.location.href = url;
-}
+function goTo(url) { window.location.href = url; }
 
-// ── ADMIN PANEL ────────────────────────────────────────────────────────────
 function buildAdminPanel() {
   const logs = getLoginLogs();
   const todayLogs = logs.filter(l => new Date(l.time).toDateString() === new Date().toDateString());
   const activeCount = USERS.filter(u => getUserActive(u.id)).length;
-
   const userRows = USERS.map(u => {
     const active = getUserActive(u.id);
-    return `
-      <div class="user-row">
-        <div class="user-avatar ${u.role}">${u.first[0]}</div>
-        <div class="user-info">
-          <div class="user-name">${u.name}</div>
-          <div class="user-meta"><span class="role-badge ${u.role}">${u.role}</span>&nbsp;PIN: ${u.pin}</div>
-        </div>
-        <div class="user-controls">
-          <button class="toggle-switch ${active ? 'on' : ''}" id="tog-${u.id}"
-                  onclick="toggleUserActive('${u.id}')"
-                  ${u.id === 'rl' ? 'disabled style="opacity:0.4;cursor:not-allowed"' : ''}>
-          </button>
-        </div>
-      </div>`;
+    return `<div class="user-row"><div class="user-avatar ${u.role}">${u.first[0]}</div><div class="user-info"><div class="user-name">${u.name}</div><div class="user-meta"><span class="role-badge ${u.role}">${u.role}</span>&nbsp;PIN: ${u.pin}</div></div><div class="user-controls"><button class="toggle-switch ${active?'on':''}" id="tog-${u.id}" onclick="toggleUserActive('${u.id}')" ${u.id==='rl'?'disabled style="opacity:0.4;cursor:not-allowed"':''}></button></div></div>`;
   }).join('');
-
-  const logItems = logs.length === 0
-    ? '<p style="color:var(--muted);font-size:13px;padding:12px 0;">No login activity yet.</p>'
-    : logs.slice(0, 15).map(l => {
+  const logItems = logs.length === 0 ? '<p style="color:var(--muted);font-size:13px;padding:12px 0;">No login activity yet.</p>'
+    : logs.slice(0,15).map(l => {
         const d = new Date(l.time);
-        const timeStr = d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-        return `
-          <div class="log-item">
-            <div class="log-dot" style="background:${l.role==='admin'?'var(--blue)':l.role==='manager'?'var(--gold)':'var(--green)'}"></div>
-            <div class="log-info"><div class="log-name">${l.name}</div><div class="log-time">${timeStr}</div></div>
-            <span class="role-badge ${l.role}">${l.role}</span>
-          </div>`;
+        const ts = d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+        return `<div class="log-item"><div class="log-dot" style="background:${l.role==='admin'?'var(--blue)':l.role==='manager'?'var(--gold)':'var(--green)'}"></div><div class="log-info"><div class="log-name">${l.name}</div><div class="log-time">${ts}</div></div><span class="role-badge ${l.role}">${l.role}</span></div>`;
       }).join('');
-
   document.getElementById('admin-content').innerHTML = `
     <div class="stat-grid" style="margin-top:20px;">
       <div class="stat-card"><div class="stat-val">${USERS.length}</div><div class="stat-lbl">Users</div></div>
       <div class="stat-card"><div class="stat-val">${activeCount}</div><div class="stat-lbl">Active</div></div>
       <div class="stat-card"><div class="stat-val">${todayLogs.length}</div><div class="stat-lbl">Logins Today</div></div>
     </div>
-    <div class="admin-section">
-      <div class="admin-section-title">User Access</div>
-      ${userRows}
-    </div>
-    <div class="admin-section">
-      <div class="admin-section-title">Recent Login Activity</div>
-      <div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;padding:4px 16px;">${logItems}</div>
-    </div>
-    <div class="admin-section">
-      <div class="admin-section-title">Quick Actions</div>
-      <div class="cta-card wide red" onclick="clearLoginLog()" style="margin-bottom:10px;">
-        <div class="cta-icon red">🗑</div>
-        <div class="cta-text"><div class="cta-label">Clear Login Log</div><div class="cta-sub">Remove all login history</div></div>
-      </div>
-      <div class="cta-card wide gold" onclick="goTo('https://servicebridge.vyaxis.com/admin-panel.html')">
-        <div class="cta-icon gold">⚙️</div>
-        <div class="cta-text"><div class="cta-label">Full Admin Console</div><div class="cta-sub">Email, data & dealer settings</div></div>
-        <div class="cta-arrow">→</div>
-      </div>
+    <div class="admin-section"><div class="admin-section-title">User Access</div>${userRows}</div>
+    <div class="admin-section"><div class="admin-section-title">Recent Login Activity</div><div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;padding:4px 16px;">${logItems}</div></div>
+    <div class="admin-section"><div class="admin-section-title">Quick Actions</div>
+      <div class="cta-card wide red" onclick="clearLoginLog()" style="margin-bottom:10px;"><div class="cta-icon red">🗑</div><div class="cta-text"><div class="cta-label">Clear Login Log</div><div class="cta-sub">Remove all login history</div></div></div>
+      <div class="cta-card wide gold" onclick="goTo('https://servicebridge.vyaxis.com/admin-panel.html')"><div class="cta-icon gold">⚙️</div><div class="cta-text"><div class="cta-label">Full Admin Console</div><div class="cta-sub">Email, data & dealer settings</div></div><div class="cta-arrow">→</div></div>
     </div>`;
 }
 
 function toggleUserActive(id) {
   if (id === 'rl') return;
-  const current = getUserActive(id);
-  setUserActive(id, !current);
-  const tog = document.getElementById('tog-' + id);
-  if (tog) tog.classList.toggle('on', !current);
-  const user = USERS.find(u => u.id === id);
-  showToast(`${user.first} ${!current ? 'activated' : 'deactivated'}`);
+  const current = getUserActive(id); setUserActive(id, !current);
+  const tog = document.getElementById('tog-' + id); if (tog) tog.classList.toggle('on', !current);
+  const user = USERS.find(u => u.id === id); showToast(`${user.first} ${!current?'activated':'deactivated'}`);
 }
+function clearLoginLog() { if (!confirm('Clear all login history?')) return; localStorage.removeItem('sb_login_log'); buildAdminPanel(); showToast('Login log cleared'); }
+function logout() { currentUser = null; clearSession(); unsubscribeFromPush(); document.getElementById('nav-bar').classList.remove('visible'); window.location.replace('/login.html'); }
+function showToast(msg) { const t = document.getElementById('app-toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
 
-function clearLoginLog() {
-  if (!confirm('Clear all login history?')) return;
-  localStorage.removeItem('sb_login_log');
-  buildAdminPanel();
-  showToast('Login log cleared');
-}
-
-// ── LOGOUT ─────────────────────────────────────────────────────────────────
-function logout() {
-  currentUser = null;
-  clearSession();
-  unsubscribeFromPush();
-  document.getElementById('nav-bar').classList.remove('visible');
-  window.location.replace('/login.html');
-}
-
-// ── TOAST ──────────────────────────────────────────────────────────────────
-function showToast(msg) {
-  const t = document.getElementById('app-toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ── PUSH NOTIFICATIONS ─────────────────────────────────────────────────────
 const VAPID_PUBLIC_KEY = 'BFYqM0IN3sQtNJiq1iTFIh1Ex3LCEboUq7hB966WA5UT_Z5_q58_VPbuIUY__m36IyinsOTKlTHhg-PG5JN-JU4';
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
-}
-
+function urlBase64ToUint8Array(b) { const p='='.repeat((4-b.length%4)%4); const d=(b+p).replace(/-/g,'+').replace(/_/g,'/'); return Uint8Array.from([...atob(d)].map(c=>c.charCodeAt(0))); }
 async function subscribeToPush(user) {
-  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
-  if (Notification.permission === 'denied') return;
+  if (!('Notification' in window)||!('serviceWorker' in navigator)) return;
+  if (Notification.permission==='denied') return;
   try {
-    const reg = await navigator.serviceWorker.ready;
-    let sub = await reg.pushManager.getSubscription();
-    if (!sub) {
-      const perm = await Notification.requestPermission();
-      if (perm !== 'granted') return;
-      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
-    }
-    await fetch('/api/save-subscription', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription: sub.toJSON(), user_id: user.id, user_name: user.name, user_role: user.role })
-    });
-  } catch (err) { console.warn('Push subscription failed:', err); }
+    const reg = await navigator.serviceWorker.ready; let sub = await reg.pushManager.getSubscription();
+    if (!sub) { const perm = await Notification.requestPermission(); if (perm!=='granted') return; sub = await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)}); }
+    await fetch('/api/save-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),user_id:user.id,user_name:user.name,user_role:user.role})});
+  } catch(e){console.warn('Push failed:',e);}
 }
-
 async function unsubscribeFromPush() {
-  try {
-    const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.getSubscription();
-    if (sub) {
-      await fetch('/api/save-subscription', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: sub.endpoint }) });
-      await sub.unsubscribe();
-    }
-  } catch (err) { console.warn('Unsubscribe failed:', err); }
+  try { const reg=await navigator.serviceWorker.ready; const sub=await reg.pushManager.getSubscription(); if(sub){await fetch('/api/save-subscription',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe();} } catch{}
 }
-
 async function toggleNotifications() {
-  try {
-    const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.getSubscription();
-    if (sub) { await unsubscribeFromPush(); updateNotifButton(false); }
-    else { await subscribeToPush(currentUser); updateNotifButton(true); }
-  } catch { showToast('Notifications not available'); }
+  try { const reg=await navigator.serviceWorker.ready; const sub=await reg.pushManager.getSubscription(); if(sub){await unsubscribeFromPush();updateNotifButton(false);}else{await subscribeToPush(currentUser);updateNotifButton(true);} } catch{showToast('Notifications not available');}
 }
-
-async function checkNotifStatus() {
-  if (!('PushManager' in window)) return false;
-  try { const reg = await navigator.serviceWorker.ready; return !!(await reg.pushManager.getSubscription()); }
-  catch { return false; }
-}
-
+async function checkNotifStatus() { if(!('PushManager' in window)) return false; try{const reg=await navigator.serviceWorker.ready;return !!(await reg.pushManager.getSubscription());}catch{return false;} }
 function updateNotifButton(enabled) {
-  const btn = document.getElementById('notif-toggle-btn');
-  if (!btn) return;
-  btn.textContent = enabled ? '🔔 Notifications On' : '🔕 Enable Notifications';
-  btn.style.borderColor = enabled ? 'rgba(34,197,94,0.4)' : 'var(--border)';
-  btn.style.color = enabled ? 'var(--green)' : 'var(--muted)';
-  btn.style.background = enabled ? 'rgba(34,197,94,0.08)' : 'var(--card)';
+  const btn=document.getElementById('notif-toggle-btn'); if(!btn) return;
+  btn.textContent=enabled?'🔔 Notifications On':'🔕 Enable Notifications';
+  btn.style.borderColor=enabled?'rgba(34,197,94,0.4)':'var(--border)';
+  btn.style.color=enabled?'var(--green)':'var(--muted)';
+  btn.style.background=enabled?'rgba(34,197,94,0.08)':'var(--card)';
 }
+async function initNotifButton() { updateNotifButton(await checkNotifStatus()); }
+if ('serviceWorker' in navigator) { window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})}); }
 
-async function initNotifButton() {
-  const enabled = await checkNotifStatus();
-  updateNotifButton(enabled);
-}
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
-}
-
-// ── INIT ───────────────────────────────────────────────────────────────────
 function init() {
-  // Primary: read sb_rep set by login.html
-  const sbRep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
+  const sbRep = JSON.parse(sessionStorage.getItem('sb_rep')||'null');
   if (sbRep) {
     const matched = USERS.find(u => u.name === sbRep.name);
-    if (matched) {
-      currentUser = matched;
-      addLoginLog(currentUser);
-      saveSession(currentUser);
-      buildHome();
-      buildNav();
-      showScreen('screen-home');
-      subscribeToPush(currentUser);
-      return;
-    }
+    if (matched) { currentUser=matched; addLoginLog(currentUser); saveSession(currentUser); buildHome(); buildNav(); initAppNav(); showScreen('screen-home'); subscribeToPush(currentUser); return; }
   }
-
-  // Fallback: internal 8hr session (returning user, tab reload)
   const saved = loadSession();
-  if (saved) {
-    currentUser = saved;
-    buildHome();
-    buildNav();
-    showScreen('screen-home');
-    return;
-  }
-
-  // No valid session — back to login
+  if (saved) { currentUser=saved; buildHome(); buildNav(); initAppNav(); showScreen('screen-home'); return; }
   window.location.replace('/login.html');
 }
-
 init();
 </script>
 </body>
