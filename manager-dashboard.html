@@ -4,9 +4,7 @@
   <script>
 (function(){
   const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
-  if (!rep || (rep.role !== 'Manager' && rep.role !== 'Admin')) {
-    window.location.replace('/login.html');
-  }
+  if (!rep) { window.location.replace('/login.html'); }
 })();
 </script>
 <meta charset="UTF-8">
@@ -38,7 +36,7 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .bg-orb1 { position:fixed; top:-200px; right:-150px; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(91,79,232,0.12) 0%,transparent 70%); pointer-events:none; z-index:0; }
 .bg-orb2 { position:fixed; bottom:-200px; left:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle,rgba(200,16,46,0.08) 0%,transparent 70%); pointer-events:none; z-index:0; }
 
-/* ══ NAV ══ */
+/* NAV */
 nav {
   position:sticky; top:0; z-index:200;
   background:rgba(7,7,14,0.95);
@@ -54,73 +52,33 @@ nav::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1p
 .nav-left { display:flex; align-items:center; gap:14px; }
 .nav-right { display:flex; align-items:center; gap:10px; }
 
-/* User pill */
-.nav-user-pill {
-  display:flex; align-items:center; gap:8px;
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:30px; padding:4px 12px 4px 4px;
-}
-.nav-avatar {
-  width:30px; height:30px; border-radius:50%;
-  background:linear-gradient(135deg,var(--purple),#C8102E);
-  display:flex; align-items:center; justify-content:center;
-  font-size:11px; font-weight:700; color:#fff; flex-shrink:0;
-}
+.nav-user-pill { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:30px; padding:4px 12px 4px 4px; }
+.nav-avatar { width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,var(--purple),#C8102E); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; flex-shrink:0; }
 .nav-user-name { font-size:12px; font-weight:600; white-space:nowrap; }
 .nav-role-pill { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; white-space:nowrap; }
-.role-admin { background:rgba(232,184,75,0.15); color:var(--gold); border:1px solid rgba(232,184,75,0.3); }
+.role-admin   { background:rgba(232,184,75,0.15); color:var(--gold); border:1px solid rgba(232,184,75,0.3); }
 .role-manager { background:rgba(99,102,241,0.15); color:var(--purple2); border:1px solid rgba(99,102,241,0.3); }
+.role-sales   { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.15); }
 
-/* Refresh btn */
 .refresh-btn { font-size:12px; font-weight:600; padding:7px 14px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid var(--border2); color:var(--muted); cursor:pointer; transition:all 0.18s; font-family:'DM Sans',sans-serif; }
 .refresh-btn:hover { color:var(--text); border-color:var(--border2); }
 
-/* Hamburger */
-.hamburger {
-  width:38px; height:38px; border-radius:9px;
-  background:rgba(255,255,255,0.06); border:1px solid var(--border2);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
-  cursor:pointer; transition:all 0.18s; flex-shrink:0;
-}
+.hamburger { width:38px; height:38px; border-radius:9px; background:rgba(255,255,255,0.06); border:1px solid var(--border2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer; transition:all 0.18s; flex-shrink:0; }
 .hamburger:hover { background:rgba(255,255,255,0.1); border-color:var(--purple); }
 .hamburger span { display:block; width:16px; height:2px; background:var(--text); border-radius:2px; transition:all 0.22s; }
 .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
 .hamburger.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
 .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
 
-/* Dropdown */
-.nav-dropdown {
-  position:fixed; top:66px; right:16px;
-  min-width:230px;
-  background:var(--surface);
-  border:1px solid var(--border2);
-  border-radius:16px;
-  padding:8px;
-  box-shadow:0 24px 64px rgba(0,0,0,0.6);
-  z-index:500;
-  display:none;
-  animation:dropIn 0.18s ease both;
-}
+.nav-dropdown { position:fixed; top:66px; right:16px; min-width:230px; background:var(--surface); border:1px solid var(--border2); border-radius:16px; padding:8px; box-shadow:0 24px 64px rgba(0,0,0,0.6); z-index:500; display:none; animation:dropIn 0.18s ease both; }
 .nav-dropdown.open { display:block; }
 @keyframes dropIn { from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);} }
 
-/* Dropdown header */
-.dd-header {
-  padding:12px 14px 10px;
-  border-bottom:1px solid var(--border);
-  margin-bottom:6px;
-}
+.dd-header { padding:12px 14px 10px; border-bottom:1px solid var(--border); margin-bottom:6px; }
 .dd-header-name { font-size:13px; font-weight:700; }
 .dd-header-role { font-size:11px; color:var(--muted2); margin-top:2px; }
 
-.dd-item {
-  display:flex; align-items:center; gap:10px;
-  padding:10px 14px; border-radius:10px;
-  font-size:13px; font-weight:600; color:var(--muted);
-  cursor:pointer; transition:all 0.15s;
-  text-decoration:none; border:none; background:none;
-  width:100%; font-family:'DM Sans',sans-serif; text-align:left;
-}
+.dd-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; transition:all 0.15s; text-decoration:none; border:none; background:none; width:100%; font-family:'DM Sans',sans-serif; text-align:left; }
 .dd-item:hover { background:rgba(255,255,255,0.06); color:var(--text); }
 .dd-item .dd-icon { font-size:16px; width:24px; text-align:center; flex-shrink:0; }
 .dd-divider { height:1px; background:var(--border); margin:6px 4px; }
@@ -296,10 +254,10 @@ nav::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1p
 <div class="bg-orb1"></div>
 <div class="bg-orb2"></div>
 
-<!-- ══ NAV ══ -->
+<!-- NAV -->
 <nav>
   <div class="nav-left">
-    <div class="nav-brand">ServiceBridge</div>
+    <div class="nav-brand">Performance Dashboard</div>
     <div class="nav-live">● LIVE</div>
   </div>
   <div class="nav-right">
@@ -315,13 +273,14 @@ nav::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1p
   </div>
 </nav>
 
-<!-- ══ DROPDOWN ══ -->
+<!-- DROPDOWN -->
 <div class="nav-dropdown" id="nav-dropdown">
   <div class="dd-header">
     <div class="dd-header-name" id="dd-name"></div>
     <div class="dd-header-role" id="dd-role"></div>
   </div>
-  <a href="app.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
+  <a href="app.html" class="dd-item"><span class="dd-icon">🏠</span> Home</a>
+  <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
   <button class="dd-item" onclick="goReports()"><span class="dd-icon">📊</span> Reports</button>
   <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
   <div class="dd-divider dd-admin-div" id="admin-div"></div>
@@ -535,7 +494,7 @@ const SB_URL='https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
 const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 
-// ── Session Init ──────────────────────────────────────────────
+// Session Init
 const currentRep = JSON.parse(sessionStorage.getItem('sb_rep')||'null');
 (function initNav(){
   if (!currentRep) return;
@@ -543,7 +502,8 @@ const currentRep = JSON.parse(sessionStorage.getItem('sb_rep')||'null');
   document.getElementById('nav-name').textContent = currentRep.name.split(' ')[0];
   const roleEl = document.getElementById('nav-role');
   roleEl.textContent = currentRep.role;
-  roleEl.className = 'nav-role-pill ' + (currentRep.role==='Admin'?'role-admin':'role-manager');
+  const roleClass = currentRep.role==='Admin' ? 'role-admin' : currentRep.role==='Manager' ? 'role-manager' : 'role-sales';
+  roleEl.className = 'nav-role-pill ' + roleClass;
   document.getElementById('dd-name').textContent = currentRep.name;
   document.getElementById('dd-role').textContent = currentRep.role + ' · ServiceBridge';
   if (currentRep.role==='Admin') {
@@ -552,7 +512,7 @@ const currentRep = JSON.parse(sessionStorage.getItem('sb_rep')||'null');
   }
 })();
 
-// ── Hamburger Menu ────────────────────────────────────────────
+// Hamburger
 function toggleMenu(e) {
   e.stopPropagation();
   document.getElementById('hamburger').classList.toggle('open');
@@ -567,15 +527,14 @@ document.getElementById('nav-dropdown').addEventListener('click', e => e.stopPro
 function goReports() {
   document.getElementById('nav-dropdown').classList.remove('open');
   document.getElementById('hamburger').classList.remove('open');
-  const tab = document.getElementById('tab-reports');
-  switchTab('reports', tab);
+  switchTab('reports', document.getElementById('tab-reports'));
 }
 function signOut() {
   sessionStorage.removeItem('sb_rep');
   window.location.replace('/login.html');
 }
 
-// ── Data ─────────────────────────────────────────────────────
+// Data
 let allEntries=[], currentTab='all';
 
 async function loadAll(){
@@ -798,7 +757,7 @@ async function deleteMgrEntry(){
 }
 document.getElementById('mgr-edit-modal').addEventListener('click',function(e){if(e.target===this)closeMgrEdit();});
 
-// ── Reports ───────────────────────────────────────────────────
+// Reports
 function setRange(r){
   const now=new Date(),fmt=d=>d.toISOString().slice(0,10),start=d=>{const x=new Date(d);x.setHours(0,0,0,0);return x;};
   let from,to;
@@ -841,12 +800,10 @@ function renderReport(){
     {lbl:'Close Rate',val:cr+'%',c:'#F97316',sub:'to sold'},
   ].map(k=>`<div class="rpt-kpi-card" style="border-top-color:${k.c};"><div class="rpt-kpi-lbl">${k.lbl}</div><div class="rpt-kpi-val" style="color:${k.c};">${k.val}</div><div class="rpt-kpi-sub">${k.sub}</div></div>`).join('');
 
-  const repC={},outC={},voiC={};
+  const repC={},outC={};
   rptS2S.forEach(e=>{
     repC[e.submitter||'Unknown']=(repC[e.submitter||'Unknown']||0)+1;
     outC[e.outcome||'Unknown']=(outC[e.outcome||'Unknown']||0)+1;
-    const sc=parseInt(e.eng_score||0),b=sc>=8?'🔥 Hot (8-10)':sc>=5?'🌡 Warm (5-7)':'❄ Cool (1-4)';
-    voiC[b]=(voiC[b]||0)+1;
   });
   renderBarChart('rpt-by-rep',repC,'#6366F1');
   renderBarChart('rpt-by-source',outC,'#F59E0B');
