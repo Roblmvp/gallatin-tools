@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ServiceBridge">
+<meta name="theme-color" content="#080B14">
+<title>ServiceBridge</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #080B14;
+    --ink2: #0F1628;
+    --ink3: #182040;
+    --red: #C8102E;
+    --red2: #E8213F;
+    --gold: #C49A2A;
+    --green: #22C55E;
+    --blue: #6366F1;
+    --text: #FFFFFF;
+    --muted: rgba(255,255,255,0.45);
+    --muted2: rgba(255,255,255,0.22);
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --card: rgba(255,255,255,0.04);
+    --card2: rgba(255,255,255,0.07);
+    --sh: 0 8px 32px rgba(0,0,0,0.4);
+    --r: 16px;
+    --rsm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--ink);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-glow {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-glow-red { background: radial-gradient(circle, rgba(200,16,46,0.12) 0%, transparent 70%); top: -200px; left: -100px; }
+  .bg-glow-blue { background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%); bottom: -200px; right: -100px; }
+
+  /* ── LOGIN SCREEN ── */
+  #screen-login {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 0;
+  }
+
+  .login-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 1;
+  }
+  .login-logo-icon {
+    width: 52px; height: 52px;
+    background: var(--red);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 20px rgba(200,16,46,0.4);
+  }
+  .login-logo-text { line-height: 1; }
+  .login-logo-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .login-logo-sub {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--ink2);
+    border: 1px solid var(--border2);
+    border-radius: 24px;
+    padding: 32px 28px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+
+  .login-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+  .login-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  /* User selector */
+  .user-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .user-chip {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: left;
+  }
+  .user-chip:hover { border-color: var(--border2); background: var(--card2); }
+  .user-chip.sel {
+    border-color: var(--red);
+    background: rgba(200,16,46,0.1);
+  }
+  .user-chip.sel.mgr { border-color: var(--gold); background: rgba(196,154,42,0.1); }
+  .user-chip.sel.admin { border-color: var(--blue); background: rgba(99,102,241,0.1); }
+  .user-chip-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 3px;
+  }
+  .user-chip-role {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .user-chip.sel .user-chip-role { color: var(--red); }
+  .user-chip.sel.mgr .user-chip-role { color: var(--gold); }
+  .user-chip.sel.admin .user-chip-role { color: var(--blue); }
+
+  /* PIN pad */
+  .pin-section { display: none; }
+  .pin-section.visible { display: block; }
+
+  .pin-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .pin-dots {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .pin-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    transition: all 0.15s;
+  }
+  .pin-dot.filled { background: var(--red); border-color: var(--red); }
+  .pin-dot.filled.mgr { background: var(--gold); border-color: var(--gold); }
+  .pin-dot.filled.admin { background: var(--blue); border-color: var(--blue); }
+  .pin-dot.shake { animation: shake 0.4s ease; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  .pin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .pin-btn {
+    aspect-ratio: 1;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.12s;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+  .pin-btn:active { transform: scale(0.92); background: var(--card); }
+  .pin-btn.del { font-size: 18px; color: var(--muted); }
+  .pin-btn.zero { grid-column: 2; }
+
+  .pin-error {
+    font-size: 12px;
+    color: var(--red);
+    text-align: center;
+    margin-top: 12px;
+    min-height: 18px;
+    font-weight: 500;
+  }
+
+  /* ── NAV BAR ── */
+  .nav-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(8,11,20,0.95);
+    border-top: 1px solid var(--border);
+    padding: 12px 0 max(12px, env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: none;
+  }
+  .nav-bar.visible { display: flex; }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px 16px;
+    border-radius: 12px;
+    transition: all 0.15s;
+    min-width: 60px;
+  }
+  .nav-item.active .nav-icon { color: var(--red); }
+  .nav-item.active .nav-label { color: var(--text); }
+  .nav-icon { font-size: 20px; color: var(--muted); transition: color 0.15s; line-height: 1; }
+  .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); transition: color 0.15s; }
+
+  /* ── HEADER ── */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,11,20,0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .header-logo {
+    width: 32px; height: 32px;
+    background: var(--red);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .header-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-user {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .header-logout {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+  .header-logout:active { background: var(--card2); }
+
+  /* ── HOME SCREEN ── */
+  .home-content {
+    padding: 20px 20px 100px;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .home-greeting {
+    margin-bottom: 28px;
+  }
+  .home-greeting-sub {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .home-greeting-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .cta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .cta-card {
+    background: var(--ink2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .cta-card:active { transform: scale(0.97); }
+  .cta-card:active::before { opacity: 1; }
+
+  .cta-card.red::before { background: rgba(200,16,46,0.08); }
+  .cta-card.gold::before { background: rgba(196,154,42,0.08); }
+  .cta-card.blue::before { background: rgba(99,102,241,0.08); }
+  .cta-card.green::before { background: rgba(34,197,94,0.08); }
+  .cta-card.purple::before { background: rgba(168,85,247,0.08); }
+  .cta-card.teal::before { background: rgba(20,184,166,0.08); }
+
+  .cta-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .cta-icon.red { background: rgba(200,16,46,0.15); }
+  .cta-icon.gold { background: rgba(196,154,42,0.15); }
+  .cta-icon.blue { background: rgba(99,102,241,0.15); }
+  .cta-icon.green { background: rgba(34,197,94,0.15); }
+  .cta-icon.purple { background: rgba(168,85,247,0.15); }
+  .cta-icon.teal { background: rgba(20,184,166,0.15); }
+
+  .cta-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .cta-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .cta-card.wide {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    padding: 18px 20px;
+    gap: 16px;
+  }
+  .cta-card.wide .cta-text { flex: 1; }
+
+  .cta-arrow {
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  /* ── IFRAME SCREEN ── */
+  #screen-iframe {
+    flex-direction: column;
+  }
+  .iframe-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    padding-top: max(14px, env(safe-area-inset-top));
+    background: var(--ink2);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    flex-shrink: 0;
+  }
+  .iframe-back {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .iframe-back:active { background: var(--card2); }
+  .iframe-title-wrap { flex: 1; min-width: 0; }
+  .iframe-title { font-size: 15px; font-weight: 700; }
+  .iframe-subtitle { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .iframe-el {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: var(--ink);
+  }
+
+  /* ── ADMIN SCREEN ── */
+  #screen-admin .home-content { padding-top: 0; }
+
+  .admin-section {
+    margin-bottom: 28px;
+  }
+  .admin-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    padding: 0 2px;
+  }
+
+  .user-row {
+    background: var(--ink2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .user-avatar {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: 'DM Serif Display', serif;
+  }
+  .user-avatar.sales { background: rgba(200,16,46,0.15); color: var(--red); }
+  .user-avatar.manager { background: rgba(196,154,42,0.15); color: var(--gold); }
+  .user-avatar.admin { background: rgba(99,102,241,0.15); color: var(--blue); }
+
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 14px; font-weight: 700; }
+  .user-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .user-controls { display: flex; align-items: center; gap: 8px; }
+
+  .toggle-switch {
+    width: 44px; height: 24px;
+    border-radius: 12px;
+    background: var(--border);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+    border: none;
+  }
+  .toggle-switch.on { background: var(--green); }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .toggle-switch.on::after { transform: translateX(20px); }
+
+  .role-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+  .role-badge.sales { background: rgba(200,16,46,0.15); color: var(--red); }
+  .role-badge.manager { background: rgba(196,154,42,0.15); color: var(--gold); }
+  .role-badge.admin { background: rgba(99,102,241,0.15); color: var(--blue); }
+
+  /* Login log */
+  .log-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+  .log-info { flex: 1; }
+  .log-name { font-size: 13px; font-weight: 600; }
+  .log-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .log-device { font-size: 10px; color: var(--muted2); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink3);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── LOADING ── */
+  .loading-spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── STAT CARDS ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--ink2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-lbl { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* ── SAFE AREA ── */
+  .safe-bottom { padding-bottom: max(90px, calc(70px + env(safe-area-inset-bottom))); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow-red"></div>
+<div class="bg-glow bg-glow-blue"></div>
+
+<!-- ══════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="login-logo">
+    <div class="login-logo-icon">🛡</div>
+    <div class="login-logo-text">
+      <div class="login-logo-name">ServiceBridge</div>
+      <div class="login-logo-sub">Gallatin CDJR · WeAuto</div>
+    </div>
+  </div>
+
+  <div class="login-card">
+    <div class="login-title">Welcome back.</div>
+    <div class="login-subtitle">Select your name to continue</div>
+
+    <div class="user-grid" id="user-grid"></div>
+
+    <div class="pin-section" id="pin-section">
+      <div class="pin-label">Enter your PIN</div>
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-grid">
+        <button class="pin-btn" onclick="pinPress(1)">1</button>
+        <button class="pin-btn" onclick="pinPress(2)">2</button>
+        <button class="pin-btn" onclick="pinPress(3)">3</button>
+        <button class="pin-btn" onclick="pinPress(4)">4</button>
+        <button class="pin-btn" onclick="pinPress(5)">5</button>
+        <button class="pin-btn" onclick="pinPress(6)">6</button>
+        <button class="pin-btn" onclick="pinPress(7)">7</button>
+        <button class="pin-btn" onclick="pinPress(8)">8</button>
+        <button class="pin-btn" onclick="pinPress(9)">9</button>
+        <button class="pin-btn zero" onclick="pinPress(0)">0</button>
+        <button class="pin-btn del" onclick="pinDel()">⌫</button>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HOME SCREEN (ROLE-BASED)
+══════════════════════════════════════════ -->
+<div class="screen" id="screen-home">
+  <div class="app-header">
+    <div class="header-left">
+      <div class="header-logo">🛡</div>
+      <div class="header-title">ServiceBridge</div>
+    </div>
+    <div class="header-right">
+      <span class="header-user" id="header-user-name"></span>
+      <div class="header-logout" onclick="logout()" title="Logout">↩</div>
+    </div>
+  </div>
+
+  <div class="home-content safe-bottom" id="home-content">
+    <!-- Populated by JS based on role -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     IFRAME SCREEN (embedded pages)
+══════════════════════════════════════════ -->
+<div class="screen" id="screen-iframe">
+  <div class="iframe-header">
+    <div class="iframe-back" onclick="closeIframe()">←</div>
+    <div class="iframe-title-wrap">
+      <div class="iframe-title" id="iframe-title">Loading...</div>
+      <div class="iframe-subtitle" id="iframe-subtitle">ServiceBridge</div>
+    </div>
+  </div>
+  <iframe class="iframe-el" id="main-iframe" src="about:blank" allow="camera; microphone"></iframe>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ADMIN SCREEN
+══════════════════════════════════════════ -->
+<div class="screen" id="screen-admin">
+  <div class="app-header">
+    <div class="header-left">
+      <div class="header-logo" style="background:var(--blue)">⚙</div>
+      <div class="header-title">Admin Panel</div>
+    </div>
+    <div class="header-right">
+      <div class="header-logout" onclick="showScreen('screen-home')" title="Back">←</div>
+      <div class="header-logout" onclick="logout()" title="Logout">↩</div>
+    </div>
+  </div>
+
+  <div class="home-content safe-bottom" id="admin-content">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     NAV BAR
+══════════════════════════════════════════ -->
+<div class="nav-bar" id="nav-bar"></div>
+
+<!-- TOAST -->
+<div class="toast" id="app-toast"></div>
+
+<script>
+// ── USERS ──────────────────────────────────────────────────────────────────
+const USERS = [
+  { id: 'rl', name: 'Robert Lisowski', first: 'Robert', role: 'admin',   pin: '5757' },
+  { id: 'td', name: 'Tyler Doyle',     first: 'Tyler',  role: 'manager', pin: '1234' },
+  { id: 'ak', name: 'Andrew Kirk',     first: 'Andrew', role: 'sales',   pin: '1234' },
+  { id: 'dj', name: 'DJ Rogers',       first: 'DJ',     role: 'sales',   pin: '1234' },
+  { id: 'km', name: 'Kody McCann',     first: 'Kody',   role: 'sales',   pin: '1234' },
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let currentUser = null;
+let selectedUser = null;
+let pinEntry = '';
+
+// Active/inactive state stored in localStorage
+function getUserActive(id) {
+  const stored = localStorage.getItem('sb_active_' + id);
+  return stored === null ? true : stored === 'true';
+}
+function setUserActive(id, val) {
+  localStorage.setItem('sb_active_' + id, val);
+}
+
+// Login log stored in localStorage
+function addLoginLog(user) {
+  const logs = getLoginLogs();
+  logs.unshift({
+    name: user.name,
+    role: user.role,
+    time: new Date().toISOString(),
+    id: user.id
+  });
+  localStorage.setItem('sb_login_log', JSON.stringify(logs.slice(0, 50)));
+}
+function getLoginLogs() {
+  try { return JSON.parse(localStorage.getItem('sb_login_log') || '[]'); } catch { return []; }
+}
+
+// Session persistence
+function saveSession(user) {
+  sessionStorage.setItem('sb_session', JSON.stringify({ id: user.id, time: Date.now() }));
+}
+function loadSession() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem('sb_session') || 'null');
+    if (!s) return null;
+    if (Date.now() - s.time > 8 * 60 * 60 * 1000) return null; // 8hr timeout
+    return USERS.find(u => u.id === s.id) || null;
+  } catch { return null; }
+}
+function clearSession() {
+  sessionStorage.removeItem('sb_session');
+}
+
+// ── SCREENS ────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.pointerEvents = 'none';
+  });
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add('active');
+    el.style.pointerEvents = 'all';
+    el.scrollTop = 0;
+  }
+  // Nav bar visibility
+  const nav = document.getElementById('nav-bar');
+  nav.classList.toggle('visible', id === 'screen-home' || id === 'screen-admin');
+  updateNav(id);
+}
+
+// ── NAV ────────────────────────────────────────────────────────────────────
+function buildNav() {
+  const nav = document.getElementById('nav-bar');
+  if (!currentUser) { nav.innerHTML = ''; return; }
+
+  const items = getNavItems();
+  nav.innerHTML = items.map(item => `
+    <div class="nav-item ${item.screen === 'screen-home' ? 'active' : ''}" 
+         onclick="navGo('${item.screen}', '${item.label}')" 
+         data-screen="${item.screen}">
+      <div class="nav-icon">${item.icon}</div>
+      <div class="nav-label">${item.label}</div>
+    </div>
+  `).join('');
+}
+
+function getNavItems() {
+  const base = [{ icon: '🏠', label: 'Home', screen: 'screen-home' }];
+  if (currentUser.role === 'admin') {
+    return [...base, { icon: '⚙️', label: 'Admin', screen: 'screen-admin' }];
+  }
+  if (currentUser.role === 'manager') {
+    return [...base, { icon: '⚙️', label: 'Admin', screen: 'screen-admin' }];
+  }
+  return base;
+}
+
+function navGo(screen, label) {
+  if (screen === 'screen-admin') { buildAdminPanel(); }
+  showScreen(screen);
+  updateNav(screen);
+}
+
+function updateNav(activeScreen) {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.screen === activeScreen);
+  });
+}
+
+// ── LOGIN ──────────────────────────────────────────────────────────────────
+function buildLoginGrid() {
+  const grid = document.getElementById('user-grid');
+  grid.innerHTML = USERS.map(u => `
+    <div class="user-chip ${u.role}" onclick="selectUser('${u.id}')" id="chip-${u.id}">
+      <div class="user-chip-name">${u.first}</div>
+      <div class="user-chip-role">${u.role === 'admin' ? 'Admin' : u.role === 'manager' ? 'Manager' : 'Sales'}</div>
+    </div>
+  `).join('');
+}
+
+function selectUser(id) {
+  selectedUser = USERS.find(u => u.id === id);
+  if (!selectedUser) return;
+
+  // Check active status
+  if (!getUserActive(id) && id !== 'rl') {
+    showToast('Account inactive — contact admin');
+    return;
+  }
+
+  document.querySelectorAll('.user-chip').forEach(c => c.classList.remove('sel'));
+  document.getElementById('chip-' + id).classList.add('sel');
+
+  pinEntry = '';
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-section').classList.add('visible');
+}
+
+function pinPress(n) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += n;
+  updatePinDots();
+  if (pinEntry.length === 4) {
+    setTimeout(checkPin, 120);
+  }
+}
+
+function pinDel() {
+  pinEntry = pinEntry.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('d' + i);
+    dot.classList.toggle('filled', i < pinEntry.length);
+    dot.classList.toggle(selectedUser?.role || '', i < pinEntry.length);
+  }
+}
+
+function checkPin() {
+  if (!selectedUser) return;
+  if (pinEntry === selectedUser.pin) {
+    // Success
+    currentUser = selectedUser;
+    addLoginLog(currentUser);
+    saveSession(currentUser);
+    buildHome();
+    buildNav();
+    showScreen('screen-home');
+    pinEntry = '';
+    selectedUser = null;
+    document.getElementById('pin-section').classList.remove('visible');
+    document.querySelectorAll('.user-chip').forEach(c => c.classList.remove('sel'));
+    document.getElementById('pin-error').textContent = '';
+  } else {
+    // Wrong PIN
+    pinEntry = '';
+    updatePinDots();
+    document.getElementById('pin-error').textContent = 'Incorrect PIN — try again';
+    document.querySelectorAll('.pin-dot').forEach(d => {
+      d.classList.add('shake');
+      setTimeout(() => d.classList.remove('shake'), 500);
+    });
+  }
+}
+
+// ── HOME ───────────────────────────────────────────────────────────────────
+function buildHome() {
+  const content = document.getElementById('home-content');
+  const header = document.getElementById('header-user-name');
+  header.textContent = currentUser.first;
+
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  let cards = '';
+
+  if (currentUser.role === 'sales') {
+    cards = `
+      <div class="cta-grid">
+        <div class="cta-card red" onclick="openPage('https://servicebridge.vyaxis.com/service-to-sales-log.html','S2S Entry','Log a service drive lead')">
+          <div class="cta-icon red">📋</div>
+          <div>
+            <div class="cta-label">S2S Entry</div>
+            <div class="cta-sub">Log a lead</div>
+          </div>
+        </div>
+        <div class="cta-card blue" onclick="openPage('https://servicebridge.vyaxis.com/scorecards.html','Scoreboard','Team performance')">
+          <div class="cta-icon blue">🏆</div>
+          <div>
+            <div class="cta-label">Scoreboard</div>
+            <div class="cta-sub">Team standings</div>
+          </div>
+        </div>
+      </div>
+      <div class="cta-card wide green" onclick="openPage('https://servicebridge.vyaxis.com/manager-dashboard.html','Dashboard','Manager view')">
+        <div class="cta-icon green">📊</div>
+        <div class="cta-text">
+          <div class="cta-label">View Dashboard</div>
+          <div class="cta-sub">All entries & analytics</div>
+        </div>
+        <div class="cta-arrow">→</div>
+      </div>`;
+  }
+
+  if (currentUser.role === 'manager') {
+    cards = `
+      <div class="cta-grid">
+        <div class="cta-card gold" onclick="openPage('https://servicebridge.vyaxis.com/manager-dashboard.html','Dashboard','Manager operations')">
+          <div class="cta-icon gold">📊</div>
+          <div>
+            <div class="cta-label">Dashboard</div>
+            <div class="cta-sub">All entries</div>
+          </div>
+        </div>
+        <div class="cta-card blue" onclick="openPage('https://servicebridge.vyaxis.com/scorecards.html','Scoreboard','Team standings')">
+          <div class="cta-icon blue">🏆</div>
+          <div>
+            <div class="cta-label">Scoreboard</div>
+            <div class="cta-sub">Leaderboard</div>
+          </div>
+        </div>
+        <div class="cta-card red" onclick="openPage('https://servicebridge.vyaxis.com/service-to-sales-log.html','S2S Entry','Log a lead')">
+          <div class="cta-icon red">📋</div>
+          <div>
+            <div class="cta-label">S2S Entry</div>
+            <div class="cta-sub">Log a lead</div>
+          </div>
+        </div>
+        <div class="cta-card teal" onclick="openPage('https://servicebridge.vyaxis.com/upboard.html','UP Board','Floor rotation')">
+          <div class="cta-icon teal">🔄</div>
+          <div>
+            <div class="cta-label">UP Board</div>
+            <div class="cta-sub">Floor rotation</div>
+          </div>
+        </div>
+      </div>
+      <div class="cta-card wide purple" onclick="navGo('screen-admin','Admin')">
+        <div class="cta-icon purple">⚙️</div>
+        <div class="cta-text">
+          <div class="cta-label">Admin Panel</div>
+          <div class="cta-sub">Manage users & access</div>
+        </div>
+        <div class="cta-arrow">→</div>
+      </div>`;
+  }
+
+  if (currentUser.role === 'admin') {
+    cards = `
+      <div class="cta-grid">
+        <div class="cta-card gold" onclick="openPage('https://servicebridge.vyaxis.com/manager-dashboard.html','Dashboard','Manager operations')">
+          <div class="cta-icon gold">📊</div>
+          <div>
+            <div class="cta-label">Dashboard</div>
+            <div class="cta-sub">All entries</div>
+          </div>
+        </div>
+        <div class="cta-card blue" onclick="openPage('https://servicebridge.vyaxis.com/scorecards.html','Scoreboard','Team standings')">
+          <div class="cta-icon blue">🏆</div>
+          <div>
+            <div class="cta-label">Scoreboard</div>
+            <div class="cta-sub">Leaderboard</div>
+          </div>
+        </div>
+        <div class="cta-card red" onclick="openPage('https://servicebridge.vyaxis.com/service-to-sales-log.html','S2S Entry','Log a lead')">
+          <div class="cta-icon red">📋</div>
+          <div>
+            <div class="cta-label">S2S Entry</div>
+            <div class="cta-sub">Log a lead</div>
+          </div>
+        </div>
+        <div class="cta-card teal" onclick="openPage('https://servicebridge.vyaxis.com/upboard.html','UP Board','Floor rotation')">
+          <div class="cta-icon teal">🔄</div>
+          <div>
+            <div class="cta-label">UP Board</div>
+            <div class="cta-sub">Floor rotation</div>
+          </div>
+        </div>
+      </div>
+      <div class="cta-card wide purple" onclick="buildAdminPanel(); navGo('screen-admin','Admin')">
+        <div class="cta-icon purple">⚙️</div>
+        <div class="cta-text">
+          <div class="cta-label">Admin Panel</div>
+          <div class="cta-sub">Users, access & login activity</div>
+        </div>
+        <div class="cta-arrow">→</div>
+      </div>`;
+  }
+
+  content.innerHTML = `
+    <div class="home-greeting">
+      <div class="home-greeting-sub">${greet}</div>
+      <div class="home-greeting-name">${currentUser.first}.</div>
+    </div>
+    ${cards}
+  `;
+}
+
+// ── IFRAME / PAGE OPEN ─────────────────────────────────────────────────────
+function openPage(url, title, subtitle) {
+  document.getElementById('iframe-title').textContent = title;
+  document.getElementById('iframe-subtitle').textContent = subtitle;
+  document.getElementById('main-iframe').src = url;
+  document.getElementById('nav-bar').classList.remove('visible');
+  showScreen('screen-iframe');
+}
+
+function closeIframe() {
+  document.getElementById('main-iframe').src = 'about:blank';
+  showScreen('screen-home');
+  document.getElementById('nav-bar').classList.add('visible');
+  updateNav('screen-home');
+}
+
+// ── ADMIN PANEL ────────────────────────────────────────────────────────────
+function buildAdminPanel() {
+  const content = document.getElementById('admin-content');
+  const logs = getLoginLogs();
+
+  const userRows = USERS.map(u => {
+    const active = getUserActive(u.id);
+    return `
+      <div class="user-row" id="urow-${u.id}">
+        <div class="user-avatar ${u.role}">${u.first[0]}</div>
+        <div class="user-info">
+          <div class="user-name">${u.name}</div>
+          <div class="user-meta">
+            <span class="role-badge ${u.role}">${u.role}</span>
+            &nbsp;PIN: ${u.pin}
+          </div>
+        </div>
+        <div class="user-controls">
+          <button class="toggle-switch ${active ? 'on' : ''}" 
+                  id="tog-${u.id}"
+                  onclick="toggleUserActive('${u.id}')"
+                  ${u.id === 'rl' ? 'disabled style="opacity:0.4;cursor:not-allowed"' : ''}
+                  title="${active ? 'Active — click to deactivate' : 'Inactive — click to activate'}">
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const logItems = logs.length === 0
+    ? '<p style="color:var(--muted);font-size:13px;padding:12px 0;">No login activity yet.</p>'
+    : logs.slice(0, 15).map(l => {
+        const d = new Date(l.time);
+        const timeStr = d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        return `
+          <div class="log-item">
+            <div class="log-dot" style="background:${l.role === 'admin' ? 'var(--blue)' : l.role === 'manager' ? 'var(--gold)' : 'var(--green)'}"></div>
+            <div class="log-info">
+              <div class="log-name">${l.name}</div>
+              <div class="log-time">${timeStr}</div>
+            </div>
+            <span class="role-badge ${l.role}">${l.role}</span>
+          </div>
+        `;
+      }).join('');
+
+  // Quick stats
+  const todayLogs = logs.filter(l => new Date(l.time).toDateString() === new Date().toDateString());
+  const activeCount = USERS.filter(u => getUserActive(u.id)).length;
+
+  content.innerHTML = `
+    <div class="stat-grid" style="margin-top:20px;">
+      <div class="stat-card">
+        <div class="stat-val">${USERS.length}</div>
+        <div class="stat-lbl">Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${activeCount}</div>
+        <div class="stat-lbl">Active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${todayLogs.length}</div>
+        <div class="stat-lbl">Logins Today</div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">User Access</div>
+      ${userRows}
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Recent Login Activity</div>
+      <div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;padding:4px 16px;">
+        ${logItems}
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Quick Actions</div>
+      <div class="cta-card wide red" onclick="clearLoginLog()" style="margin-bottom:10px;">
+        <div class="cta-icon red">🗑</div>
+        <div class="cta-text">
+          <div class="cta-label">Clear Login Log</div>
+          <div class="cta-sub">Remove all login history</div>
+        </div>
+      </div>
+      <div class="cta-card wide gold" onclick="openPage('https://servicebridge.vyaxis.com/manager-dashboard.html','Dashboard','Full view')">
+        <div class="cta-icon gold">📊</div>
+        <div class="cta-text">
+          <div class="cta-label">Open Dashboard</div>
+          <div class="cta-sub">View all S2S entries</div>
+        </div>
+        <div class="cta-arrow">→</div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleUserActive(id) {
+  if (id === 'rl') return; // admin always active
+  const current = getUserActive(id);
+  setUserActive(id, !current);
+  const tog = document.getElementById('tog-' + id);
+  if (tog) tog.classList.toggle('on', !current);
+  const user = USERS.find(u => u.id === id);
+  showToast(`${user.first} ${!current ? 'activated' : 'deactivated'}`);
+}
+
+function clearLoginLog() {
+  if (!confirm('Clear all login history?')) return;
+  localStorage.removeItem('sb_login_log');
+  buildAdminPanel();
+  showToast('Login log cleared');
+}
+
+// ── LOGOUT ─────────────────────────────────────────────────────────────────
+function logout() {
+  currentUser = null;
+  clearSession();
+  document.getElementById('nav-bar').classList.remove('visible');
+  document.getElementById('pin-section').classList.remove('visible');
+  document.querySelectorAll('.user-chip').forEach(c => c.classList.remove('sel'));
+  document.getElementById('pin-error').textContent = '';
+  pinEntry = '';
+  selectedUser = null;
+  document.getElementById('main-iframe').src = 'about:blank';
+  showScreen('screen-login');
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('app-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+function init() {
+  buildLoginGrid();
+
+  // Try to restore session
+  const saved = loadSession();
+  if (saved) {
+    currentUser = saved;
+    buildHome();
+    buildNav();
+    showScreen('screen-home');
+  } else {
+    showScreen('screen-login');
+  }
+}
+
+init();
+
+// Register service worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

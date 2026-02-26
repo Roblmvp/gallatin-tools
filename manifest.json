@@ -1,0 +1,22 @@
+{
+  "name": "ServiceBridge",
+  "short_name": "ServiceBridge",
+  "description": "Gallatin CDJR Service Drive Operations",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "background_color": "#080B14",
+  "theme_color": "#080B14",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868303/TAA062407W-GallatinLogos-Web-CDJR-2_yn1fwh.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868303/TAA062407W-GallatinLogos-Web-CDJR-2_yn1fwh.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
