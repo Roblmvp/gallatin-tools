@@ -390,6 +390,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 const rep=JSON.parse(sessionStorage.getItem('sb_rep')||'null');
 let ALL=[];let currentTab='all';
+const canClaim=rep&&(rep.role==='admin'||rep.role==='manager');
 
 // Nav
 (function(){
@@ -481,7 +482,7 @@ function renderEntries(){
         </div>
         <div class="eright">
           <div class="etime">${time}</div>
-          ${!claimed?`<button class="cbtn" onclick="claimEntry(${e.id},event)">Claim</button>`:`<div class="clby">Claimed by ${claimed}</div>`}
+          ${!claimed?(canClaim?`<button class="cbtn" onclick="claimEntry(${e.id},event)">Claim</button>`:''):`<div class="clby">Claimed by ${claimed}</div>`}
           <div style="display:flex;gap:5px;margin-top:2px;">
             <button class="ebtn" onclick="openEdit(${e.id})">Edit</button>
             <button class="crm" onclick="pushCRM(${e.id})" ${crmDone?'disabled':''}>CRM${crmDone?' ✓':''}</button>
@@ -532,6 +533,7 @@ function showTab(tab,btn){
 function toggleExpand(id){const el=document.getElementById('ee-'+id);el.classList.toggle('open');}
 
 async function claimEntry(id,evt){
+  if(!canClaim){showToast('Only managers can claim leads');return;}
   const name=rep?rep.name:'Manager';
   await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${id}`,{method:'PATCH',headers:H,body:JSON.stringify({manager_claimed_by:name})});
   const e=ALL.find(x=>x.id===id);if(e)e.manager_claimed_by=name;
