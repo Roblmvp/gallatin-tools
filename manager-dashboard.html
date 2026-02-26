@@ -251,7 +251,64 @@ textarea.min{resize:vertical;min-height:70px;}
 .fi-in{animation:fadeUp 0.4s ease both;}
 
 @media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr);}.eg{grid-template-columns:1fr 1fr;}.rpt-g{grid-template-columns:1fr 1fr;}.rkpis{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:600px){.page{padding:16px 14px 80px;}.kpis{grid-template-columns:repeat(2,1fr);}.em{grid-template-columns:auto 1fr;}.eright{flex-direction:row;flex-wrap:wrap;}.eg{grid-template-columns:1fr;}.mf{grid-template-columns:1fr;}.mg,.mg3{grid-template-columns:1fr;}.rpt-g{grid-template-columns:1fr;}.rkpis{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.page{padding:16px 14px 80px;}.kpis{grid-template-columns:repeat(2,1fr);}.em{grid-template-columns:auto 1fr;}.eright{flex-direction:row;flex-wrap:wrap;}.eg{grid-template-columns:1fr;}.mf{grid-template-columns:1fr;}.mg,.mg3{grid-template-columns:1fr;}.rpt-g{grid-template-columns:1fr;}.rkpis{grid-template-columns:1fr 1fr;}.fu-kpis{grid-template-columns:1fr 1fr;}.fu-top{flex-wrap:wrap;}.fu-sched{flex-direction:column;align-items:stretch;}.fu-sched input[type=date]{width:100%;}}
+
+/* ═══ Follow-Ups Tab ═══ */
+.fu-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.fu-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);padding:14px 16px;position:relative;overflow:hidden;}
+.fu-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.fk-red::before{background:var(--red);} .fk-gold::before{background:var(--gold);} .fk-blue::before{background:var(--blue);} .fk-green::before{background:var(--green);}
+.fu-kpi-v{font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;}
+.fk-red .fu-kpi-v{color:#F87171;} .fk-gold .fu-kpi-v{color:var(--gold);} .fk-blue .fu-kpi-v{color:var(--blue);} .fk-green .fu-kpi-v{color:var(--green);}
+.fu-kpi-l{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-top:2px;}
+.fu-sec{margin-bottom:20px;}
+.fu-sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.fu-sec-t{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);}
+.fu-sec-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.fu-sec-badge.b-red{background:var(--red-soft);color:#F87171;border:1px solid rgba(224,27,54,0.2);}
+.fu-sec-badge.b-gold{background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2);}
+.fu-sec-badge.b-blue{background:var(--blue-soft);color:var(--blue);border:1px solid rgba(108,112,240,0.2);}
+.fu-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden;transition:all 0.18s;}
+.fu-card:hover{border-color:var(--border2);}
+.fu-card.overdue{border-left:3px solid var(--red);}
+.fu-card.today{border-left:3px solid var(--gold);}
+.fu-card.upcoming{border-left:3px solid var(--blue);}
+.fu-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;gap:10px;}
+.fu-left{flex:1;min-width:0;}
+.fu-cust{font-weight:700;font-size:14px;color:var(--text);display:flex;align-items:center;gap:8px;}
+.fu-temp{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;flex-shrink:0;}
+.fu-t-hot{background:rgba(224,27,54,0.15);color:#F87171;} .fu-t-warm{background:var(--gold-soft);color:var(--gold);} .fu-t-cool{background:rgba(255,255,255,0.06);color:var(--text3);}
+.fu-meta{font-size:12px;color:var(--text3);margin-top:2px;}
+.fu-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.fu-due{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;}
+.fu-due.d-over{background:var(--red-soft);color:#F87171;} .fu-due.d-today{background:var(--gold-soft);color:var(--gold);} .fu-due.d-soon{background:var(--blue-soft);color:var(--blue);}
+.fu-expand{display:none;padding:0 16px 16px;border-top:1px solid var(--border);}
+.fu-expand.open{display:block;padding-top:14px;}
+.fu-actions{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.fu-abtn{font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;transition:all 0.15s;font-family:'Plus Jakarta Sans',sans-serif;}
+.fu-abtn:hover{background:var(--surface3);border-color:var(--border3);}
+.fu-abtn.a-call{border-color:rgba(45,212,160,0.3);color:var(--green);}
+.fu-abtn.a-text{border-color:rgba(108,112,240,0.3);color:var(--blue);}
+.fu-abtn.a-email{border-color:rgba(212,167,58,0.3);color:var(--gold);}
+.fu-abtn.a-done{border-color:rgba(45,212,160,0.3);color:var(--green);background:var(--green-soft);}
+.fu-abtn.a-lost{border-color:rgba(224,27,54,0.2);color:#F87171;}
+.fu-sched{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.fu-sched input[type=date]{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:7px 12px;outline:none;width:160px;}
+.fu-sched input:focus{border-color:var(--blue);}
+.fu-note{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:8px 12px;resize:none;outline:none;margin-bottom:10px;min-height:42px;}
+.fu-note:focus{border-color:var(--blue);}
+.fu-timeline{margin-top:10px;border-top:1px solid var(--border);padding-top:12px;}
+.fu-tl-t{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.fu-tl-item{display:flex;gap:10px;margin-bottom:8px;position:relative;padding-left:16px;}
+.fu-tl-item::before{content:'';position:absolute;left:4px;top:7px;width:6px;height:6px;border-radius:50%;background:var(--border3);}
+.fu-tl-item.tl-call::before{background:var(--green);} .fu-tl-item.tl-text::before{background:var(--blue);} .fu-tl-item.tl-email::before{background:var(--gold);} .fu-tl-item.tl-done::before{background:var(--green);} .fu-tl-item.tl-lost::before{background:var(--red);}
+.fu-tl-item::after{content:'';position:absolute;left:6px;top:15px;width:1px;height:calc(100% + 2px);background:var(--border);}
+.fu-tl-item:last-child::after{display:none;}
+.fu-tl-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:70px;}
+.fu-tl-act{font-size:12px;font-weight:600;color:var(--text);}
+.fu-tl-note{font-size:11px;color:var(--text3);margin-top:1px;}
+.fu-tl-by{font-size:10px;color:var(--text3);font-style:italic;}
+.fu-empty{text-align:center;padding:24px;color:var(--text3);font-size:13px;}
 </style>
 </head>
 <body>
@@ -304,6 +361,7 @@ textarea.min{resize:vertical;min-height:70px;}
     <button class="tb" onclick="showTab('hot',this)">🔥 Hot</button>
     <button class="tb" onclick="showTab('aging',this)">⏰ Aging</button>
     <button class="tb" onclick="showTab('unclaimed',this)">📭 Unclaimed</button>
+    <button class="tb" onclick="showTab('followups',this)">📅 Follow-Ups</button>
     <button class="tb" onclick="showTab('reports',this)">📊 Reports</button>
   </div>
 
@@ -316,6 +374,19 @@ textarea.min{resize:vertical;min-height:70px;}
   <div id="tab-entries">
     <div class="sh"><div class="sh-t" id="sh-label">All Entries</div><div class="sh-c" id="sh-count">—</div></div>
     <div class="el" id="entries-list"><div class="ld"><span class="sp"></span> Loading...</div></div>
+  </div>
+
+  <!-- FOLLOW-UPS -->
+  <div id="tab-followups" style="display:none;">
+    <div class="fu-kpis">
+      <div class="fu-kpi fk-red"><div class="fu-kpi-v" id="fu-overdue">0</div><div class="fu-kpi-l">Overdue</div></div>
+      <div class="fu-kpi fk-gold"><div class="fu-kpi-v" id="fu-today">0</div><div class="fu-kpi-l">Due Today</div></div>
+      <div class="fu-kpi fk-blue"><div class="fu-kpi-v" id="fu-upcoming">0</div><div class="fu-kpi-l">Upcoming</div></div>
+      <div class="fu-kpi fk-green"><div class="fu-kpi-v" id="fu-complete">0</div><div class="fu-kpi-l">Completed</div></div>
+    </div>
+    <div id="fu-overdue-sec"></div>
+    <div id="fu-today-sec"></div>
+    <div id="fu-upcoming-sec"></div>
   </div>
 
   <!-- REPORTS -->
@@ -409,14 +480,7 @@ function toggleMenu(){const h=document.getElementById('ham'),d=document.getEleme
 function closeMenu(){document.getElementById('ham').classList.remove('open');document.getElementById('nav-dd').classList.remove('open');document.getElementById('nav-ov').classList.remove('open');}
 
 // Load
-async function init(){
-  try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=1000`,{headers:H});if(res.ok)ALL=await res.json();}catch(e){console.error(e);}
-  renderKPIs();renderEntries();
-  // set default report dates
-  const now=new Date(),d30=new Date(now);d30.setDate(d30.getDate()-30);
-  document.getElementById('rpt-from').value=d30.toISOString().slice(0,10);
-  document.getElementById('rpt-to').value=now.toISOString().slice(0,10);
-}
+// (init logic moved to initDash at bottom of script)
 
 function renderKPIs(){
   const n=ALL.length;
@@ -526,8 +590,12 @@ function showTab(tab,btn){
   currentTab=tab;
   document.querySelectorAll('.tb').forEach(t=>t.classList.remove('ac'));
   btn.classList.add('ac');
-  if(tab==='reports'){document.getElementById('tab-entries').style.display='none';document.getElementById('tab-reports').style.display='block';runReport();}
-  else{document.getElementById('tab-entries').style.display='block';document.getElementById('tab-reports').style.display='none';renderEntries();}
+  document.getElementById('tab-entries').style.display='none';
+  document.getElementById('tab-reports').style.display='none';
+  document.getElementById('tab-followups').style.display='none';
+  if(tab==='reports'){document.getElementById('tab-reports').style.display='block';runReport();}
+  else if(tab==='followups'){document.getElementById('tab-followups').style.display='block';renderFollowUps();}
+  else{document.getElementById('tab-entries').style.display='block';renderEntries();}
 }
 
 function toggleExpand(id){const el=document.getElementById('ee-'+id);el.classList.toggle('open');}
@@ -654,7 +722,149 @@ function exportPrint(){
 
 function showToast(msg,cls){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(cls?' '+cls:'');setTimeout(()=>t.className='toast',3000);}
 
-init();
+// ═══ FOLLOW-UP SYSTEM ═══
+let FU_LOG=[];
+
+async function loadFollowUpLog(){
+  try{const res=await fetch(`${SB_URL}/rest/v1/s2s_followup_log?select=*&order=created_at.desc&limit=500`,{headers:H});if(res.ok)FU_LOG=await res.json();}catch(e){console.error(e);}
+}
+
+function todayStr(){return new Date().toISOString().slice(0,10);}
+
+function getFollowUpEntries(){
+  const today=todayStr();
+  const needsFollowUp=ALL.filter(e=>{
+    if(!e.next_followup_date)return false;
+    if(e.follow_up_status==='Complete'||e.follow_up_status==='No Response')return false;
+    if(e.manager_outcome&&(e.manager_outcome.includes('Lost')||e.manager_outcome==='Verified Sold'))return false;
+    return true;
+  });
+  const overdue=needsFollowUp.filter(e=>e.next_followup_date<today).sort((a,b)=>a.next_followup_date.localeCompare(b.next_followup_date));
+  const todayList=needsFollowUp.filter(e=>e.next_followup_date===today);
+  const upcoming=needsFollowUp.filter(e=>e.next_followup_date>today).sort((a,b)=>a.next_followup_date.localeCompare(b.next_followup_date));
+  const complete=ALL.filter(e=>e.follow_up_status==='Complete').length;
+  return{overdue,today:todayList,upcoming,complete};
+}
+
+function renderFollowUps(){
+  const{overdue,today:todayList,upcoming,complete}=getFollowUpEntries();
+  document.getElementById('fu-overdue').textContent=overdue.length;
+  document.getElementById('fu-today').textContent=todayList.length;
+  document.getElementById('fu-upcoming').textContent=upcoming.length;
+  document.getElementById('fu-complete').textContent=complete;
+
+  function renderSection(containerId,items,label,badgeCls,cardCls,dueCls){
+    const el=document.getElementById(containerId);
+    if(!items.length){el.innerHTML='';return;}
+    el.innerHTML=`<div class="fu-sec"><div class="fu-sec-hdr"><div class="fu-sec-t">${label}</div><span class="fu-sec-badge ${badgeCls}">${items.length}</span></div>${items.map(e=>renderFUCard(e,cardCls,dueCls)).join('')}</div>`;
+  }
+
+  renderSection('fu-overdue-sec',overdue,'🚨 Overdue','b-red','overdue','d-over');
+  renderSection('fu-today-sec',todayList,'📌 Due Today','b-gold','today','d-today');
+  renderSection('fu-upcoming-sec',upcoming,'📅 Upcoming','b-blue','upcoming','d-soon');
+}
+
+function renderFUCard(e,cardCls,dueCls){
+  const sc=parseInt(e.eng_score)||0;
+  const tempCls=sc>=8?'fu-t-hot':sc>=5?'fu-t-warm':'fu-t-cool';
+  const veh=[e.veh_year,e.veh_make,e.veh_model].filter(Boolean).join(' ')||'—';
+  const daysUntil=Math.round((new Date(e.next_followup_date)-new Date(todayStr()))/(86400000));
+  const dueLabel=daysUntil<0?`${Math.abs(daysUntil)}d overdue`:daysUntil===0?'Today':`In ${daysUntil}d`;
+  const logs=FU_LOG.filter(l=>l.entry_id===e.id);
+  const tmrw=new Date();tmrw.setDate(tmrw.getDate()+1);
+  const nextDefault=tmrw.toISOString().slice(0,10);
+
+  return`<div class="fu-card ${cardCls}">
+    <div class="fu-top" onclick="document.getElementById('fue-${e.id}').classList.toggle('open')">
+      <div class="fu-left">
+        <div class="fu-cust">${e.first_name||''} ${e.last_name||''} <span class="fu-temp ${tempCls}">${sc}/10</span></div>
+        <div class="fu-meta">${veh} · ${e.submitter||'—'} · ${e.phone||'—'}${e.outcome?' · '+e.outcome:''}</div>
+      </div>
+      <div class="fu-right">
+        <div class="fu-due ${dueCls}">${dueLabel}</div>
+      </div>
+    </div>
+    <div class="fu-expand" id="fue-${e.id}">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Log Activity</div>
+      <div class="fu-actions">
+        <button class="fu-abtn a-call" onclick="logFU(${e.id},'Called','Phone')">📞 Called</button>
+        <button class="fu-abtn a-text" onclick="logFU(${e.id},'Texted','Text')">💬 Texted</button>
+        <button class="fu-abtn a-email" onclick="logFU(${e.id},'Emailed','Email')">✉️ Emailed</button>
+        <button class="fu-abtn a-done" onclick="logFU(${e.id},'Closed — Sold','Done')">✓ Sold</button>
+        <button class="fu-abtn a-done" onclick="logFU(${e.id},'Appointment Confirmed','Done')">📅 Appt Set</button>
+        <button class="fu-abtn a-lost" onclick="logFU(${e.id},'Lost — No Response','Lost')">✗ Lost</button>
+      </div>
+      <div class="fu-sched">
+        <span style="font-size:11px;font-weight:600;color:var(--text3);">Next follow-up:</span>
+        <input type="date" id="fud-${e.id}" value="${nextDefault}">
+        <button class="fu-abtn" onclick="scheduleFU(${e.id})" style="font-size:11px;">Set Date</button>
+      </div>
+      <textarea class="fu-note" id="fun-${e.id}" placeholder="Add notes about this follow-up..." rows="2"></textarea>
+      ${logs.length?`<div class="fu-timeline"><div class="fu-tl-t">Activity Timeline (${logs.length})</div>${logs.slice(0,8).map(l=>{
+        const cls=l.method==='Phone'?'tl-call':l.method==='Text'?'tl-text':l.method==='Email'?'tl-email':l.outcome&&l.outcome.includes('Lost')?'tl-lost':'tl-done';
+        const d=new Date(l.created_at);
+        return`<div class="fu-tl-item ${cls}"><div class="fu-tl-date">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div><div><div class="fu-tl-act">${l.action}</div>${l.notes?`<div class="fu-tl-note">${l.notes}</div>`:''}${l.next_date?`<div class="fu-tl-note">→ Next: ${l.next_date}</div>`:''}<div class="fu-tl-by">by ${l.logged_by}</div></div></div>`;
+      }).join('')}${logs.length>8?`<div style="font-size:11px;color:var(--text3);padding-left:16px;">+ ${logs.length-8} more</div>`:''}</div>`:'<div style="font-size:11px;color:var(--text3);font-style:italic;">No activity logged yet</div>'}
+    </div>
+  </div>`;
+}
+
+async function logFU(entryId,action,method){
+  const notes=document.getElementById('fun-'+entryId).value.trim();
+  const nextDate=document.getElementById('fud-'+entryId).value||null;
+  const logBy=rep?rep.name:'Manager';
+
+  // Determine if this is a closing action
+  const isClose=action.includes('Sold')||action.includes('Confirmed')||action.includes('Lost');
+  const newStatus=isClose?(action.includes('Lost')?'No Response':'Complete'):'Contacted';
+  const mgrOutcome=action.includes('Sold')?'Verified Sold':action.includes('Confirmed')?'Appointment Confirmed':action.includes('Lost')?'Lost — No Follow-Up':null;
+
+  // Insert activity log
+  await fetch(`${SB_URL}/rest/v1/s2s_followup_log`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({entry_id:entryId,action,method:method||null,notes:notes||null,logged_by:logBy,next_date:isClose?null:nextDate,outcome:isClose?action:null})});
+
+  // Update the entry
+  const patch={follow_up_status:newStatus,followup_count:(ALL.find(x=>x.id===entryId)?.followup_count||0)+1};
+  if(!isClose&&nextDate) patch.next_followup_date=nextDate;
+  if(isClose){patch.next_followup_date=null;if(mgrOutcome)patch.manager_outcome=mgrOutcome;}
+  if(notes) patch.manager_notes=notes;
+
+  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${entryId}`,{method:'PATCH',headers:H,body:JSON.stringify(patch)});
+
+  // Update local state
+  const entry=ALL.find(x=>x.id===entryId);
+  if(entry) Object.assign(entry,patch);
+  FU_LOG.unshift({entry_id:entryId,action,method,notes:notes||null,logged_by:logBy,next_date:isClose?null:nextDate,outcome:isClose?action:null,created_at:new Date().toISOString()});
+
+  document.getElementById('fun-'+entryId).value='';
+  renderFollowUps();renderKPIs();
+  showToast(`✓ ${action} logged for #${entryId}`,'grn');
+}
+
+async function scheduleFU(entryId){
+  const nextDate=document.getElementById('fud-'+entryId).value;
+  if(!nextDate){showToast('Select a date first');return;}
+  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${entryId}`,{method:'PATCH',headers:H,body:JSON.stringify({next_followup_date:nextDate})});
+  const entry=ALL.find(x=>x.id===entryId);if(entry)entry.next_followup_date=nextDate;
+  // Log the schedule action
+  const logBy=rep?rep.name:'Manager';
+  await fetch(`${SB_URL}/rest/v1/s2s_followup_log`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({entry_id:entryId,action:'Follow-up scheduled',logged_by:logBy,next_date:nextDate})});
+  FU_LOG.unshift({entry_id:entryId,action:'Follow-up scheduled',logged_by:logBy,next_date:nextDate,created_at:new Date().toISOString()});
+  renderFollowUps();showToast(`✓ Follow-up scheduled for ${nextDate}`,'grn');
+}
+
+// ── Init ──
+async function initDash(){
+  await Promise.all([
+    (async()=>{try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=1000`,{headers:H});if(res.ok)ALL=await res.json();}catch(e){console.error(e);}})(),
+    loadFollowUpLog()
+  ]);
+  renderKPIs();renderEntries();
+  const now=new Date(),d30=new Date(now);d30.setDate(d30.getDate()-30);
+  document.getElementById('rpt-from').value=d30.toISOString().slice(0,10);
+  document.getElementById('rpt-to').value=now.toISOString().slice(0,10);
+}
+
+initDash();
 </script>
 </body>
 </html>
