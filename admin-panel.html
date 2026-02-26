@@ -1,361 +1,402 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
+<script>
 (function(){
-  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
-  if (!rep || rep.role !== 'Admin') {
-    window.location.replace('/login.html');
-  }
+  var rep = null;
+  try { rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null'); } catch(e) {}
+  if (!rep || !rep.name || !rep.role) { window.location.replace('/login.html'); }
+  if (rep.role.toLowerCase() !== 'admin') { window.location.replace('/app.html'); }
 })();
 </script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ServiceBridge Admin — Vyaxis</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#06080E">
+<title>Admin Console — ServiceBridge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --ink:#0C0C14;--ink2:#15151F;--surface:#F5F4F1;--card:#FFFFFF;
-  --border:#E4E2DC;--muted:#8C897F;--text:#18171A;--subtext:#6A6760;
-  --red:#C8102E;--red-dark:#9B0D22;--red-light:#FEF2F3;
-  --gold:#C49A2A;--gold-light:#FDF9EF;
-  --green:#14532D;--green-mid:#166534;--green-light:#F0FDF4;
-  --blue:#1E3A8A;--blue-light:#EFF6FF;
-  --purple:#7C3AED;--purple-light:#F5F3FF;
-  --r:10px;--rsm:6px;
-  --sh:0 1px 3px rgba(0,0,0,0.06),0 4px 20px rgba(0,0,0,0.05);
-  --sh-lg:0 12px 48px rgba(0,0,0,0.14);
+:root {
+  --bg: #06080E; --bg2: #0C0F18;
+  --surface: #111520; --surface2: #171C2A; --surface3: #1D2333;
+  --red: #E01B36; --red-soft: rgba(224,27,54,0.10); --red-glow: rgba(224,27,54,0.25);
+  --gold: #D4A73A; --gold-soft: rgba(212,167,58,0.10);
+  --green: #2DD4A0; --green-soft: rgba(45,212,160,0.10);
+  --blue: #6C70F0; --blue-soft: rgba(108,112,240,0.10);
+  --orange: #F59E0B; --orange-soft: rgba(245,158,11,0.10);
+  --purple: #A855F7; --purple-soft: rgba(168,85,247,0.10);
+  --text: #EDEEF2; --text2: rgba(237,238,242,0.62); --text3: rgba(237,238,242,0.34);
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.10); --border3: rgba(255,255,255,0.16);
+  --r: 14px; --rsm: 10px; --rlg: 18px;
+  --spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  min-height: 100vh; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  font-size: 15px; line-height: 1.5; letter-spacing: -0.01em;
+}
 
-/* ══ NAV ══ */
-.admin-nav{
-  background:var(--ink);
-  height:62px;
+/* ── Background ── */
+.bg-noise { position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
+.bg-grad { position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 20% 0%,rgba(108,112,240,0.06) 0%,transparent 70%),radial-gradient(ellipse 50% 60% at 80% 100%,rgba(224,27,54,0.04) 0%,transparent 70%); }
+
+/* ── Header ── */
+.app-header {
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;
-  position:sticky;top:0;z-index:200;
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  padding:14px 24px 12px; padding-top:max(14px, env(safe-area-inset-top));
+  border-bottom:1px solid var(--border);
+  background:rgba(6,8,14,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  position:sticky;top:0;z-index:100;
 }
-.admin-nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--blue));}
-.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.06em;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.nav-sep{width:1px;height:18px;background:rgba(255,255,255,0.15);}
-.nav-product{font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.4);}
-.nav-left{display:flex;align-items:center;gap:14px;}
-.nav-right{display:flex;align-items:center;gap:10px;}
-
-/* User pill */
-.nav-user-pill{
-  display:flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
-  border-radius:30px;padding:4px 12px 4px 4px;
-}
-.nav-avatar{
-  width:30px;height:30px;border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),#E8B84B);
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:700;color:var(--ink);flex-shrink:0;
-}
-.nav-user-name{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;}
-.nav-role-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(196,154,42,0.2);color:var(--gold);border:1px solid rgba(196,154,42,0.35);white-space:nowrap;}
+.app-header::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),var(--purple),transparent);opacity:0.5; }
+.header-left { display:flex;align-items:center;gap:12px; }
+.header-logo { width:30px;height:30px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center; }
+.header-logo svg { width:14px;height:14px; }
+.header-title { font-family:'Instrument Serif',Georgia,serif;font-size:17px;letter-spacing:-0.01em;color:var(--text); }
+.header-sep { width:1px;height:16px;background:var(--border3); }
+.header-product { font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3); }
+.header-right { display:flex;align-items:center;gap:10px;position:relative; }
+.header-user-pill { display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:30px;padding:4px 12px 4px 4px; }
+.header-avatar { width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--orange));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bg);flex-shrink:0;font-family:'JetBrains Mono',monospace; }
+.header-user-name { font-size:12px;font-weight:600;color:var(--text);white-space:nowrap; }
+.header-role-badge { font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:10px;background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2); }
 
 /* Hamburger */
-.hamburger{
-  width:38px;height:38px;border-radius:9px;
-  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
-  cursor:pointer;transition:all 0.18s;flex-shrink:0;
-}
-.hamburger:hover{background:rgba(255,255,255,0.1);border-color:var(--purple);}
-.hamburger span{display:block;width:16px;height:2px;background:#fff;border-radius:2px;transition:all 0.22s;}
-.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
-.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0);}
-.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.hamburger { background:none;border:1px solid var(--border2);border-radius:8px;width:34px;height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all 0.18s;padding:0;flex-shrink:0; }
+.hamburger:hover { border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.03); }
+.hamburger span { display:block;width:14px;height:1.5px;background:rgba(255,255,255,0.55);border-radius:2px;transition:all 0.2s; }
+.hamburger.open span:nth-child(1) { transform:translateY(5.5px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity:0; }
+.hamburger.open span:nth-child(3) { transform:translateY(-5.5px) rotate(-45deg); }
 
 /* Dropdown */
-.nav-dropdown{
-  position:fixed;top:70px;right:16px;
-  min-width:230px;
-  background:#1A2438;
-  border:1px solid rgba(255,255,255,0.15);
-  border-radius:16px;
-  padding:8px;
-  box-shadow:0 24px 64px rgba(0,0,0,0.6);
-  z-index:500;
-  display:none;
-  animation:dropIn 0.18s ease both;
+.nav-overlay { position:fixed;inset:0;z-index:190;display:none; }
+.nav-overlay.open { display:block; }
+.nav-dropdown { position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);min-width:230px;padding:6px;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:201;opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;transition:all 0.18s var(--spring); }
+.nav-dropdown.open { opacity:1;transform:translateY(0) scale(1);pointer-events:all; }
+.dd-item { display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--rsm);font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s; }
+.dd-item:hover { background:rgba(255,255,255,0.04);color:var(--text); }
+.dd-item.active-page { background:var(--blue-soft);color:var(--blue); }
+.dd-item.danger { color:#FC8181; }
+.dd-item.danger:hover { background:rgba(239,68,68,0.08); }
+.dd-icon { font-size:14px;width:20px;text-align:center; }
+.dd-divider { height:1px;background:var(--border);margin:4px 0; }
+.dd-header { padding:10px 14px 6px; }
+.dd-header-name { font-size:13px;font-weight:700;color:var(--text); }
+.dd-header-role { font-size:11px;color:var(--text3);margin-top:1px; }
+
+/* ── Tab Navigation ── */
+.tab-bar {
+  display:flex;gap:0;padding:0 24px;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;position:relative;z-index:1;
 }
-.nav-dropdown.open{display:block;}
-@keyframes dropIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-
-.dd-header{padding:12px 14px 10px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:6px;}
-.dd-header-name{font-size:13px;font-weight:700;color:#fff;}
-.dd-header-role{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;}
-.dd-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;border-radius:10px;
-  font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);
-  cursor:pointer;transition:all 0.15s;
-  text-decoration:none;border:none;background:none;
-  width:100%;font-family:'DM Sans',sans-serif;text-align:left;
+.tab-bar::-webkit-scrollbar { display:none; }
+.tab-btn {
+  padding:12px 18px;font-size:11px;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--text3);border-bottom:2px solid transparent;
+  cursor:pointer;transition:all 0.18s;white-space:nowrap;
+  background:none;border-top:none;border-left:none;border-right:none;
+  font-family:'Plus Jakarta Sans',sans-serif;
 }
-.dd-item:hover{background:rgba(255,255,255,0.07);color:#fff;}
-.dd-item .dd-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0;}
-.dd-divider{height:1px;background:rgba(255,255,255,0.1);margin:6px 4px;}
-.dd-item.danger{color:#FC8181;}
-.dd-item.danger:hover{background:rgba(239,68,68,0.1);color:#FC8181;}
+.tab-btn:hover { color:var(--text2); }
+.tab-btn.active { color:var(--blue);border-bottom-color:var(--blue); }
 
-/* PAGE NAV TABS */
-.nav-wrap{background:var(--card);border-bottom:1px solid var(--border);padding:0 36px;display:flex;gap:0;}
-.nav-tab{padding:14px 20px 14px 0;font-size:11px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;transition:all 0.18s;margin-right:20px;}
-.nav-tab:hover{color:var(--text);}
-.nav-tab.active{color:var(--purple);border-bottom-color:var(--purple);}
+/* ── Page ── */
+.page { max-width:1200px;margin:0 auto;padding:28px 24px 80px;position:relative;z-index:1; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
 
-/* PAGE */
-.page{max-width:1200px;margin:0 auto;padding:32px 24px 80px;}
-.sh{display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 20px;}
-.sh-title{font-family:'DM Serif Display',serif;font-size:24px;}
-.sh-desc{font-size:12px;color:var(--muted);margin-top:4px;}
+/* ── Section Headers ── */
+.sh { display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 18px; }
+.sh-title { font-family:'Instrument Serif',Georgia,serif;font-size:26px;letter-spacing:-0.02em;color:var(--text); }
+.sh-desc { font-size:13px;color:var(--text3);margin-top:3px; }
+.sh-actions { display:flex;gap:8px;flex-shrink:0; }
 
-/* CARDS */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px 26px;box-shadow:var(--sh);margin-bottom:16px;}
-.card-title{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:18px;}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
-.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-
-/* KPI */
-.kpi-tile{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;}
-.kpi-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-.k-purple::before{background:var(--purple);}
-.k-green::before{background:var(--green-mid);}
-.k-blue::before{background:var(--blue);}
-.k-red::before{background:var(--red);}
-.kpi-label{font-size:9px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.kpi-val{font-family:'DM Serif Display',serif;font-size:30px;line-height:1;}
-.k-purple .kpi-val{color:var(--purple);}
-.k-green .kpi-val{color:var(--green-mid);}
-.k-blue .kpi-val{color:var(--blue);}
-.k-red .kpi-val{color:var(--red);}
-
-/* TABLE */
-.tbl-wrap{overflow-x:auto;border-radius:var(--rsm);border:1px solid var(--border);}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-thead tr{background:var(--ink);}
-thead th{padding:10px 14px;text-align:left;font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.7);white-space:nowrap;}
-tbody tr{border-bottom:1px solid var(--border);transition:background 0.12s;}
-tbody tr:hover{background:rgba(124,58,237,0.03);}
-td{padding:10px 14px;color:var(--text);font-size:12px;}
-
-/* DEALER CARDS */
-.dealer-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh);position:relative;overflow:hidden;}
-.dealer-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--purple),var(--blue));}
-.dealer-name{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:4px;}
-.dealer-id{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
-.dealer-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.dealer-stat{background:var(--surface);border-radius:var(--rsm);padding:8px 12px;}
-.dealer-stat-val{font-family:'DM Serif Display',serif;font-size:20px;color:var(--purple);}
-.dealer-stat-lbl{font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
-.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;}
-.s-active{background:var(--green-light);color:var(--green-mid);}
-.s-inactive{background:#F0EEEB;color:var(--muted);}
-
-/* FORM ELEMENTS */
-.form-group{margin-bottom:16px;}
-.form-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px;}
-.form-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rsm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 14px;outline:none;transition:border-color 0.18s;-webkit-appearance:none;}
-.form-input:focus{border-color:var(--purple);}
-.form-input::placeholder{color:#C2BFB9;}
-select.form-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238C897F' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;}
-
-/* BTNS */
-.btn-primary{background:var(--purple);color:#fff;border:none;border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.06em;padding:10px 22px;cursor:pointer;transition:background 0.18s;}
-.btn-primary:hover{background:#6D28D9;}
-.btn-dark{background:var(--ink);color:#fff;border:none;border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.06em;padding:10px 22px;cursor:pointer;transition:background 0.18s;}
-.btn-dark:hover{background:#000;}
-.btn-outline{background:transparent;color:var(--purple);border:1.5px solid var(--purple);border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.06em;padding:9px 20px;cursor:pointer;transition:all 0.18s;}
-.btn-outline:hover{background:var(--purple-light);}
-.btn-red{background:var(--red);color:#fff;border:none;border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.06em;padding:9px 20px;cursor:pointer;transition:background 0.18s;}
-.btn-red:hover{background:var(--red-dark);}
-.btn-sm{padding:6px 14px;font-size:11px;}
-
-/* REP TABLE */
-.rep-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
-.rep-row:last-child{border-bottom:none;}
-.rep-info{display:flex;flex-direction:column;gap:3px;}
-.rep-name-lg{font-weight:600;font-size:14px;}
-.rep-meta{font-size:11px;color:var(--muted);}
-.rep-actions{display:flex;align-items:center;gap:8px;}
-
-/* EMAIL LOG */
-.email-log-row{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
-.email-log-row:last-child{border-bottom:none;}
-.email-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
-.dot-hot{background:var(--red);}
-.dot-daily{background:var(--blue);}
-.dot-system{background:var(--muted);}
-.email-log-info{flex:1;}
-.email-log-subject{font-size:13px;font-weight:600;color:var(--text);}
-.email-log-meta{font-size:11px;color:var(--muted);margin-top:3px;}
-
-/* TAB PANELS */
-.tab-panel{display:none;}
-.tab-panel.active{display:block;}
-
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:500;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--card);border-radius:var(--r);padding:32px;width:100%;max-width:480px;box-shadow:var(--sh-lg);}
-.modal-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px;}
-.modal-desc{font-size:13px;color:var(--muted);margin-bottom:24px;}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;}
-
-/* ALERT */
-.alert{padding:12px 16px;border-radius:var(--rsm);font-size:12px;font-weight:500;margin-bottom:16px;display:none;}
-.alert.show{display:block;}
-.alert-success{background:var(--green-light);color:var(--green-mid);border:1px solid #BBF7D0;}
-.alert-error{background:var(--red-light);color:var(--red);border:1px solid #FECACA;}
-
-/* LOADING */
-.loading{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
-.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;vertical-align:middle;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* EXPORT */
-.export-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
-.export-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.18s;}
-.export-csv{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#166534;}
-.export-csv:hover{background:rgba(34,197,94,0.2);transform:translateY(-1px);}
-.export-pdf{background:rgba(200,16,46,0.12);border:1px solid rgba(200,16,46,0.3);color:var(--red);}
-.export-pdf:hover{background:rgba(200,16,46,0.2);transform:translateY(-1px);}
-
-@media(max-width:768px){
-  .nav-user-name{display:none;}
-  .grid-2,.grid-4{grid-template-columns:1fr;}
-  .admin-nav{padding:0 16px;}
+/* ── KPI Tiles ── */
+.kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px; }
+.kpi-tile {
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:18px 18px;position:relative;overflow:hidden;
+  transition:transform 0.2s var(--spring);
 }
+.kpi-tile:hover { transform:translateY(-2px); }
+.kpi-tile::before { content:'';position:absolute;top:0;left:0;right:0;height:2px; }
+.k-blue::before { background:var(--blue); } .k-green::before { background:var(--green); }
+.k-red::before { background:var(--red); } .k-gold::before { background:var(--gold); }
+.kpi-label { font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px; }
+.kpi-val { font-family:'Instrument Serif',Georgia,serif;font-size:36px;line-height:1; }
+.k-blue .kpi-val { color:var(--blue); } .k-green .kpi-val { color:var(--green); }
+.k-red .kpi-val { color:#F87171; } .k-gold .kpi-val { color:var(--gold); }
+
+/* ── Cards ── */
+.card {
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);
+  padding:22px 22px;margin-bottom:14px;
+}
+.card-title { font-family:'Instrument Serif',Georgia,serif;font-size:18px;margin-bottom:16px;color:var(--text); }
+.grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+
+/* ── Dealer Cards ── */
+.dealer-card {
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);
+  padding:22px;position:relative;overflow:hidden;
+}
+.dealer-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple)); }
+.dealer-name { font-family:'Instrument Serif',Georgia,serif;font-size:20px;color:var(--text);margin-bottom:3px; }
+.dealer-id { font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px; }
+.dealer-stats { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.dealer-stat { background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 12px; }
+.dealer-stat-val { font-family:'Instrument Serif',Georgia,serif;font-size:22px;color:var(--blue); }
+.dealer-stat-lbl { font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:2px; }
+.dealer-footer { margin-top:14px;display:flex;align-items:center;justify-content:space-between; }
+.status-badge { display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.06em; }
+.s-active { background:var(--green-soft);color:var(--green);border:1px solid rgba(45,212,160,0.2); }
+.dealer-add {
+  border:2px dashed var(--border2);background:transparent;border-radius:var(--rlg);
+  padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:220px;cursor:pointer;transition:all 0.2s;
+}
+.dealer-add:hover { border-color:var(--border3);background:rgba(255,255,255,0.02); }
+.dealer-add-icon { font-size:32px;margin-bottom:10px;opacity:0.4; }
+.dealer-add-title { font-family:'Instrument Serif',Georgia,serif;font-size:16px;color:var(--text2); }
+.dealer-add-sub { font-size:12px;color:var(--text3);margin-top:4px; }
+
+/* ── Form Elements ── */
+.form-group { margin-bottom:14px; }
+.form-label { font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px; }
+.form-input {
+  width:100%;background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--rsm);
+  color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;
+  padding:10px 14px;outline:none;transition:border-color 0.18s;-webkit-appearance:none;
+}
+.form-input:focus { border-color:var(--blue);box-shadow:0 0 0 3px rgba(108,112,240,0.1); }
+.form-input::placeholder { color:var(--text3);opacity:0.5; }
+select.form-input {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='rgba(237,238,242,0.34)' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;
+}
+select.form-input option { background:var(--surface); }
+
+/* ── Buttons ── */
+.btn-primary { background:var(--blue);color:#fff;border:none;border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.04em;padding:10px 22px;cursor:pointer;transition:all 0.18s var(--spring); }
+.btn-primary:hover { transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,112,240,0.3); }
+.btn-dark { background:var(--surface2);color:var(--text);border:1.5px solid var(--border2);border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.04em;padding:10px 22px;cursor:pointer;transition:all 0.18s; }
+.btn-dark:hover { border-color:var(--border3);background:var(--surface3); }
+.btn-outline { background:transparent;color:var(--blue);border:1.5px solid rgba(108,112,240,0.3);border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.04em;padding:9px 18px;cursor:pointer;transition:all 0.18s; }
+.btn-outline:hover { background:var(--blue-soft); }
+.btn-red { background:var(--red-soft);color:#FC8181;border:1px solid rgba(224,27,54,0.25);border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;padding:9px 18px;cursor:pointer;transition:all 0.18s; }
+.btn-red:hover { background:rgba(224,27,54,0.18); }
+.btn-sm { padding:6px 14px;font-size:11px; }
+
+/* ── Table ── */
+.tbl-wrap { overflow-x:auto;border-radius:var(--rsm);border:1px solid var(--border); }
+table { width:100%;border-collapse:collapse;font-size:12px; }
+thead tr { background:var(--surface2); }
+thead th { padding:10px 14px;text-align:left;font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);white-space:nowrap; }
+tbody tr { border-bottom:1px solid var(--border);transition:background 0.12s; }
+tbody tr:hover { background:rgba(108,112,240,0.03); }
+td { padding:10px 14px;color:var(--text2);font-size:12px; }
+td:first-child { font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:11px; }
+
+/* ── Rep Rows ── */
+.rep-row { display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border); }
+.rep-row:last-child { border-bottom:none; }
+.rep-info { display:flex;align-items:center;gap:12px; }
+.rep-avatar { width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;font-family:'JetBrains Mono',monospace;flex-shrink:0; }
+.rep-name-lg { font-weight:700;font-size:14px;color:var(--text); }
+.rep-meta { font-size:11px;color:var(--text3);margin-top:1px; }
+.rep-actions { display:flex;align-items:center;gap:10px; }
+.rep-count { font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3); }
+
+/* ── Email Log ── */
+.email-log-row { display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border); }
+.email-log-row:last-child { border-bottom:none; }
+.email-dot { width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0; }
+.dot-hot { background:var(--red); } .dot-daily { background:var(--blue); } .dot-system { background:var(--text3); }
+.email-log-subject { font-size:13px;font-weight:600;color:var(--text); }
+.email-log-meta { font-size:11px;color:var(--text3);margin-top:2px; }
+
+/* ── Export Bar ── */
+.export-bar { display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap; }
+.export-btn { display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--rsm);font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.18s; }
+.export-csv { background:var(--green-soft);border:1px solid rgba(45,212,160,0.2);color:var(--green); }
+.export-csv:hover { background:rgba(45,212,160,0.18);transform:translateY(-1px); }
+.export-pdf { background:var(--red-soft);border:1px solid rgba(224,27,54,0.2);color:#FC8181; }
+.export-pdf:hover { background:rgba(224,27,54,0.18);transform:translateY(-1px); }
+
+/* ── Alert ── */
+.alert { padding:12px 16px;border-radius:var(--rsm);font-size:12px;font-weight:600;margin-bottom:14px;display:none; }
+.alert.show { display:block; }
+.alert-success { background:var(--green-soft);color:var(--green);border:1px solid rgba(45,212,160,0.2); }
+.alert-error { background:var(--red-soft);color:#FC8181;border:1px solid rgba(224,27,54,0.2); }
+
+/* ── Loading ── */
+.loading { text-align:center;padding:40px;color:var(--text3);font-size:13px; }
+.spinner { display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;vertical-align:middle; }
+@keyframes spin { to{transform:rotate(360deg);} }
+
+/* ── Modal ── */
+.modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal {
+  background:var(--surface);border:1px solid var(--border2);border-radius:var(--rlg);
+  padding:28px;width:100%;max-width:480px;position:relative;
+}
+.modal::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:var(--rlg) var(--rlg) 0 0; }
+.modal-title { font-family:'Instrument Serif',Georgia,serif;font-size:24px;margin-bottom:4px; }
+.modal-desc { font-size:13px;color:var(--text3);margin-bottom:22px; }
+.modal-actions { display:flex;gap:10px;justify-content:flex-end;margin-top:22px; }
+
+/* ── Sync Label ── */
+.sync-label { font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3); }
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .kpi-grid { grid-template-columns:repeat(2,1fr); }
+  .grid-2 { grid-template-columns:1fr; }
+  .header-user-name { display:none; }
+}
+@media(max-width:600px){
+  .page { padding:20px 16px 80px; }
+  .card { padding:18px 16px; }
+  .app-header { padding:12px 16px; }
+}
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+.fade-in { animation:fadeUp 0.4s ease both; }
 </style>
 </head>
 <body>
 
-<!-- ══ NAV ══ -->
-<header class="admin-nav">
-  <div class="nav-left">
-    <div class="nav-brand">ServiceBridge</div>
-    <div class="nav-sep"></div>
-    <div class="nav-product">Admin Console</div>
-  </div>
-  <div class="nav-right">
-    <div class="nav-user-pill">
-      <div class="nav-avatar" id="nav-avatar">RL</div>
-      <span class="nav-user-name" id="nav-name"></span>
-      <span class="nav-role-pill">Admin</span>
+<div class="bg-noise"></div>
+<div class="bg-grad"></div>
+
+<!-- ── HEADER ── -->
+<header class="app-header">
+  <div class="header-left">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
     </div>
-    <div class="hamburger" id="hamburger" onclick="toggleMenu(event)">
+    <div class="header-title">ServiceBridge</div>
+    <div class="header-sep"></div>
+    <div class="header-product">Admin Console</div>
+  </div>
+  <div class="header-right">
+    <div class="header-user-pill">
+      <div class="header-avatar" id="nav-avatar">RL</div>
+      <span class="header-user-name" id="nav-name"></span>
+      <span class="header-role-badge">Admin</span>
+    </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
+    </button>
+    <div class="nav-dropdown" id="nav-dropdown">
+      <div class="dd-header">
+        <div class="dd-header-name" id="dd-name"></div>
+        <div class="dd-header-role">Admin · ServiceBridge</div>
+      </div>
+      <div class="dd-divider"></div>
+      <a href="app.html" class="dd-item"><span class="dd-icon">🏠</span> Home</a>
+      <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
+      <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Dashboard</a>
+      <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
+      <div class="dd-divider"></div>
+      <a href="admin-panel.html" class="dd-item active-page"><span class="dd-icon">⚙️</span> Admin Panel</a>
+      <div class="dd-divider"></div>
+      <button class="dd-item danger" onclick="signOut()"><span class="dd-icon">🚪</span> Sign Out</button>
     </div>
   </div>
 </header>
+<div class="nav-overlay" id="nav-overlay" onclick="closeMenu()"></div>
 
-<!-- ══ DROPDOWN ══ -->
-<div class="nav-dropdown" id="nav-dropdown">
-  <div class="dd-header">
-    <div class="dd-header-name" id="dd-name"></div>
-    <div class="dd-header-role">Admin · ServiceBridge</div>
-  </div>
-  <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Manager Dashboard</a>
-  <a href="app.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
-  <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
-  <div class="dd-divider"></div>
-  <button class="dd-item danger" onclick="signOut()"><span class="dd-icon">🚪</span> Sign Out</button>
-</div>
-
-<!-- PAGE NAV TABS -->
-<div class="nav-wrap">
-  <div class="nav-tab active" onclick="showTab('overview',this)">📊 Overview</div>
-  <div class="nav-tab" onclick="showTab('dealers',this)">🏢 Dealers</div>
-  <div class="nav-tab" onclick="showTab('reps',this)">👤 Rep Management</div>
-  <div class="nav-tab" onclick="showTab('emails',this)">📧 Email Settings</div>
-  <div class="nav-tab" onclick="showTab('data',this)">🗄 Data</div>
+<!-- ── TAB BAR ── -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('overview',this)">📊 Overview</button>
+  <button class="tab-btn" onclick="showTab('dealers',this)">🏢 Dealers</button>
+  <button class="tab-btn" onclick="showTab('reps',this)">👤 Rep Management</button>
+  <button class="tab-btn" onclick="showTab('emails',this)">📧 Email Settings</button>
+  <button class="tab-btn" onclick="showTab('data',this)">🗄 Data</button>
 </div>
 
 <div class="page">
 
-  <div class="export-bar" style="margin-top:20px;">
-    <button class="export-btn export-csv" onclick="adminExportS2SCSV()">⬇ S2S Entries — CSV</button>
-    <button class="export-btn export-pdf" onclick="adminExportS2SPDF()">🖨 S2S Entries — Print / PDF</button>
+  <div class="export-bar fade-in" style="margin-top:4px;">
+    <button class="export-btn export-csv" onclick="adminExportCSV()">⬇ S2S Entries — CSV</button>
+    <button class="export-btn export-pdf" onclick="adminExportPDF()">🖨 S2S Entries — Print</button>
   </div>
 
-  <!-- OVERVIEW -->
-  <div class="tab-panel active" id="tab-overview">
+  <!-- ═══ OVERVIEW ═══ -->
+  <div class="tab-panel active fade-in" id="tab-overview">
     <div class="sh">
       <div><div class="sh-title">Platform Overview</div><div class="sh-desc">ServiceBridge across all dealers</div></div>
-      <div style="font-size:11px;color:var(--muted);" id="overview-sync">—</div>
+      <div class="sync-label" id="overview-sync">—</div>
     </div>
-    <div class="grid-4" style="margin-bottom:20px;">
-      <div class="kpi-tile k-purple"><div class="kpi-label">Total Dealers</div><div class="kpi-val" id="kpi-dealers">1</div></div>
+    <div class="kpi-grid">
+      <div class="kpi-tile k-blue"><div class="kpi-label">Total Dealers</div><div class="kpi-val">1</div></div>
       <div class="kpi-tile k-green"><div class="kpi-label">Total Entries</div><div class="kpi-val" id="kpi-entries">—</div></div>
-      <div class="kpi-tile k-blue"><div class="kpi-label">Vehicles Sold</div><div class="kpi-val" id="kpi-sold">—</div></div>
+      <div class="kpi-tile k-gold"><div class="kpi-label">Vehicles Sold</div><div class="kpi-val" id="kpi-sold">—</div></div>
       <div class="kpi-tile k-red"><div class="kpi-label">Hot Leads</div><div class="kpi-val" id="kpi-hot">—</div></div>
     </div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Recent Entries</div>
-        <div id="recent-entries-list"><div class="loading"><span class="spinner"></span>Loading...</div></div>
+        <div id="recent-list"><div class="loading"><span class="spinner"></span> Loading...</div></div>
       </div>
       <div class="card">
         <div class="card-title">Email Notification Log</div>
-        <div id="email-log-list">
-          <div class="email-log-row">
-            <div class="email-dot dot-system"></div>
-            <div class="email-log-info">
-              <div class="email-log-subject">Email system initializing...</div>
-              <div class="email-log-meta">Waiting for DNS verification on vyaxis.com</div>
-            </div>
-          </div>
+        <div id="email-log">
+          <div class="email-log-row"><div class="email-dot dot-system"></div><div><div class="email-log-subject">System initializing...</div><div class="email-log-meta">Waiting for first activity</div></div></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- DEALERS -->
+  <!-- ═══ DEALERS ═══ -->
   <div class="tab-panel" id="tab-dealers">
     <div class="sh">
       <div><div class="sh-title">Dealer Management</div><div class="sh-desc">All ServiceBridge dealer accounts</div></div>
-      <button class="btn-primary" onclick="openAddDealer()">+ Add Dealer</button>
+      <button class="btn-primary" onclick="openModal('dealer-modal')">+ Add Dealer</button>
     </div>
-    <div id="dealers-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="grid-2">
       <div class="dealer-card">
         <div class="dealer-name">Gallatin CDJR</div>
         <div class="dealer-id">Dealer ID: gallatin-cdjr · WeAuto Group</div>
-        <div class="dealer-stats" id="gallatin-stats">
+        <div class="dealer-stats">
           <div class="dealer-stat"><div class="dealer-stat-val" id="gs-entries">—</div><div class="dealer-stat-lbl">Total Entries</div></div>
           <div class="dealer-stat"><div class="dealer-stat-val" id="gs-sold">—</div><div class="dealer-stat-lbl">Sold</div></div>
           <div class="dealer-stat"><div class="dealer-stat-val" id="gs-conv">—</div><div class="dealer-stat-lbl">Conv. Rate</div></div>
           <div class="dealer-stat"><div class="dealer-stat-val" id="gs-hot">—</div><div class="dealer-stat-lbl">Hot Leads</div></div>
         </div>
-        <div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;">
+        <div class="dealer-footer">
           <span class="status-badge s-active">● Active</span>
           <div style="display:flex;gap:8px;">
-            <a href="manager-dashboard.html" target="_blank" class="btn-outline btn-sm">View Dashboard</a>
-            <a href="service-to-sales-log.html" target="_blank" class="btn-dark btn-sm">View Form</a>
+            <a href="manager-dashboard.html" class="btn-outline btn-sm">Dashboard</a>
+            <a href="service-to-sales-log.html" class="btn-dark btn-sm">Form</a>
           </div>
         </div>
       </div>
-      <div class="dealer-card" style="border:2px dashed var(--border);background:transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;cursor:pointer;" onclick="openAddDealer()">
-        <div style="font-size:32px;margin-bottom:12px;">+</div>
-        <div style="font-family:'DM Serif Display',serif;font-size:16px;color:var(--subtext);">Add New Dealer</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:6px;">Onboard next ServiceBridge client</div>
+      <div class="dealer-add" onclick="openModal('dealer-modal')">
+        <div class="dealer-add-icon">+</div>
+        <div class="dealer-add-title">Add New Dealer</div>
+        <div class="dealer-add-sub">Onboard next ServiceBridge client</div>
       </div>
     </div>
   </div>
 
-  <!-- REP MANAGEMENT -->
+  <!-- ═══ REP MANAGEMENT ═══ -->
   <div class="tab-panel" id="tab-reps">
     <div class="sh">
       <div><div class="sh-title">Rep Management</div><div class="sh-desc">Gallatin CDJR S2S Team</div></div>
-      <button class="btn-primary" onclick="openAddRep()">+ Add Rep</button>
+      <button class="btn-primary" onclick="openModal('rep-modal')">+ Add Rep</button>
     </div>
     <div class="card">
       <div id="alert-rep" class="alert"></div>
@@ -363,89 +404,68 @@ select.form-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
     </div>
   </div>
 
-  <!-- EMAIL SETTINGS -->
+  <!-- ═══ EMAIL SETTINGS ═══ -->
   <div class="tab-panel" id="tab-emails">
     <div class="sh"><div><div class="sh-title">Email Notifications</div><div class="sh-desc">Alert and reporting configuration</div></div></div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">🔥 Hot Lead Alerts</div>
-        <p style="font-size:13px;color:var(--subtext);margin-bottom:18px;">Instant email when a buying temperature of 8, 9, or 10 is submitted. Sent to all recipients below.</p>
-        <div class="form-group">
-          <label class="form-label">Status</label>
-          <select class="form-input" id="hot-alert-status">
-            <option value="enabled">✅ Enabled</option>
-            <option value="disabled">❌ Disabled</option>
-          </select>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:16px;">Instant email when buying temp of 8+ is submitted.</p>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-input" id="hot-status"><option value="enabled">✅ Enabled</option><option value="disabled">❌ Disabled</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Trigger Threshold (Min Buying Temp)</label>
-          <select class="form-input" id="hot-threshold">
-            <option value="8">8+ (Hot leads only)</option>
-            <option value="7">7+ (Warm & hot)</option>
-            <option value="9">9+ (Very hot only)</option>
-          </select>
+        <div class="form-group"><label class="form-label">Trigger Threshold</label>
+          <select class="form-input" id="hot-threshold"><option value="8">8+ (Hot leads only)</option><option value="7">7+ (Warm & hot)</option><option value="9">9+ (Very hot only)</option></select>
         </div>
-        <button class="btn-primary" onclick="saveHotAlertSettings()">Save Settings</button>
+        <button class="btn-primary" onclick="alert('Hot lead alert settings saved.')">Save Settings</button>
       </div>
       <div class="card">
         <div class="card-title">📅 Daily Summary Report</div>
-        <p style="font-size:13px;color:var(--subtext);margin-bottom:18px;">Morning email with previous day's S2S activity, outcomes, top leads, and team performance.</p>
-        <div class="form-group">
-          <label class="form-label">Status</label>
-          <select class="form-input" id="daily-status">
-            <option value="enabled">✅ Enabled</option>
-            <option value="disabled">❌ Disabled</option>
-          </select>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:16px;">Morning email with previous day's S2S activity.</p>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-input" id="daily-status"><option value="enabled">✅ Enabled</option><option value="disabled">❌ Disabled</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Send Time (CT)</label>
-          <select class="form-input" id="daily-time">
-            <option value="9:00">9:00 AM CT</option>
-            <option value="7:00">7:00 AM CT</option>
-            <option value="8:00">8:00 AM CT</option>
-            <option value="10:00">10:00 AM CT</option>
-          </select>
+        <div class="form-group"><label class="form-label">Send Time (CT)</label>
+          <select class="form-input" id="daily-time"><option value="9:00">9:00 AM CT</option><option value="7:00">7:00 AM CT</option><option value="8:00">8:00 AM CT</option><option value="10:00">10:00 AM CT</option></select>
         </div>
-        <button class="btn-primary" onclick="saveDailySettings()">Save Settings</button>
+        <button class="btn-primary" onclick="alert('Daily summary settings saved.')">Save Settings</button>
       </div>
     </div>
     <div class="card">
       <div class="card-title">📬 Notification Recipients</div>
-      <p style="font-size:13px;color:var(--subtext);margin-bottom:18px;">All emails below will receive hot lead alerts and daily summary reports.</p>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:14px;">All emails below receive hot lead alerts and daily reports.</p>
       <div id="recipients-list"></div>
-      <div style="display:flex;gap:10px;margin-top:16px;">
+      <div style="display:flex;gap:10px;margin-top:14px;">
         <input class="form-input" type="email" id="new-recipient" placeholder="Add email address..." style="flex:1;">
         <button class="btn-primary" onclick="addRecipient()">Add</button>
       </div>
     </div>
     <div class="card">
       <div class="card-title">🧪 Test Email System</div>
-      <p style="font-size:13px;color:var(--subtext);margin-bottom:18px;">Send a test email to verify the system is working correctly.</p>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <input class="form-input" type="email" id="test-email" placeholder="Send test to..." style="width:280px;" value="Rob.l@gallatincdjr.com">
-        <button class="btn-outline" onclick="sendTestEmail()">Send Test Email</button>
-        <button class="btn-dark" onclick="sendTestDailySummary()">Send Test Summary</button>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:14px;">Send a test to verify the system is working.</p>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input class="form-input" type="email" id="test-email" placeholder="Send test to..." style="width:260px;" value="Rob.l@gallatincdjr.com">
+        <button class="btn-outline" onclick="sendTestEmail()">Send Test Alert</button>
+        <button class="btn-dark" onclick="sendTestSummary()">Send Test Summary</button>
       </div>
-      <div id="test-result" class="alert" style="margin-top:14px;"></div>
+      <div id="test-result" class="alert" style="margin-top:12px;"></div>
     </div>
   </div>
 
-  <!-- DATA -->
+  <!-- ═══ DATA ═══ -->
   <div class="tab-panel" id="tab-data">
     <div class="sh">
       <div><div class="sh-title">Data Management</div><div class="sh-desc">View and manage all S2S entries</div></div>
-      <div style="display:flex;gap:10px;">
+      <div class="sh-actions">
         <button class="btn-dark" onclick="exportAllCSV()">⬇ Export All CSV</button>
         <button class="btn-red" onclick="confirmDeleteAll()">✕ Delete All</button>
       </div>
     </div>
-    <div class="card">
+    <div class="card" style="padding:0;overflow:hidden;">
       <div class="tbl-wrap">
         <table>
-          <thead><tr>
-            <th>ID</th><th>Date</th><th>Submitter</th><th>Customer</th><th>Outcome</th><th>Temp</th><th>Vehicle</th><th>Actions</th>
-          </tr></thead>
-          <tbody id="data-tbody"><tr><td colspan="8"><div class="loading"><span class="spinner"></span>Loading...</div></td></tr></tbody>
+          <thead><tr><th>ID</th><th>Date</th><th>Submitter</th><th>Customer</th><th>Outcome</th><th>Temp</th><th>Vehicle</th><th>Actions</th></tr></thead>
+          <tbody id="data-tbody"><tr><td colspan="8"><div class="loading"><span class="spinner"></span> Loading...</div></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -453,372 +473,290 @@ select.form-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
 
 </div>
 
-<!-- ADD DEALER MODAL -->
+<!-- ═══ ADD DEALER MODAL ═══ -->
 <div class="modal-overlay" id="dealer-modal">
   <div class="modal">
     <div class="modal-title">Add New Dealer</div>
-    <div class="modal-desc">Onboard a new ServiceBridge client. They'll get their own isolated data and branded dashboard.</div>
+    <div class="modal-desc">Onboard a new ServiceBridge client with their own isolated data.</div>
     <div class="form-group"><label class="form-label">Dealership Name</label><input class="form-input" id="new-dealer-name" placeholder="e.g. Nashville CDJR"></div>
     <div class="form-group"><label class="form-label">Dealer Group</label><input class="form-input" id="new-dealer-group" placeholder="e.g. WeAuto Group"></div>
     <div class="form-group"><label class="form-label">Primary Contact Email</label><input class="form-input" type="email" id="new-dealer-email" placeholder="manager@dealership.com"></div>
     <div class="form-group"><label class="form-label">City, State</label><input class="form-input" id="new-dealer-location" placeholder="Nashville, TN"></div>
     <div class="modal-actions">
-      <button class="btn-outline" onclick="closeModal('dealer-modal')">Cancel</button>
-      <button class="btn-primary" onclick="addDealer()">Create Dealer Account</button>
+      <button class="btn-outline" onclick="closeModalById('dealer-modal')">Cancel</button>
+      <button class="btn-primary" onclick="addDealer()">Create Dealer</button>
     </div>
   </div>
 </div>
 
-<!-- ADD REP MODAL -->
+<!-- ═══ ADD REP MODAL ═══ -->
 <div class="modal-overlay" id="rep-modal">
   <div class="modal">
     <div class="modal-title">Add Rep</div>
     <div class="modal-desc">Add a new salesperson to the Gallatin CDJR S2S team.</div>
     <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="new-rep-name" placeholder="e.g. John Smith"></div>
-    <div class="form-group"><label class="form-label">Role</label><select class="form-input" id="new-rep-role"><option>Sales</option><option>S2S Manager</option><option>Finance Manager</option></select></div>
+    <div class="form-group"><label class="form-label">Role</label>
+      <select class="form-input" id="new-rep-role"><option>Sales</option><option>S2S Manager</option><option>Finance Manager</option></select>
+    </div>
     <div class="modal-actions">
-      <button class="btn-outline" onclick="closeModal('rep-modal')">Cancel</button>
+      <button class="btn-outline" onclick="closeModalById('rep-modal')">Cancel</button>
       <button class="btn-primary" onclick="addRep()">Add Rep</button>
     </div>
   </div>
 </div>
 
 <script>
-const SB_URL  = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
-const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
-const HEADERS = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+const SB_URL='https://jbkgwtohwsbaorhvuuqb.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
+const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 
-let RECIPIENTS = ['Rob.l@gallatincdjr.com','Tyler.d@gallatincdjr.com','Joe.s@gallatincdjr.com','Jbarba@weauto.us','dominick.f@gallatincdjr.com','Mich.s@gallatincdjr.com'];
-let REPS = [{name:'Tyler Doyle',role:'S2S Manager'},{name:'Andrew Kirk',role:'Sales'},{name:'DJ Rogers',role:'Sales'},{name:'Kody McCann',role:'Sales'}];
-let ALL_ENTRIES = [];
-let emailLog = [];
+let RECIPIENTS=['Rob.l@gallatincdjr.com','Tyler.d@gallatincdjr.com','Joe.s@gallatincdjr.com','Jbarba@weauto.us','dominick.f@gallatincdjr.com','Mich.s@gallatincdjr.com'];
+let REPS=[{name:'Tyler Doyle',role:'S2S Manager',color:'linear-gradient(135deg,#D4A73A,#F59E0B)'},{name:'Andrew Kirk',role:'Sales',color:'linear-gradient(135deg,#6C70F0,#A855F7)'},{name:'DJ Rogers',role:'Sales',color:'linear-gradient(135deg,#2DD4A0,#14B8A6)'},{name:'Kody McCann',role:'Sales',color:'linear-gradient(135deg,#E01B36,#F87171)'}];
+let ALL_ENTRIES=[];
+let emailLog=[];
 
-// ── Session & Nav ──────────────────────────────────────
-const currentRep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
+// ── Session & Nav ──
+const currentRep=JSON.parse(sessionStorage.getItem('sb_rep')||'null');
 (function initNav(){
-  if (!currentRep) return;
-  document.getElementById('nav-avatar').textContent = currentRep.initials || currentRep.name.slice(0,2).toUpperCase();
-  document.getElementById('nav-name').textContent = currentRep.name.split(' ')[0];
-  document.getElementById('dd-name').textContent = currentRep.name;
+  if(!currentRep) return;
+  document.getElementById('nav-avatar').textContent=currentRep.initials||currentRep.name.slice(0,2).toUpperCase();
+  document.getElementById('nav-name').textContent=currentRep.name.split(' ')[0];
+  document.getElementById('dd-name').textContent=currentRep.name;
 })();
 
-// ── Hamburger ──────────────────────────────────────────
-function toggleMenu(e){
-  e.stopPropagation();
-  document.getElementById('hamburger').classList.toggle('open');
-  document.getElementById('nav-dropdown').classList.toggle('open');
+function toggleMenu(){
+  const hb=document.getElementById('hamburger'),dd=document.getElementById('nav-dropdown'),ov=document.getElementById('nav-overlay');
+  const isOpen=dd.classList.contains('open');
+  hb.classList.toggle('open',!isOpen);dd.classList.toggle('open',!isOpen);ov.classList.toggle('open',!isOpen);
 }
-document.addEventListener('click', () => {
+function closeMenu(){
   document.getElementById('hamburger').classList.remove('open');
   document.getElementById('nav-dropdown').classList.remove('open');
-});
-document.getElementById('nav-dropdown').addEventListener('click', e => e.stopPropagation());
+  document.getElementById('nav-overlay').classList.remove('open');
+}
+function signOut(){sessionStorage.removeItem('sb_rep');window.location.replace('/login.html');}
 
-function signOut(){
-  sessionStorage.removeItem('sb_rep');
-  window.location.replace('/login.html');
+// ── Tabs ──
+function showTab(id,el){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
 }
 
-// ── Init ───────────────────────────────────────────────
+// ── Init ──
 async function init(){
   await loadEntries();
-  renderOverview();
-  renderReps();
-  renderRecipients();
-  renderDataTable();
-  updateDealerStats();
-  document.getElementById('overview-sync').textContent = `Last updated: ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}`;
+  renderOverview();renderReps();renderRecipients();renderDataTable();updateDealerStats();
+  document.getElementById('overview-sync').textContent='Last sync: '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
 }
 
 async function loadEntries(){
-  try{
-    const res = await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=1000`, {headers:HEADERS});
-    if (res.ok) ALL_ENTRIES = await res.json();
-  } catch(e){ console.error(e); }
+  try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=1000`,{headers:H});if(res.ok)ALL_ENTRIES=await res.json();}catch(e){console.error(e);}
 }
 
-// ── Overview ───────────────────────────────────────────
+// ── Overview ──
 function renderOverview(){
-  const n = ALL_ENTRIES.length;
-  const sold = ALL_ENTRIES.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used'))).length;
-  const hot = ALL_ENTRIES.filter(e=>parseInt(e.eng_score)>=8).length;
-  document.getElementById('kpi-entries').textContent = n;
-  document.getElementById('kpi-sold').textContent = sold;
-  document.getElementById('kpi-hot').textContent = hot;
-  const recent = ALL_ENTRIES.slice(0,5);
-  document.getElementById('recent-entries-list').innerHTML = recent.length ? recent.map(e=>`
+  const n=ALL_ENTRIES.length;
+  const sold=ALL_ENTRIES.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used'))).length;
+  const hot=ALL_ENTRIES.filter(e=>parseInt(e.eng_score)>=8).length;
+  document.getElementById('kpi-entries').textContent=n;
+  document.getElementById('kpi-sold').textContent=sold;
+  document.getElementById('kpi-hot').textContent=hot;
+  const recent=ALL_ENTRIES.slice(0,6);
+  document.getElementById('recent-list').innerHTML=recent.length?recent.map(e=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
-      <div><div style="font-weight:600;font-size:13px;">${e.first_name||''} ${e.last_name||''}</div>
-      <div style="font-size:11px;color:var(--muted);">${e.submitter||'—'} · ${e.timestamp||'—'}</div></div>
+      <div><div style="font-weight:700;font-size:13px;color:var(--text);">${e.first_name||''} ${e.last_name||''}</div>
+      <div style="font-size:11px;color:var(--text3);">${e.submitter||'—'} · ${e.timestamp||'—'}</div></div>
       <div style="text-align:right;">
-        <div style="font-size:11px;font-weight:600;color:${e.outcome&&e.outcome.includes('Sold')?'var(--green-mid)':e.outcome==='Follow-Up Required'?'var(--gold)':'var(--muted)'};">${e.outcome||'—'}</div>
-        <div style="font-size:11px;color:var(--muted);">Temp: ${e.eng_score||'—'}</div>
+        <div style="font-size:11px;font-weight:700;color:${e.outcome&&e.outcome.includes('Sold')?'var(--green)':e.outcome==='Follow-Up Required'?'var(--gold)':'var(--text3)'};">${e.outcome||'—'}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">Temp: ${e.eng_score||'—'}</div>
       </div>
-    </div>`).join('') : `<div style="text-align:center;padding:30px;color:var(--muted);">No entries yet</div>`;
+    </div>`).join(''):'<div style="text-align:center;padding:30px;color:var(--text3);">No entries yet</div>';
 }
 
 function updateDealerStats(){
-  const n = ALL_ENTRIES.length;
-  const sold = ALL_ENTRIES.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used'))).length;
-  const hot = ALL_ENTRIES.filter(e=>parseInt(e.eng_score)>=8).length;
-  document.getElementById('gs-entries').textContent = n;
-  document.getElementById('gs-sold').textContent = sold;
-  document.getElementById('gs-conv').textContent = n ? Math.round((sold/n)*100)+'%' : '0%';
-  document.getElementById('gs-hot').textContent = hot;
+  const n=ALL_ENTRIES.length;
+  const sold=ALL_ENTRIES.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used'))).length;
+  const hot=ALL_ENTRIES.filter(e=>parseInt(e.eng_score)>=8).length;
+  document.getElementById('gs-entries').textContent=n;
+  document.getElementById('gs-sold').textContent=sold;
+  document.getElementById('gs-conv').textContent=n?Math.round((sold/n)*100)+'%':'0%';
+  document.getElementById('gs-hot').textContent=hot;
 }
 
-// ── Rep Management ─────────────────────────────────────
+// ── Rep Management ──
 function renderReps(){
-  document.getElementById('reps-list').innerHTML = REPS.map((r,i)=>`
+  document.getElementById('reps-list').innerHTML=REPS.map((r,i)=>`
     <div class="rep-row">
-      <div class="rep-info"><div class="rep-name-lg">${r.name}</div><div class="rep-meta">${r.role} · Gallatin CDJR</div></div>
+      <div class="rep-info">
+        <div class="rep-avatar" style="background:${r.color||'var(--surface3)'};">${r.name.split(' ').map(w=>w[0]).join('')}</div>
+        <div><div class="rep-name-lg">${r.name}</div><div class="rep-meta">${r.role} · Gallatin CDJR</div></div>
+      </div>
       <div class="rep-actions">
-        <span style="font-size:11px;color:var(--muted);">Entries: ${ALL_ENTRIES.filter(e=>e.submitter===r.name).length}</span>
+        <span class="rep-count">${ALL_ENTRIES.filter(e=>e.submitter===r.name).length} entries</span>
         <button class="btn-red btn-sm" onclick="removeRep(${i})">Remove</button>
       </div>
     </div>`).join('');
 }
-function openAddRep(){ document.getElementById('rep-modal').classList.add('open'); }
-function addRep(){
-  const name = document.getElementById('new-rep-name').value.trim();
-  const role = document.getElementById('new-rep-role').value;
-  if (!name){ alert('Enter a name.'); return; }
-  REPS.push({name,role});
-  renderReps(); closeModal('rep-modal');
-  document.getElementById('new-rep-name').value = '';
-  showAlert('rep','Rep added successfully. Update the form HTML to include this rep.',true);
-}
-function removeRep(i){
-  if (!confirm(`Remove ${REPS[i].name}?`)) return;
-  REPS.splice(i,1); renderReps();
-}
 
-// ── Email / Recipients ─────────────────────────────────
+function addRep(){
+  const name=document.getElementById('new-rep-name').value.trim();
+  const role=document.getElementById('new-rep-role').value;
+  if(!name){alert('Enter a name.');return;}
+  REPS.push({name,role,color:'linear-gradient(135deg,var(--blue),var(--purple))'});
+  renderReps();closeModalById('rep-modal');document.getElementById('new-rep-name').value='';
+  showAlert('rep','Rep added successfully. Update the S2S form HTML to include this rep.',true);
+}
+function removeRep(i){if(!confirm(`Remove ${REPS[i].name}?`))return;REPS.splice(i,1);renderReps();}
+
+// ── Email Recipients ──
 function renderRecipients(){
-  document.getElementById('recipients-list').innerHTML = RECIPIENTS.map((r,i)=>`
+  document.getElementById('recipients-list').innerHTML=RECIPIENTS.map((r,i)=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
-      <span style="font-size:13px;">${r}</span>
+      <span style="font-size:13px;color:var(--text);">${r}</span>
       <button class="btn-red btn-sm" onclick="removeRecipient(${i})">Remove</button>
     </div>`).join('');
 }
 function addRecipient(){
-  const v = document.getElementById('new-recipient').value.trim();
-  if (!v||!v.includes('@')){ alert('Enter a valid email.'); return; }
-  RECIPIENTS.push(v); renderRecipients();
-  document.getElementById('new-recipient').value = '';
+  const v=document.getElementById('new-recipient').value.trim();
+  if(!v||!v.includes('@')){alert('Enter a valid email.');return;}
+  RECIPIENTS.push(v);renderRecipients();document.getElementById('new-recipient').value='';
 }
-function removeRecipient(i){ RECIPIENTS.splice(i,1); renderRecipients(); }
-function saveHotAlertSettings(){ alert('Hot lead alert settings saved.'); }
-function saveDailySettings(){ alert('Daily summary settings saved.'); }
+function removeRecipient(i){RECIPIENTS.splice(i,1);renderRecipients();}
 
-// ── Email Sending ──────────────────────────────────────
-async function sendEmail(to, subject, html){
+// ── Email Sending ──
+async function sendEmail(to,subject,html){
   try{
-    const res = await fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:Array.isArray(to)?to:[to],subject,html})});
-    const data = await res.json();
-    addEmailLog(subject, data.success?'sent':'failed');
-    return data.success ? {success:true,id:data.id} : {success:false,error:data.error};
-  } catch(err){
-    addEmailLog(subject,'failed');
-    return {success:false,error:err.message};
-  }
+    const res=await fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:Array.isArray(to)?to:[to],subject,html})});
+    const data=await res.json();
+    addEmailLog(subject,data.success?'sent':'failed');
+    return data.success?{success:true}:{success:false,error:data.error};
+  }catch(err){addEmailLog(subject,'failed');return{success:false,error:err.message};}
 }
 
-function addEmailLog(subject, status){
+function addEmailLog(subject,status){
   emailLog.unshift({subject,status,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})});
-  const el = document.getElementById('email-log-list');
-  if (el) el.innerHTML = emailLog.slice(0,8).map(e=>`
-    <div class="email-log-row">
-      <div class="email-dot ${e.status==='sent'?'dot-daily':'dot-hot'}"></div>
-      <div class="email-log-info">
-        <div class="email-log-subject">${e.subject}</div>
-        <div class="email-log-meta">${e.status==='sent'?'✓ Sent':'✗ Failed'} · ${e.time}</div>
-      </div>
-    </div>`).join('');
+  const el=document.getElementById('email-log');
+  if(el)el.innerHTML=emailLog.slice(0,8).map(e=>`
+    <div class="email-log-row"><div class="email-dot ${e.status==='sent'?'dot-daily':'dot-hot'}"></div><div><div class="email-log-subject">${e.subject}</div><div class="email-log-meta">${e.status==='sent'?'✓ Sent':'✗ Failed'} · ${e.time}</div></div></div>`).join('');
 }
 
 async function sendTestEmail(){
-  const to = document.getElementById('test-email').value;
-  const result = document.getElementById('test-result');
-  result.className='alert show'; result.style.display='block'; result.textContent='Sending...';
-  const html = buildHotLeadEmail({
-    first_name:'Test',last_name:'Customer',phone:'(615) 555-0100',
-    veh_year:'2019',veh_make:'Ram',veh_model:'1500',veh_miles:'62000',
-    eng_score:9,outcome:'Follow-Up Required',submitter:'Tyler Doyle',
-    visit_reason:'Major Mechanical Repair',repair_cost:'$3,200',
-    trade_equity:'Positive Equity',timeline:'Within 30 Days',notes:'Test alert from ServiceBridge Admin',
-    timestamp:new Date().toLocaleString()
-  });
-  const res = await sendEmail(to,'🔥 [TEST] Hot Lead Alert — ServiceBridge',html);
-  result.className = `alert alert-${res.success?'success':'error'} show`;
-  result.textContent = res.success ? '✓ Test email sent successfully! Check your inbox.' : `✗ Failed: ${res.error}. DNS may still be propagating — try again in a few minutes.`;
+  const to=document.getElementById('test-email').value;
+  const result=document.getElementById('test-result');
+  result.className='alert show';result.style.display='block';result.textContent='Sending...';result.style.color='var(--text2)';result.style.background='var(--surface2)';result.style.borderColor='var(--border2)';
+  const html=buildHotLeadEmail({first_name:'Test',last_name:'Customer',phone:'(615) 555-0100',veh_year:'2019',veh_make:'Ram',veh_model:'1500',eng_score:9,outcome:'Follow-Up Required',submitter:'Tyler Doyle',visit_reason:'Major Mechanical Repair',repair_cost:'$3,200',trade_equity:'Positive Equity',timeline:'Within 30 Days',notes:'Test alert from Admin Console',timestamp:new Date().toLocaleString()});
+  const res=await sendEmail(to,'🔥 [TEST] Hot Lead Alert — ServiceBridge',html);
+  result.className=`alert alert-${res.success?'success':'error'} show`;
+  result.textContent=res.success?'✓ Test email sent! Check your inbox.':'✗ Failed: '+(res.error||'Check API setup');
 }
 
-async function sendTestDailySummary(){
-  const to = document.getElementById('test-email').value;
-  const result = document.getElementById('test-result');
-  result.className='alert show'; result.style.display='block'; result.textContent='Sending daily summary test...';
-  const html = buildDailySummaryEmail(ALL_ENTRIES.slice(0,5));
-  const res = await sendEmail(to,'📊 [TEST] Daily S2S Summary — Gallatin CDJR',html);
-  result.className = `alert alert-${res.success?'success':'error'} show`;
-  result.textContent = res.success ? '✓ Daily summary test sent! Check your inbox.' : `✗ Failed: ${res.error}. DNS may still be propagating.`;
+async function sendTestSummary(){
+  const to=document.getElementById('test-email').value;
+  const result=document.getElementById('test-result');
+  result.className='alert show';result.style.display='block';result.textContent='Sending summary...';result.style.color='var(--text2)';result.style.background='var(--surface2)';result.style.borderColor='var(--border2)';
+  const html=buildDailySummaryEmail(ALL_ENTRIES.slice(0,5));
+  const res=await sendEmail(to,'📊 [TEST] Daily S2S Summary — Gallatin CDJR',html);
+  result.className=`alert alert-${res.success?'success':'error'} show`;
+  result.textContent=res.success?'✓ Summary sent! Check your inbox.':'✗ Failed: '+(res.error||'Check API setup');
 }
 
-// ── Email Templates (preserved exactly) ───────────────
+// ── Email Templates ──
 function buildHotLeadEmail(e){
-  const tempColor=parseInt(e.eng_score)>=9?'#C8102E':parseInt(e.eng_score)>=8?'#C49A2A':'#166534';
-  return`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#F5F4F1;font-family:'Helvetica Neue',Arial,sans-serif;">
-<div style="max-width:600px;margin:0 auto;padding:24px 16px;">
-  <div style="background:#0C0C14;border-radius:12px 12px 0 0;padding:24px 28px;background-image:linear-gradient(135deg,#0C0C14 0%,#1a1a2e 100%);">
-    <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Vyaxis · ServiceBridge</div>
-    <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">🔥 Hot Lead Alert</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.5);">Gallatin CDJR · Service Drive</div>
-  </div>
-  <div style="background:#fff;padding:28px;border-left:1px solid #E4E2DC;border-right:1px solid #E4E2DC;">
-    <div style="display:inline-block;background:${tempColor};color:#fff;border-radius:6px;padding:6px 16px;font-size:13px;font-weight:700;margin-bottom:20px;">🌡 Buying Temperature: ${e.eng_score}/10</div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;width:40%;">Customer</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;font-weight:600;">${e.first_name} ${e.last_name}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Phone</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${e.phone||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Vehicle</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''} ${e.veh_miles?'· '+Number(e.veh_miles).toLocaleString()+' mi':''}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Visit Reason</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${e.visit_reason||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Repair Cost</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${e.repair_cost||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Equity</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${e.trade_equity||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Timeline</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${e.timeline||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Logged By</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${e.submitter||'—'}</td></tr>
-      <tr><td style="padding:8px 0;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Outcome</td><td style="padding:8px 0;font-size:13px;font-weight:600;color:#C49A2A;">${e.outcome||'—'}</td></tr>
-    </table>
-    ${e.notes?`<div style="background:#F5F4F1;border-radius:6px;padding:14px 16px;margin-bottom:20px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;margin-bottom:6px;">Notes</div><div style="font-size:13px;">${e.notes}</div></div>`:''}
-    <a href="https://servicebridge.vyaxis.com/manager-dashboard.html" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;border-radius:6px;padding:12px 24px;font-size:13px;font-weight:600;letter-spacing:0.04em;">View in Dashboard →</a>
-  </div>
-  <div style="background:#EDECEA;border:1px solid #E4E2DC;border-top:none;border-radius:0 0 12px 12px;padding:16px 28px;text-align:center;">
-    <div style="font-size:11px;color:#8C897F;">ServiceBridge by Vyaxis · Gallatin CDJR · ${e.timestamp||new Date().toLocaleString()}</div>
-  </div>
-</div></body></html>`;
+  const tc=parseInt(e.eng_score)>=9?'#C8102E':'#C49A2A';
+  return`<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F5F4F1;font-family:Arial,sans-serif;"><div style="max-width:600px;margin:0 auto;padding:24px 16px;"><div style="background:#0C0C14;border-radius:12px 12px 0 0;padding:24px 28px;"><div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Vyaxis · ServiceBridge</div><div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">🔥 Hot Lead Alert</div><div style="font-size:13px;color:rgba(255,255,255,0.5);">Gallatin CDJR · Service Drive</div></div><div style="background:#fff;padding:28px;border-left:1px solid #E4E2DC;border-right:1px solid #E4E2DC;"><div style="display:inline-block;background:${tc};color:#fff;border-radius:6px;padding:6px 16px;font-size:13px;font-weight:700;margin-bottom:20px;">🌡 Buying Temp: ${e.eng_score}/10</div><table style="width:100%;border-collapse:collapse;">${[['Customer',`${e.first_name} ${e.last_name}`],['Phone',e.phone||'—'],['Vehicle',`${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''}`],['Visit Reason',e.visit_reason||'—'],['Repair Cost',e.repair_cost||'—'],['Equity',e.trade_equity||'—'],['Timeline',e.timeline||'—'],['Logged By',e.submitter||'—'],['Outcome',e.outcome||'—']].map(([k,v])=>`<tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;width:35%;">${k}</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${v}</td></tr>`).join('')}</table>${e.notes?`<div style="background:#F5F4F1;border-radius:6px;padding:14px 16px;margin-top:16px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;margin-bottom:6px;">Notes</div><div style="font-size:13px;">${e.notes}</div></div>`:''}<div style="margin-top:20px;"><a href="https://servicebridge.vyaxis.com/manager-dashboard.html" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;border-radius:6px;padding:12px 24px;font-size:13px;font-weight:600;">View in Dashboard →</a></div></div><div style="background:#EDECEA;border:1px solid #E4E2DC;border-top:none;border-radius:0 0 12px 12px;padding:16px 28px;text-align:center;"><div style="font-size:11px;color:#8C897F;">ServiceBridge by Vyaxis · Gallatin CDJR · ${e.timestamp||new Date().toLocaleString()}</div></div></div></body></html>`;
 }
 
 function buildDailySummaryEmail(entries){
-  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-  const dateStr=yesterday.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   const n=entries.length,sold=entries.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used'))).length;
-  const appts=entries.filter(e=>e.outcome==='Appointment Set').length,fu=entries.filter(e=>e.outcome==='Follow-Up Required').length,hot=entries.filter(e=>parseInt(e.eng_score)>=8).length;
-  const conv=n?Math.round((sold/n)*100):0,temps=entries.map(e=>parseInt(e.eng_score)).filter(t=>!isNaN(t));
-  const avgTemp=temps.length?(temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1):'—';
-  return`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#F5F4F1;font-family:'Helvetica Neue',Arial,sans-serif;">
-<div style="max-width:600px;margin:0 auto;padding:24px 16px;">
-  <div style="background:#0C0C14;border-radius:12px 12px 0 0;padding:24px 28px;">
-    <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Vyaxis · ServiceBridge</div>
-    <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">📊 Daily S2S Summary</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.5);">Gallatin CDJR · ${dateStr}</div>
-  </div>
-  <div style="background:#fff;padding:28px;border-left:1px solid #E4E2DC;border-right:1px solid #E4E2DC;">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px;">
-      ${[['Total Entries',n,'#0C0C14'],['Vehicles Sold',sold,'#166534'],['Appts Set',appts,'#1E3A8A'],['Follow-Ups',fu,'#C49A2A'],['Hot Leads (8+)',hot,'#C8102E'],['Avg Buy Temp',avgTemp,'#7C3AED']].map(([l,v,c])=>`<div style="background:#F5F4F1;border-radius:8px;padding:14px;text-align:center;"><div style="font-size:24px;font-weight:700;color:${c};font-family:Georgia,serif;">${v}</div><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;margin-top:4px;">${l}</div></div>`).join('')}
-    </div>
-    <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#0C0C14;">Conversion Rate: ${conv}%</div>
-    ${n>0?`<table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-      <tr style="background:#0C0C14;"><th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Customer</th>
-      <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Rep</th>
-      <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Temp</th>
-      <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Outcome</th></tr>
-      ${entries.slice(0,8).map((e,i)=>`<tr style="background:${i%2?'#FAFAF8':'#fff'};"><td style="padding:8px 12px;font-size:12px;">${e.first_name||''} ${e.last_name||''}</td><td style="padding:8px 12px;font-size:12px;">${e.submitter||'—'}</td><td style="padding:8px 12px;font-size:12px;font-weight:700;">${e.eng_score||'—'}</td><td style="padding:8px 12px;font-size:12px;">${e.outcome||'—'}</td></tr>`).join('')}
-    </table>`:`<div style="text-align:center;padding:30px;color:#8C897F;">No entries logged yesterday.</div>`}
-    <a href="https://servicebridge.vyaxis.com/manager-dashboard.html" style="display:inline-block;background:#0C0C14;color:#fff;text-decoration:none;border-radius:6px;padding:12px 24px;font-size:13px;font-weight:600;">Open Full Dashboard →</a>
-  </div>
-  <div style="background:#EDECEA;border:1px solid #E4E2DC;border-top:none;border-radius:0 0 12px 12px;padding:16px 28px;text-align:center;">
-    <div style="font-size:11px;color:#8C897F;">ServiceBridge by Vyaxis · Daily report sent at 9:00 AM CT</div>
-  </div>
-</div></body></html>`;
+  const appts=entries.filter(e=>e.outcome==='Appointment Set').length,hot=entries.filter(e=>parseInt(e.eng_score)>=8).length;
+  const temps=entries.map(e=>parseInt(e.eng_score)).filter(t=>!isNaN(t));
+  const avg=temps.length?(temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1):'—';
+  return`<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F5F4F1;font-family:Arial,sans-serif;"><div style="max-width:600px;margin:0 auto;padding:24px 16px;"><div style="background:#0C0C14;border-radius:12px 12px 0 0;padding:24px 28px;"><div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Vyaxis · ServiceBridge</div><div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">📊 Daily S2S Summary</div></div><div style="background:#fff;padding:28px;border-left:1px solid #E4E2DC;border-right:1px solid #E4E2DC;"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px;">${[['Total',n,'#0C0C14'],['Sold',sold,'#166534'],['Appts',appts,'#1E3A8A'],['Follow-Ups',entries.filter(e=>e.outcome==='Follow-Up Required').length,'#C49A2A'],['Hot (8+)',hot,'#C8102E'],['Avg Temp',avg,'#7C3AED']].map(([l,v,c])=>`<div style="background:#F5F4F1;border-radius:8px;padding:14px;text-align:center;"><div style="font-size:24px;font-weight:700;color:${c};">${v}</div><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;margin-top:4px;">${l}</div></div>`).join('')}</div>${n>0?`<table style="width:100%;border-collapse:collapse;"><tr style="background:#0C0C14;"><th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Customer</th><th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Rep</th><th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Temp</th><th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Outcome</th></tr>${entries.slice(0,8).map((e,i)=>`<tr style="background:${i%2?'#FAFAF8':'#fff'};"><td style="padding:8px 12px;font-size:12px;">${e.first_name||''} ${e.last_name||''}</td><td style="padding:8px 12px;font-size:12px;">${e.submitter||'—'}</td><td style="padding:8px 12px;font-size:12px;font-weight:700;">${e.eng_score||'—'}</td><td style="padding:8px 12px;font-size:12px;">${e.outcome||'—'}</td></tr>`).join('')}</table>`:'<div style="text-align:center;padding:30px;color:#8C897F;">No entries.</div>'}<div style="margin-top:20px;"><a href="https://servicebridge.vyaxis.com/manager-dashboard.html" style="display:inline-block;background:#0C0C14;color:#fff;text-decoration:none;border-radius:6px;padding:12px 24px;font-size:13px;font-weight:600;">Open Dashboard →</a></div></div><div style="background:#EDECEA;border:1px solid #E4E2DC;border-top:none;border-radius:0 0 12px 12px;padding:16px 28px;text-align:center;"><div style="font-size:11px;color:#8C897F;">ServiceBridge · Daily report · 9:00 AM CT</div></div></div></body></html>`;
 }
 
-// ── Data Table ─────────────────────────────────────────
+// ── Data Table ──
 function renderDataTable(){
-  const tbody = document.getElementById('data-tbody');
-  if (!ALL_ENTRIES.length){ tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted);">No entries yet</td></tr>`; return; }
-  tbody.innerHTML = ALL_ENTRIES.map(e=>`<tr>
-    <td style="color:var(--muted);">${e.id}</td>
-    <td style="font-size:11px;">${e.timestamp||'—'}</td>
-    <td style="font-weight:600;">${e.submitter||'—'}</td>
-    <td>${e.first_name||''} ${e.last_name||''}</td>
-    <td>${e.outcome||'—'}</td>
-    <td style="font-weight:700;">${e.eng_score||'—'}</td>
+  const tbody=document.getElementById('data-tbody');
+  if(!ALL_ENTRIES.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text3);">No entries yet</td></tr>';return;}
+  tbody.innerHTML=ALL_ENTRIES.map(e=>`<tr>
+    <td>${e.id}</td>
+    <td style="font-size:11px;color:var(--text2);">${e.timestamp||'—'}</td>
+    <td style="font-weight:700;color:var(--text);">${e.submitter||'—'}</td>
+    <td style="color:var(--text);">${e.first_name||''} ${e.last_name||''}</td>
+    <td><span style="font-size:11px;font-weight:700;color:${e.outcome&&e.outcome.includes('Sold')?'var(--green)':e.outcome==='Follow-Up Required'?'var(--gold)':'var(--text2)'};">${e.outcome||'—'}</span></td>
+    <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${parseInt(e.eng_score)>=8?'#F87171':parseInt(e.eng_score)>=5?'var(--gold)':'var(--text3)'};">${e.eng_score||'—'}</td>
     <td style="font-size:11px;">${[e.veh_year,e.veh_make,e.veh_model].filter(Boolean).join(' ')||'—'}</td>
     <td><button class="btn-red btn-sm" onclick="deleteEntry(${e.id})">Delete</button></td>
   </tr>`).join('');
 }
 
 async function deleteEntry(id){
-  if (!confirm(`Delete entry #${id}?`)) return;
-  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${id}`,{method:'DELETE',headers:HEADERS});
-  ALL_ENTRIES = ALL_ENTRIES.filter(e=>e.id!==id);
-  renderDataTable(); renderOverview(); updateDealerStats();
+  if(!confirm(`Delete entry #${id}?`))return;
+  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${id}`,{method:'DELETE',headers:H});
+  ALL_ENTRIES=ALL_ENTRIES.filter(e=>e.id!==id);
+  renderDataTable();renderOverview();updateDealerStats();
+}
+
+// ── Exports ──
+function toCSV(rows,headers){
+  const esc=v=>{if(v==null)return'';const s=String(v).replace(/"/g,'""');return s.includes(',')||s.includes('"')||s.includes('\n')?`"${s}"`:s;};
+  return[headers.join(','),...rows.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\n');
 }
 
 function exportAllCSV(){
-  if (!ALL_ENTRIES.length){ alert('No entries.'); return; }
-  const keys = Object.keys(ALL_ENTRIES[0]);
-  const blob = new Blob([[keys.join(','),...ALL_ENTRIES.map(e=>keys.map(k=>`"${(e[k]??'').toString().replace(/"/g,'""')}"`).join(','))].join('\n')],{type:'text/csv'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `ServiceBridge_AllData_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  if(!ALL_ENTRIES.length)return alert('No entries.');
+  const keys=Object.keys(ALL_ENTRIES[0]);
+  const blob=new Blob([[keys.join(','),...ALL_ENTRIES.map(e=>keys.map(k=>`"${(e[k]??'').toString().replace(/"/g,'""')}"`).join(','))].join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`ServiceBridge_AllData_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+async function adminExportCSV(){
+  const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=2000`,{headers:H});
+  const data=await res.json();
+  if(!data.length)return alert('No entries found.');
+  const hdrs=['id','submitter','first_name','last_name','phone','email','veh_year','veh_make','veh_model','repair_cost','eng_score','outcome','followup_status','manager_outcome','manager_claimed_by','manager_notes','notes','created_at'];
+  const blob=new Blob([toCSV(data,hdrs)],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`s2s-entries-${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+async function adminExportPDF(){
+  const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=2000`,{headers:H});
+  const data=await res.json();
+  if(!data.length)return alert('No entries found.');
+  const date=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const rows=data.map(e=>`<tr><td>${e.submitter||'—'}</td><td>${e.first_name||''} ${e.last_name||''}</td><td>${e.phone||'—'}</td><td>${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''}</td><td>${e.repair_cost?'$'+e.repair_cost:'—'}</td><td style="text-align:center;font-weight:700;">${e.eng_score||'—'}</td><td>${e.outcome||'—'}</td><td>${e.followup_status||'Pending'}</td><td>${e.created_at?new Date(e.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—'}</td></tr>`).join('');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>S2S Export</title><style>body{font-family:Arial,sans-serif;font-size:11px;padding:24px;}h1{font-size:18px;margin-bottom:4px;}.sub{color:#666;font-size:12px;margin-bottom:16px;}table{width:100%;border-collapse:collapse;}th{background:#0C0C14;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;}td{padding:7px 10px;border-bottom:1px solid #eee;}tr:nth-child(even) td{background:#f9f9f9;}</style></head><body><h1>ServiceBridge — S2S Entries</h1><div class="sub">Gallatin CDJR · Exported ${date} · ${data.length} entries</div><table><thead><tr><th>Rep</th><th>Customer</th><th>Phone</th><th>Vehicle</th><th>Repair $</th><th>Temp</th><th>Outcome</th><th>Follow-Up</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+  w.document.close();setTimeout(()=>w.print(),500);
 }
 
 async function confirmDeleteAll(){
-  if (!confirm('DELETE ALL entries from ALL dealers? This cannot be undone.')) return;
-  const code = prompt('Type CONFIRM:');
-  if (code !== 'CONFIRM'){ alert('Cancelled.'); return; }
-  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=gte.0`,{method:'DELETE',headers:HEADERS});
-  ALL_ENTRIES = []; renderDataTable(); renderOverview(); updateDealerStats();
+  if(!confirm('DELETE ALL entries? This cannot be undone.'))return;
+  const code=prompt('Type CONFIRM:');
+  if(code!=='CONFIRM'){alert('Cancelled.');return;}
+  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=gte.0`,{method:'DELETE',headers:H});
+  ALL_ENTRIES=[];renderDataTable();renderOverview();updateDealerStats();
 }
 
-// ── Dealers ────────────────────────────────────────────
-function openAddDealer(){ document.getElementById('dealer-modal').classList.add('open'); }
+// ── Dealers ──
 function addDealer(){
-  const name = document.getElementById('new-dealer-name').value.trim();
-  if (!name){ alert('Enter dealer name.'); return; }
-  alert(`Dealer "${name}" account created. Next step: clone the form and dashboard HTML, update the dealer_id field, and deploy to a new subdomain under vyaxis.com.`);
-  closeModal('dealer-modal');
+  const name=document.getElementById('new-dealer-name').value.trim();
+  if(!name){alert('Enter dealer name.');return;}
+  alert(`Dealer "${name}" created. Next: clone form/dashboard HTML, update dealer_id, deploy to subdomain.`);
+  closeModalById('dealer-modal');
 }
 
-// ── Utils ──────────────────────────────────────────────
-function showTab(id, el){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  el.classList.add('active');
-}
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-function showAlert(id, msg, success){
-  const el = document.getElementById('alert-'+id);
-  el.className = `alert ${success?'alert-success':'alert-error'} show`;
-  el.textContent = msg;
-  setTimeout(()=>el.classList.remove('show'), 4000);
+// ── Utils ──
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModalById(id){document.getElementById(id).classList.remove('open');}
+function showAlert(id,msg,success){
+  const el=document.getElementById('alert-'+id);
+  el.className=`alert ${success?'alert-success':'alert-error'} show`;
+  el.textContent=msg;setTimeout(()=>el.classList.remove('show'),4000);
 }
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
-
-// ── Export (preserved exactly) ─────────────────────────
-function toCSVAdmin(rows, headers){
-  const escape = v => { if(v==null)return''; const s=String(v).replace(/"/g,'""'); return s.includes(',')||s.includes('"')||s.includes('\n')?`"${s}"`:s; };
-  return [headers.join(','),...rows.map(r=>headers.map(h=>escape(r[h])).join(','))].join('\n');
-}
-function downloadCSVAdmin(csv, filename){
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download = filename; a.click();
-}
-async function adminExportS2SCSV(){
-  const res = await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=2000`,{headers:HEADERS});
-  const data = await res.json();
-  if (!data.length) return alert('No S2S entries found.');
-  const headers = ['id','submitter','first_name','last_name','phone','email','veh_year','veh_make','veh_model','repair_cost','eng_score','outcome','followup_status','manager_outcome','manager_claimed_by','manager_notes','notes','created_at'];
-  downloadCSVAdmin(toCSVAdmin(data,headers),`s2s-entries-${new Date().toISOString().slice(0,10)}.csv`);
-}
-async function adminExportS2SPDF(){
-  const res = await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=2000`,{headers:HEADERS});
-  const data = await res.json();
-  if (!data.length) return alert('No entries found.');
-  const date = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const rows = data.map(e=>`<tr><td>${e.submitter||'—'}</td><td>${e.first_name||''} ${e.last_name||''}</td><td>${e.phone||'—'}</td><td>${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''}</td><td>${e.repair_cost?'$'+e.repair_cost:'—'}</td><td style="text-align:center;font-weight:700;">${e.eng_score||'—'}</td><td>${e.outcome||'—'}</td><td>${e.followup_status||'Pending'}</td><td>${e.created_at?new Date(e.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—'}</td></tr>`).join('');
-  const html = `<!DOCTYPE html><html><head><title>S2S Export</title><style>body{font-family:Arial,sans-serif;font-size:11px;padding:24px;}h1{font-size:18px;margin-bottom:4px;}.sub{color:#666;font-size:12px;margin-bottom:16px;}table{width:100%;border-collapse:collapse;}th{background:#1a1a2e;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;}td{padding:7px 10px;border-bottom:1px solid #eee;}tr:nth-child(even) td{background:#f9f9f9;}@media print{body{padding:0;}}</style></head><body><h1>ServiceBridge — S2S Entries</h1><div class="sub">Gallatin CDJR · Exported ${date} · ${data.length} entries</div><table><thead><tr><th>Rep</th><th>Customer</th><th>Phone</th><th>Vehicle</th><th>Repair $</th><th>Temp</th><th>Outcome</th><th>Follow-Up</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
-  const w = window.open('','_blank'); w.document.write(html); w.document.close(); setTimeout(()=>w.print(),500);
-}
 
 init();
 </script>
