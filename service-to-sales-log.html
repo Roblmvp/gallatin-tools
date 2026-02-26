@@ -558,6 +558,33 @@ textarea { resize: vertical; min-height: 88px; line-height: 1.65; }
 .edit-toast.show{transform:translateX(-50%) translateY(0);}
 .edit-toast.green{border-color:rgba(34,197,94,0.4);color:#4ADE80;}
 .recent-entry{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#0F0F1A;border:1px solid rgba(255,255,255,0.09);border-radius:10px;margin-bottom:8px;}
+
+/* ── HAMBURGER NAV ── */
+.nav-hamburger-wrap{position:relative;}
+.hamburger{background:none;border:1px solid rgba(255,255,255,0.15);border-radius:8px;width:34px;height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:all 0.18s;padding:0;flex-shrink:0;}
+.hamburger:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.06);}
+.hamburger span{display:block;width:15px;height:1.5px;background:rgba(255,255,255,0.7);border-radius:2px;transition:all 0.2s;}
+.hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+.nav-overlay{position:fixed;inset:0;z-index:190;display:none;}
+.nav-overlay.open{display:block;}
+.nav-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#0F0F1A;border:1px solid rgba(255,255,255,0.13);border-radius:14px;min-width:220px;padding:6px;box-shadow:0 20px 60px rgba(0,0,0,0.7);z-index:201;opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;transition:all 0.18s cubic-bezier(0.16,1,0.3,1);}
+.nav-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+.dd-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:9px;font-size:13px;font-weight:600;color:rgba(238,232,255,0.5);text-decoration:none;cursor:pointer;transition:all 0.15s;}
+.dd-item:hover{background:rgba(255,255,255,0.05);color:#EEE8FF;}
+.dd-item.active{background:rgba(91,79,232,0.15);color:#7B72F0;}
+.dd-icon{font-size:15px;width:20px;text-align:center;}
+.dd-divider{height:1px;background:rgba(255,255,255,0.07);margin:4px 0;}
+.dd-admin{display:none;}
+.dd-admin.show{display:flex;}
+.nav-user-info{display:flex;align-items:center;gap:8px;padding:8px 14px 4px;}
+.nav-user-name{font-size:11px;font-weight:600;color:rgba(238,232,255,0.4);letter-spacing:0.06em;}
+.nav-role-pill{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:20px;}
+.role-admin{background:rgba(99,102,241,0.2);color:#818CF8;border:1px solid rgba(99,102,241,0.3);}
+.role-manager{background:rgba(196,154,42,0.15);color:#C49A2A;border:1px solid rgba(196,154,42,0.25);}
+.role-sales{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.15);}
+
 </style>
 </head>
 <body>
@@ -574,9 +601,27 @@ textarea { resize: vertical; min-height: 88px; line-height: 1.65; }
       <div class="header-title">Service → Sales Log</div>
       <div class="header-pill">Service Drive Operations</div>
     </div>
-    <div class="header-right">
+    <div class="header-right" style="position:relative;">
       <div class="header-date" id="hdr-date"></div>
       <div class="header-time" id="hdr-time"></div>
+      <div class="nav-hamburger-wrap">
+        <button class="hamburger" id="s2s-hamburger" onclick="toggleS2SMenu()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="nav-dropdown" id="s2s-dropdown">
+          <div class="nav-user-info">
+            <span class="nav-user-name" id="s2s-nav-user"></span>
+            <span class="nav-role-pill" id="s2s-nav-pill"></span>
+          </div>
+          <div class="dd-divider"></div>
+          <a href="app.html" class="dd-item"><span class="dd-icon">🏠</span> Home</a>
+          <a href="service-to-sales-log.html" class="dd-item active"><span class="dd-icon">📋</span> S2S Entry</a>
+          <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Performance Dashboard</a>
+          <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
+          <div class="dd-divider dd-admin" id="s2s-admin-divider"></div>
+          <a href="admin-panel.html" class="dd-item dd-admin" id="s2s-admin-link"><span class="dd-icon">⚙️</span> Admin Panel</a>
+        </div>
+      </div>
     </div>
     <div class="header-accent"></div>
   </div>
@@ -1020,15 +1065,6 @@ function submitLog(){
     body: JSON.stringify(entry)
   }).catch(err => console.warn('Supabase save failed:', err));
 
-  // ── PUSH NOTIFICATION ─────────────────────────────────────────────────
-  fetch('/api/push-notify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ entry })
-  }).catch(err => console.warn('Push notify failed:', err));
-
-
-
   // ── PUSH NOTIFICATION to all users ──────────────────────────────────
   const pushPayload = {
     title: `${score !== '—' ? (parseInt(score) >= 8 ? '🔥' : parseInt(score) >= 5 ? '🌡' : '📋') : '📋'} New S2S Entry — ${entry.first_name} ${entry.last_name}`,
@@ -1173,6 +1209,42 @@ function submitLog(){
 <div class="edit-toast" id="s2s-edit-toast"></div>
 
 
+
+
+<div class="nav-overlay" id="s2s-nav-overlay" onclick="closeS2SMenu()"></div>
+<script>
+function initS2SNav() {
+  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
+  if (!rep) return;
+  const nameEl = document.getElementById('s2s-nav-user');
+  const pillEl = document.getElementById('s2s-nav-pill');
+  if (nameEl) nameEl.textContent = rep.name ? rep.name.split(' ')[0] : '';
+  if (pillEl) {
+    const role = (rep.role || 'sales').toLowerCase();
+    pillEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+    pillEl.className = 'nav-role-pill ' + (role === 'admin' ? 'role-admin' : role === 'manager' ? 'role-manager' : 'role-sales');
+    if (role === 'admin') {
+      document.getElementById('s2s-admin-link').classList.add('show');
+      document.getElementById('s2s-admin-divider').classList.add('show');
+    }
+  }
+}
+function toggleS2SMenu() {
+  const hb = document.getElementById('s2s-hamburger');
+  const dd = document.getElementById('s2s-dropdown');
+  const ov = document.getElementById('s2s-nav-overlay');
+  const isOpen = dd.classList.contains('open');
+  hb.classList.toggle('open', !isOpen);
+  dd.classList.toggle('open', !isOpen);
+  ov.classList.toggle('open', !isOpen);
+}
+function closeS2SMenu() {
+  document.getElementById('s2s-hamburger').classList.remove('open');
+  document.getElementById('s2s-dropdown').classList.remove('open');
+  document.getElementById('s2s-nav-overlay').classList.remove('open');
+}
+initS2SNav();
+<\/script>
 
 </body></html>`;
 
