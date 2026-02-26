@@ -191,6 +191,26 @@ select {
 select option { background:var(--surface); }
 textarea { resize:vertical;min-height:88px;line-height:1.6; }
 
+/* ── Validation ── */
+.field-error input, .field-error select, .field-error textarea { border-color:var(--red) !important;background:rgba(224,27,54,0.04) !important; }
+.field-error .lbl { color:#F87171 !important; }
+.val-msg { font-size:11px;color:#F87171;font-weight:600;margin-top:2px;display:none;animation:fadeIn 0.2s ease; }
+.field-error .val-msg { display:block; }
+.score-error .score-wrap { outline:2px solid var(--red);border-radius:8px; }
+.score-error .val-msg { display:block; }
+.pills-error .pill-group { outline:2px solid var(--red);border-radius:8px; }
+.pills-error .val-msg { display:block; }
+.sub-error { padding:8px 14px;background:var(--red-soft);border:1px solid rgba(224,27,54,0.3);border-radius:var(--rsm);color:#F87171;font-size:12px;font-weight:600;margin-top:6px;display:none; }
+.sub-error.show { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(-4px);} to{opacity:1;transform:translateY(0);} }
+@keyframes shake { 0%,100%{transform:translateX(0);} 10%,30%,50%,70%,90%{transform:translateX(-4px);} 20%,40%,60%,80%{transform:translateX(4px);} }
+.shake { animation:shake 0.4s ease; }
+.btn-loading { pointer-events:none;opacity:0.7; }
+.btn-spinner { display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px; }
+@keyframes spin { to{transform:rotate(360deg);} }
+.toast-err { border-color:rgba(224,27,54,0.3) !important; }
+.toast-err .toast-dot { background:var(--red) !important; }
+
 .ro-display {
   background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--rsm);
   padding:11px 14px;font-size:14px;color:var(--text3);font-style:italic;
@@ -482,6 +502,7 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
       </div>
     </div>
     <input type="hidden" id="sub-name"><input type="hidden" id="sub-role">
+    <div class="sub-error" id="sub-error">Select your name to continue</div>
   </div>
 
   <!-- TIMESTAMP -->
@@ -503,9 +524,9 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
   </div>
   <div class="card">
     <div class="g2">
-      <div class="field"><label class="lbl">First Name <span class="req">*</span></label><input type="text" id="fname" placeholder="First name"></div>
-      <div class="field"><label class="lbl">Last Name <span class="req">*</span></label><input type="text" id="lname" placeholder="Last name"></div>
-      <div class="field"><label class="lbl">Phone Number</label><input type="tel" id="phone" placeholder="(615) 000-0000"></div>
+      <div class="field" id="f-fname"><label class="lbl">First Name <span class="req">*</span></label><input type="text" id="fname" placeholder="First name"><div class="val-msg">First name is required</div></div>
+      <div class="field" id="f-lname"><label class="lbl">Last Name <span class="req">*</span></label><input type="text" id="lname" placeholder="Last name"><div class="val-msg">Last name is required</div></div>
+      <div class="field" id="f-phone"><label class="lbl">Phone Number <span class="req">*</span></label><input type="tel" id="phone" placeholder="(615) 000-0000"><div class="val-msg">Phone number is required</div></div>
       <div class="field"><label class="lbl">Email Address</label><input type="email" id="email" placeholder="customer@email.com"></div>
       <div class="field"><label class="lbl">Preferred Contact</label>
         <select id="cpref"><option value="">Select...</option><option>Phone Call</option><option>Text Message</option><option>Email</option><option>No Preference</option></select>
@@ -527,9 +548,9 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
   </div>
   <div class="card">
     <div class="g4">
-      <div class="field"><label class="lbl">Year</label><select id="vy"><option value="">Year</option></select></div>
-      <div class="field"><label class="lbl">Make</label><select id="vmk"><option value="">Make</option></select></div>
-      <div class="field"><label class="lbl">Model</label><select id="vmd"><option value="">Model</option></select></div>
+      <div class="field" id="f-vy"><label class="lbl">Year <span class="req">*</span></label><select id="vy"><option value="">Year</option></select><div class="val-msg">Year is required</div></div>
+      <div class="field" id="f-vmk"><label class="lbl">Make <span class="req">*</span></label><select id="vmk"><option value="">Make</option></select><div class="val-msg">Make is required</div></div>
+      <div class="field" id="f-vmd"><label class="lbl">Model <span class="req">*</span></label><select id="vmd"><option value="">Model</option></select><div class="val-msg">Model is required</div></div>
       <div class="field"><label class="lbl">Mileage</label><input type="number" id="vmi" placeholder="e.g. 72000"></div>
     </div>
     <div class="g3 mt">
@@ -643,12 +664,13 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
       </div>
     </div>
 
-    <div class="field">
-      <label class="lbl">Customer Buying Temperature</label>
+    <div class="field" id="f-escore">
+      <label class="lbl">Customer Buying Temperature <span class="req">*</span></label>
       <div class="hint" style="margin-bottom:8px;">Rate 1 (cold) to 10 (ready to sign)</div>
       <div class="score-wrap" id="score-wrap"></div>
       <div class="score-labels"><span>Cold</span><span>Warm</span><span>Hot 🔥</span></div>
       <input type="hidden" id="escore">
+      <div class="val-msg">Select a buying temperature (1–10)</div>
     </div>
   </div>
 
@@ -662,7 +684,7 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
     <div class="sh-num">06 / 06</div>
   </div>
   <div class="card">
-    <div class="field" style="margin-bottom:18px;">
+    <div class="field" id="f-outcome" style="margin-bottom:18px;">
       <label class="lbl">Disposition / Outcome <span class="req">*</span></label>
       <div class="pill-group">
         <div class="pill" onclick="ps(this,'outcome','New Vehicle Sold','p-green')">🏆 New Vehicle Sold</div>
@@ -672,6 +694,7 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
         <div class="pill" onclick="ps(this,'outcome','Not Interested','p-red')">✗ Not Interested</div>
       </div>
       <input type="hidden" id="outcome">
+      <div class="val-msg">Select an outcome</div>
     </div>
     <div class="g2">
       <div class="field"><label class="lbl">Assigned Salesperson</label><div class="ro-display" id="sp-disp">Select your name above to auto-assign</div><input type="hidden" id="sp"></div>
@@ -696,7 +719,7 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
     </div>
     <div class="submit-bar-actions">
       <button class="btn-g" onclick="resetForm()">Clear</button>
-      <button class="btn-p" onclick="submitLog()">Submit Entry →</button>
+      <button class="btn-p" id="submit-btn" onclick="submitLog()">Submit Entry →</button>
     </div>
   </div>
 
@@ -723,7 +746,7 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast"><div class="toast-dot"></div>Entry logged successfully ✓</div>
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg">Entry logged successfully ✓</span></div>
 
 <!-- EDIT MODAL -->
 <div class="modal-overlay" id="edit-modal">
@@ -880,7 +903,64 @@ document.getElementById('vreason').addEventListener('change',()=>mark(4));
 const gv=id=>{const e=document.getElementById(id);return e?(e.value||'—'):'—';};
 
 // ── SUBMIT ──
-function submitLog(){
+// ── Phone auto-format ──
+document.getElementById('phone').addEventListener('blur',function(){
+  let v=this.value.replace(/\D/g,'');
+  if(v.length===10) this.value=`(${v.slice(0,3)}) ${v.slice(3,6)}-${v.slice(6)}`;
+  else if(v.length===11&&v[0]==='1') this.value=`(${v.slice(1,4)}) ${v.slice(4,7)}-${v.slice(7)}`;
+});
+
+// ── Validation ──
+function clearErrors(){
+  document.querySelectorAll('.field-error,.score-error,.pills-error').forEach(e=>e.classList.remove('field-error','score-error','pills-error'));
+  document.getElementById('sub-error').classList.remove('show');
+}
+
+function validateForm(){
+  clearErrors();
+  const errs=[];
+  function req(fid,id){const v=gv(id);if(!v||v==='—'||v===''){const el=document.getElementById(fid);if(el)el.classList.add('field-error');errs.push(fid);}}
+  // Submitter
+  if(!gv('sub-name')){document.getElementById('sub-error').classList.add('show');errs.push('sub-error');}
+  // Customer
+  req('f-fname','fname');req('f-lname','lname');req('f-phone','phone');
+  // Vehicle
+  req('f-vy','vy');req('f-vmk','vmk');req('f-vmd','vmd');
+  // Score
+  const sc=gv('escore');
+  if(!sc||sc==='—'||parseInt(sc)<1||parseInt(sc)>10){const sel=document.getElementById('f-escore');if(sel)sel.classList.add('score-error');errs.push('f-escore');}
+  // Outcome
+  if(!gv('outcome')){const oel=document.getElementById('f-outcome');if(oel)oel.classList.add('pills-error');errs.push('f-outcome');}
+  // Phone format check
+  const ph=gv('phone').replace(/\D/g,'');
+  if(ph&&ph.length<10){const pel=document.getElementById('f-phone');if(pel){pel.classList.add('field-error');pel.querySelector('.val-msg').textContent='Enter a valid 10-digit phone number';}errs.push('f-phone');}
+  return errs;
+}
+
+function showToast(msg,isError){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.toggle('toast-err',!!isError);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),isError?6000:4000);
+}
+
+async function submitLog(){
+  // Validate
+  const errs=validateForm();
+  if(errs.length>0){
+    const first=document.getElementById(errs[0]);
+    if(first){first.scrollIntoView({behavior:'smooth',block:'center'});first.classList.add('shake');setTimeout(()=>first.classList.remove('shake'),500);}
+    showToast(`${errs.length} required field${errs.length>1?'s':''} missing — scroll up to fix`,true);
+    return;
+  }
+
+  // Show loading
+  const btn=document.getElementById('submit-btn');
+  const origText=btn.textContent;
+  btn.innerHTML='<span class="btn-spinner"></span>Submitting...';
+  btn.classList.add('btn-loading');
+
   const n=new Date(),mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const ts=`${mo[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()} at ${n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})} CT`;
   const veh=[gv('vy'),gv('vmk'),gv('vmd')].filter(v=>v&&v!=='—').join(' ')||'—';
@@ -902,20 +982,36 @@ function submitLog(){
     trade_acv:gv('tacv'),trade_expect:gv('texp'),trade_equity:gv('teq'),
     voi:gv('voi'),voi_type:gv('voity'),voi_budget:gv('voibdg'),
     finance_conv:gv('finconv'),timeline:gv('timeline'),
-    eng_score:score!=='—'?parseInt(score):null,
+    eng_score:parseInt(score),
     outcome:gv('outcome'),salesperson:gv('sp'),
     followup_date:gv('fdate')||null,followup_method:gv('fmeth'),
     crm_entry:gv('crm'),notes:gv('notes'),
   };
 
-  fetch(`${SB_URL}/rest/v1/s2s_entries`,{
-    method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(entry)
-  }).catch(err=>console.warn('Supabase save failed:',err));
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/s2s_entries`,{
+      method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(entry)
+    });
+    if(!res.ok){
+      let errMsg='Save failed';
+      try{const errData=await res.json();errMsg=errData.message||errData.details||errData.hint||errMsg;}catch(e){}
+      btn.textContent=origText;btn.classList.remove('btn-loading');
+      showToast(`Error: ${errMsg}`,true);
+      return;
+    }
+  }catch(err){
+    btn.textContent=origText;btn.classList.remove('btn-loading');
+    showToast(`Network error: ${err.message||'Check connection'}`,true);
+    return;
+  }
+
+  // Reset button
+  btn.textContent=origText;btn.classList.remove('btn-loading');
 
   // Push notification
   const pushPayload={
-    title:`${score!=='—'?(parseInt(score)>=8?'🔥':parseInt(score)>=5?'🌡':'📋'):'📋'} New S2S Entry — ${entry.first_name} ${entry.last_name}`,
-    body:`${entry.veh_year||''} ${entry.veh_make||''} ${entry.veh_model||''} · Score: ${entry.eng_score||'?'}/10 · ${entry.outcome||'Logged'} · Rep: ${entry.submitter||'Unknown'}`,
+    title:`${parseInt(score)>=8?'🔥':parseInt(score)>=5?'🌡':'📋'} New S2S Entry — ${entry.first_name} ${entry.last_name}`,
+    body:`${entry.veh_year||''} ${entry.veh_make||''} ${entry.veh_model||''} · Score: ${entry.eng_score}/10 · ${entry.outcome||'Logged'} · Rep: ${entry.submitter||'Unknown'}`,
     url:'/manager-dashboard.html',entry
   };
   fetch('/api/send-push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pushPayload)}).catch(()=>{});
@@ -979,14 +1075,16 @@ function submitLog(){
   });
   document.getElementById('preview-grid').innerHTML=html;
   document.getElementById('preview-wrap').classList.add('open');
-  const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);
+  showToast('Entry logged successfully ✓',false);
   document.getElementById('preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
   for(let i=1;i<=6;i++) mark(i);
+  clearErrors();
   loadRecent();
 }
 
 // ── RESET ──
 function resetForm(){
+  clearErrors();
   document.querySelectorAll('input:not([type=checkbox]):not([type=hidden])').forEach(i=>i.value='');
   document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
   document.querySelectorAll('textarea').forEach(t=>t.value='');
