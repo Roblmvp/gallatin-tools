@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ServiceBridge — Gallatin CDJR</title>
 
-<!-- Open Graph / Link Preview -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://servicebridge.vyaxis.com/login.html">
 <meta property="og:title" content="ServiceBridge — Vyaxis">
@@ -38,7 +37,6 @@ body { background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-
 .screen { display:none;position:relative;z-index:1; }
 .screen.active { display:flex; }
 
-/* LOGIN */
 #screen-login { min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:24px; }
 
 .brand-lockup { text-align:center;margin-bottom:48px;animation:fadeDown 0.6s ease both; }
@@ -62,11 +60,13 @@ body { background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-
 .rep-avatar { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple-light));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;margin-bottom:8px; }
 .rep-btn.selected .rep-avatar { background:linear-gradient(135deg,var(--purple),var(--red)); }
 .rep-btn-name { font-size:13px;font-weight:600;color:var(--text);line-height:1.2; }
-.rep-btn-role { font-size:10px;color:var(--muted);margin-top:2px;font-weight:500;letter-spacing:0.04em; }
+.rep-btn-role { font-size:10px;margin-top:2px;font-weight:600;letter-spacing:0.04em; }
+.role-admin   { color: var(--gold); }
+.role-manager { color: var(--purple-light); }
+.role-sales   { color: var(--muted); }
 
 .pin-section { display:none; }
 .pin-section.show { display:block; }
-.pin-label { font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px; }
 .pin-dots { display:flex;gap:10px;justify-content:center;margin-bottom:20px; }
 .pin-dot { width:14px;height:14px;border-radius:50%;border:2px solid var(--border-bright);transition:all 0.15s; }
 .pin-dot.filled { background:var(--purple);border-color:var(--purple);box-shadow:0 0 8px var(--purple-glow); }
@@ -77,83 +77,9 @@ body { background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-
 .pin-key:active { transform:scale(0.94);background:rgba(91,79,232,0.2);border-color:var(--purple); }
 .pin-error { text-align:center;font-size:12px;color:#FC8181;font-weight:500;height:18px;margin-bottom:8px; }
 
-/* DASHBOARD */
-#screen-dashboard { min-height:100vh;flex-direction:column; }
-.dash-header { background:var(--ink2);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-shrink:0; }
-.dash-header::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--purple),transparent,var(--red),transparent); }
-.dash-brand { font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.06em;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
-.dash-rep-pill { display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:30px;padding:6px 14px 6px 6px; }
-.dash-rep-avatar { width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--red));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff; }
-.dash-rep-name { font-size:12px;font-weight:600; }
-.dash-logout { background:transparent;border:none;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:0.06em;cursor:pointer;padding:6px 12px;border-radius:6px;transition:color 0.18s;font-family:'DM Sans',sans-serif; }
-.dash-logout:hover { color:var(--text); }
-
-.dash-body { max-width:540px;margin:0 auto;padding:32px 20px 80px;width:100%; }
-.dash-welcome { margin-bottom:24px;animation:fadeUp 0.4s ease both; }
-.dash-greeting { font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px; }
-.dash-name { font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:0.04em;line-height:1; }
-.dash-date { font-size:12px;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace; }
-
-/* KPI row — 6 stats */
-.kpi-row { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;animation:fadeUp 0.4s 0.1s ease both; }
-.kpi-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;position:relative;overflow:hidden; }
-.kpi-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px; }
-.kpi-purple::before { background:var(--purple); }
-.kpi-red::before { background:var(--red); }
-.kpi-gold::before { background:var(--gold); }
-.kpi-green::before { background:var(--green); }
-.kpi-lbl { font-size:8px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px; }
-.kpi-val { font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1; }
-.kpi-purple .kpi-val { color:var(--purple-light); }
-.kpi-red .kpi-val { color:#FC8181; }
-.kpi-gold .kpi-val { color:var(--gold); }
-.kpi-green .kpi-val { color:#4ADE80; }
-
-/* Section label */
-.section-lbl { font-size:9px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px; }
-.section-lbl::before { content:'';display:inline-block;width:14px;height:2px;border-radius:2px; }
-.lbl-s2s::before { background:var(--purple); }
-
-
-/* Action buttons */
-.action-btn { width:100%;background:linear-gradient(135deg,var(--purple),var(--purple-light));border:none;border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s;text-decoration:none;margin-bottom:12px;box-shadow:0 8px 24px var(--purple-glow); }
-.action-btn:hover { transform:translateY(-2px);box-shadow:0 12px 32px var(--purple-glow); }
-.action-btn.green { background:linear-gradient(135deg,var(--green),#16A34A);box-shadow:0 8px 24px rgba(34,197,94,0.3); }
-.action-btn.green:hover { box-shadow:0 12px 32px rgba(34,197,94,0.4); }
-.action-btn-left { text-align:left; }
-.action-btn-eyebrow { font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:4px; }
-.action-btn-title { font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.04em;color:#fff;line-height:1; }
-.action-btn-arrow { width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
-
-/* Entries */
-.entry-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.18s; }
-.entry-card:hover { border-color:var(--border-bright); }
-.entry-name { font-size:14px;font-weight:600; }
-.entry-meta { font-size:11px;color:var(--muted);margin-top:3px; }
-.entry-outcome { font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block; }
-.out-sold { background:rgba(34,197,94,0.15);color:#4ADE80; }
-.out-appt { background:rgba(91,79,232,0.15);color:var(--purple-light); }
-.out-follow { background:rgba(232,184,75,0.15);color:var(--gold); }
-.out-other { background:rgba(255,255,255,0.06);color:var(--muted); }
-.entry-temp { font-size:11px;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace; }
-
-/* Greet entry */
-
-
-
-
-
-
-.empty-state { text-align:center;padding:32px 20px;color:var(--muted);font-size:13px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r); }
-.empty-icon { font-size:28px;margin-bottom:8px;opacity:0.5; }
-
-.loading-dots span { display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--purple);margin:0 3px;animation:pulse 1.2s ease infinite; }
-.loading-dots span:nth-child(2){animation-delay:0.2s;} .loading-dots span:nth-child(3){animation-delay:0.4s;}
-
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
 @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 </style>
 </head>
 <body>
@@ -161,7 +87,6 @@ body { background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-
 <div class="bg-orb1"></div>
 <div class="bg-orb2"></div>
 
-<!-- ═══ LOGIN ═══ -->
 <div class="screen active" id="screen-login">
   <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;">
     <div class="brand-lockup">
@@ -195,80 +120,22 @@ body { background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-
         <div class="pin-error" id="pin-error"></div>
       </div>
     </div>
-    <div style="margin-top:20px;font-size:11px;color:var(--muted2);text-align:center;">
-      Manager: <a href="manager-dashboard.html" style="color:var(--purple-light);text-decoration:none;">Dashboard</a> ·
-      <a href="scorecards.html" style="color:var(--purple-light);text-decoration:none;">Scorecards</a> ·
-      <a href="admin-panel.html" style="color:var(--muted);text-decoration:none;">Admin</a>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ DASHBOARD ═══ -->
-<div class="screen" id="screen-dashboard">
-  <div style="width:100%;display:flex;flex-direction:column;">
-    <div class="dash-header">
-      <div class="dash-brand">ServiceBridge</div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="dash-rep-pill">
-          <div class="dash-rep-avatar" id="dash-avatar"></div>
-          <div class="dash-rep-name" id="dash-repname"></div>
-        </div>
-        <button class="dash-logout" onclick="doLogout()">Sign Out</button>
-      </div>
-    </div>
-
-    <div class="dash-body">
-      <div class="dash-welcome">
-        <div class="dash-greeting">Welcome back</div>
-        <div class="dash-name" id="dash-fullname"></div>
-        <div class="dash-date" id="dash-date"></div>
-      </div>
-
-      <!-- KPIs -->
-      <div class="kpi-row" style="animation:fadeUp 0.4s 0.1s ease both;">
-        <div class="kpi-card kpi-purple"><div class="kpi-lbl">S2S Entries</div><div class="kpi-val" id="kpi-entries">—</div></div>
-        <div class="kpi-card kpi-red"><div class="kpi-lbl">Hot Leads</div><div class="kpi-val" id="kpi-hot">—</div></div>
-        <div class="kpi-card kpi-gold"><div class="kpi-lbl">Sold</div><div class="kpi-val" id="kpi-sold">—</div></div>
-        <div class="kpi-card kpi-purple"><div class="kpi-lbl">Demos</div><div class="kpi-val" id="kpi-demos">—</div></div>
-        <div class="kpi-card kpi-gold"><div class="kpi-lbl">Appts Set</div><div class="kpi-val" id="kpi-appts">—</div></div>
-      </div>
-
-      <!-- S2S Section -->
-      <div class="section-lbl lbl-s2s" style="animation:fadeUp 0.4s 0.2s ease both;">S2S Log</div>
-      <a href="service-to-sales-log.html" class="action-btn" style="animation:fadeUp 0.4s 0.25s ease both;">
-        <div class="action-btn-left">
-          <div class="action-btn-eyebrow">Log New Entry</div>
-          <div class="action-btn-title">S2S Contact Form</div>
-        </div>
-        <div class="action-btn-arrow">→</div>
-      </a>      <!-- Recent S2S -->
-      <div class="section-lbl lbl-s2s" style="animation:fadeUp 0.4s 0.4s ease both;margin-top:8px;">My Recent S2S</div>
-      <div id="s2s-list" style="animation:fadeUp 0.4s 0.45s ease both;">
-        <div style="text-align:center;padding:24px;color:var(--muted);"><span class="loading-dots"><span></span><span></span><span></span></span></div>
-      </div>
-    </div>
   </div>
 </div>
 
 <script>
-const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
-const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
-
 const REPS = [
-  {name:'Tyler Doyle',initials:'TD',role:'S2S Manager',pin:'1234'},
-  {name:'Andrew Kirk',initials:'AK',role:'Sales',pin:'1234'},
-  {name:'DJ Rogers',initials:'DJ',role:'Sales',pin:'1234'},
-  {name:'Kody McCann',initials:'KM',role:'Sales',pin:'1234'},
+  {name:'Robert Lisowski', initials:'RL', role:'Admin',   roleClass:'role-admin',   pin:'5757', redirect:'admin-panel.html'},
+  {name:'Tyler Doyle',     initials:'TD', role:'Manager', roleClass:'role-manager', pin:'1234', redirect:'manager-dashboard.html'},
+  {name:'Andrew Kirk',     initials:'AK', role:'Sales',   roleClass:'role-sales',   pin:'1234', redirect:'app.html'},
+  {name:'DJ Rogers',       initials:'DJ', role:'Sales',   roleClass:'role-sales',   pin:'1234', redirect:'app.html'},
+  {name:'Kody McCann',     initials:'KM', role:'Sales',   roleClass:'role-sales',   pin:'1234', redirect:'app.html'},
 ];
 
 let selectedRep = null, pinEntry = '';
 
 function init() {
   renderRepGrid();
-  const saved = sessionStorage.getItem('sb_rep');
-  if (saved) { selectedRep = JSON.parse(saved); showDashboard(); }
-  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 }
 
 function renderRepGrid() {
@@ -276,7 +143,7 @@ function renderRepGrid() {
     <button class="rep-btn" onclick="selectRep(${i})" id="rep-${i}">
       <div class="rep-avatar">${r.initials}</div>
       <div class="rep-btn-name">${r.name}</div>
-      <div class="rep-btn-role">${r.role}</div>
+      <div class="rep-btn-role ${r.roleClass}">${r.role}</div>
     </button>`).join('');
 }
 
@@ -295,71 +162,51 @@ function goToPin() {
   document.getElementById('pin-sub').textContent=`Welcome, ${selectedRep.name.split(' ')[0]}. Enter your PIN.`;
   pinEntry=''; updateDots();
 }
+
 function goBackToName() {
   document.getElementById('step-name').style.display='block';
   document.getElementById('step-pin').classList.remove('show');
   pinEntry=''; updateDots();
   document.getElementById('pin-error').textContent='';
 }
+
 function pinPress(d) {
   if (pinEntry.length>=4) return;
   pinEntry+=d; updateDots();
   if (pinEntry.length===4) setTimeout(checkPin,120);
 }
+
 function pinDelete() { pinEntry=pinEntry.slice(0,-1); updateDots(); document.getElementById('pin-error').textContent=''; }
+
 function updateDots() {
-  for(let i=0;i<4;i++){const dot=document.getElementById('dot-'+i);dot.classList.toggle('filled',i<pinEntry.length);dot.classList.remove('error');}
+  for(let i=0;i<4;i++){
+    const dot=document.getElementById('dot-'+i);
+    dot.classList.toggle('filled',i<pinEntry.length);
+    dot.classList.remove('error');
+  }
 }
+
 function checkPin() {
   if (pinEntry===selectedRep.pin) {
-    sessionStorage.setItem('sb_rep',JSON.stringify(selectedRep));
-    showDashboard();
+    sessionStorage.setItem('sb_rep', JSON.stringify({
+      name:     selectedRep.name,
+      initials: selectedRep.initials,
+      role:     selectedRep.role,
+      redirect: selectedRep.redirect
+    }));
+    window.location.href = selectedRep.redirect;
   } else {
-    for(let i=0;i<4;i++){const dot=document.getElementById('dot-'+i);dot.classList.remove('filled');dot.classList.add('error');}
-    document.getElementById('pin-error').textContent='Incorrect PIN. Try again.';
-    pinEntry=''; setTimeout(()=>{updateDots();},600);
-  }
-}
-
-function showDashboard() {
-  document.getElementById('screen-login').classList.remove('active');
-  document.getElementById('screen-dashboard').classList.add('active');
-  document.getElementById('dash-avatar').textContent=selectedRep.initials;
-  document.getElementById('dash-repname').textContent=selectedRep.name.split(' ')[0];
-  document.getElementById('dash-fullname').textContent=selectedRep.name.toUpperCase();
-  document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  loadData();
-}
-
-async function loadData() {
-  try {
-    const [s2sRes] = await Promise.all([
-      fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&submitter=eq.${encodeURIComponent(selectedRep.name)}&order=id.desc&limit=50`, {headers:H}),
-      fetch(`${SB_URL}/rest/v1/greet_log?select=*&rep_name=eq.${encodeURIComponent(selectedRep.name)}&order=id.desc&limit=50`, {headers:H}),
-    ]);
-    const s2s = await s2sRes.json();
-    // S2S KPIs
-    const hot = s2s.filter(e=>parseInt(e.eng_score)>=8).length;
-    const sold = s2s.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used')||e.outcome.toLowerCase().includes('sold'))).length;
-    document.getElementById('kpi-entries').textContent=s2s.length;
-    document.getElementById('kpi-hot').textContent=hot;
-    document.getElementById('kpi-sold').textContent=sold;
-    // S2S list
-    const s2sList = document.getElementById('s2s-list');
-    if (!s2s.length) {
-      s2sList.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div>No S2S entries yet.</div>';
-    } else {
-      s2sList.innerHTML = s2s.slice(0,8).map(e=>{
-        const oc = e.outcome&&(e.outcome.includes('Sold')||e.outcome.includes('New')||e.outcome.includes('Used'))?'out-sold':e.outcome==='Appointment Set'?'out-appt':e.outcome&&e.outcome.includes('Follow')?'out-follow':'out-other';
-        return `<div class="entry-card"><div><div class="entry-name">${e.first_name||''} ${e.last_name||''}</div><div class="entry-meta">${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''} · ${e.timestamp?e.timestamp.split(' at ')[0]:'—'}</div></div><div style="text-align:right;"><div class="entry-outcome ${oc}">${e.outcome||'—'}</div><div class="entry-temp">🌡 ${e.eng_score||'—'}/10</div></div></div>`;
-      }).join('');
+    for(let i=0;i<4;i++){
+      const dot=document.getElementById('dot-'+i);
+      dot.classList.remove('filled');
+      dot.classList.add('error');
     }
-  } catch(e) {
-    document.getElementById('kpi-entries').textContent='—';
+    document.getElementById('pin-error').textContent='Incorrect PIN. Try again.';
+    pinEntry='';
+    setTimeout(()=>{ updateDots(); }, 600);
   }
 }
 
-function doLogout() { sessionStorage.removeItem('sb_rep'); location.reload(); }
 init();
 </script>
 </body>
