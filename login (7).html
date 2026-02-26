@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ServiceBridge — Gallatin CDJR</title>
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://servicebridge.vyaxis.com/login.html">
+<meta property="og:title" content="ServiceBridge — Vyaxis">
+<meta property="og:description" content="Service → Sales Platform. Log S2S contacts, track hot leads, and view your personal performance dashboard.">
+<meta property="og:image" content="https://res.cloudinary.com/di5ujiwjp/image/upload/v1771987751/servicebridge-preview_fynjod.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://res.cloudinary.com/di5ujiwjp/image/upload/v1771987751/servicebridge-preview_fynjod.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#06080E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06080E; --bg2: #0C0F18;
+  --surface: #111520; --surface2: #171C2A; --surface3: #1D2333;
+  --red: #E01B36; --red-soft: rgba(224,27,54,0.12);
+  --blue: #6C70F0; --blue-soft: rgba(108,112,240,0.12);
+  --gold: #D4A73A; --green: #2DD4A0;
+  --text: #EDEEF2; --text2: rgba(237,238,242,0.62); --text3: rgba(237,238,242,0.34);
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.12); --border-active: rgba(108,112,240,0.5);
+  --r: 14px; --rsm: 10px; --rlg: 20px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  min-height: 100vh; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  font-size: 15px; line-height: 1.5; letter-spacing: -0.01em;
+}
+
+.bg-noise { position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.4;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
+.bg-grad { position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 20% 0%,rgba(224,27,54,0.07) 0%,transparent 70%),radial-gradient(ellipse 50% 60% at 80% 100%,rgba(108,112,240,0.05) 0%,transparent 70%); }
+
+.login-wrap { position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px; }
+
+/* Brand */
+.brand { text-align:center;margin-bottom:40px;animation:fadeIn 0.7s ease both; }
+.brand-powered { font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-bottom:12px; }
+.brand-name { font-family:'Instrument Serif',Georgia,serif;font-size:44px;font-weight:400;letter-spacing:-0.02em;color:var(--text);line-height:1; }
+@media(min-width:480px){.brand-name{font-size:52px;}}
+.brand-product { display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue); }
+.brand-product::before { content:'';width:18px;height:2px;background:var(--blue);border-radius:1px;opacity:0.5; }
+.brand-dealer { font-size:12px;font-weight:500;color:var(--text3);margin-top:8px;letter-spacing:0.02em; }
+
+/* Card */
+.login-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:36px 32px;width:100%;max-width:440px;box-shadow:0 24px 80px -12px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.02) inset;animation:slideUp 0.6s 0.1s ease both;position:relative; }
+.login-card::before { content:'';position:absolute;top:0;left:24px;right:24px;height:1px;background:linear-gradient(90deg,transparent,var(--blue),var(--red),transparent);opacity:0.5; }
+
+.step-label { font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:16px; }
+.step-title { font-family:'Instrument Serif',Georgia,serif;font-size:26px;font-weight:400;letter-spacing:-0.02em;color:var(--text);margin-bottom:6px; }
+.step-sub { font-size:14px;font-weight:450;color:var(--text2);margin-bottom:28px;line-height:1.5; }
+
+/* Rep grid */
+.rep-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px; }
+.rep-btn { background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 14px;cursor:pointer;transition:all 0.2s cubic-bezier(0.16,1,0.3,1);text-align:left;position:relative;overflow:hidden; }
+.rep-btn:hover { border-color:var(--border2);background:var(--surface2);transform:translateY(-1px); }
+.rep-btn.selected { border-color:var(--border-active);background:var(--blue-soft);box-shadow:0 0 0 1px var(--border-active),0 4px 20px -4px rgba(108,112,240,0.15); }
+.rep-btn.selected::after { content:'✓';position:absolute;top:10px;right:12px;font-size:11px;color:var(--blue);font-weight:700; }
+.rep-avatar { width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--surface3),var(--surface2));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;font-family:'JetBrains Mono',monospace;letter-spacing:0.02em; }
+.rep-btn.selected .rep-avatar { background:linear-gradient(135deg,var(--blue),var(--red));color:#fff;border-color:transparent; }
+.rep-btn-name { font-size:14px;font-weight:650;color:var(--text);line-height:1.25; }
+.rep-btn-role { font-size:11px;font-weight:600;margin-top:3px;letter-spacing:0.03em; }
+.role-admin { color:var(--gold); }
+.role-manager { color:var(--blue); }
+.role-sales { color:var(--text3); }
+
+/* Continue */
+.continue-btn { width:100%;background:var(--blue);border:none;border-radius:var(--rsm);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;padding:14px;cursor:pointer;transition:all 0.2s;opacity:0.35;pointer-events:none;letter-spacing:0.02em; }
+.continue-btn.ready { opacity:1;pointer-events:auto; }
+.continue-btn.ready:hover { background:#7B7EF5;transform:translateY(-1px);box-shadow:0 8px 24px -4px rgba(108,112,240,0.3); }
+.continue-btn.ready:active { transform:scale(0.98); }
+
+/* PIN */
+.pin-section { display:none; }
+.pin-section.show { display:block; }
+.pin-dots { display:flex;gap:12px;justify-content:center;margin-bottom:24px; }
+.pin-dot { width:13px;height:13px;border-radius:50%;border:2px solid var(--border2);transition:all 0.18s cubic-bezier(0.16,1,0.3,1); }
+.pin-dot.filled { background:var(--blue);border-color:var(--blue);box-shadow:0 0 12px rgba(108,112,240,0.35);transform:scale(1.1); }
+.pin-dot.error { background:var(--red);border-color:var(--red);box-shadow:0 0 12px rgba(224,27,54,0.35);animation:shake 0.35s ease; }
+.pin-pad { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px; }
+.pin-key { background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);height:54px;font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--text);cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;user-select:none; }
+.pin-key:hover { background:var(--surface2);border-color:var(--border2); }
+.pin-key:active { transform:scale(0.93);background:var(--blue-soft);border-color:var(--border-active); }
+.pin-key.disabled { opacity:0.3;pointer-events:none; }
+.pin-key.fn { font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;color:var(--text2); }
+.pin-error { text-align:center;font-size:13px;font-weight:600;color:#F87171;min-height:20px;margin-bottom:4px; }
+
+/* Loading */
+.loading-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px; }
+.loading-card { background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);height:96px;position:relative;overflow:hidden; }
+.loading-card::after { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.03) 50%,transparent 100%);animation:shimmer 1.8s infinite; }
+.error-box { background:var(--red-soft);border:1px solid rgba(224,27,54,0.2);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:20px; }
+.error-box p { font-size:14px;font-weight:500;color:#F87171;margin-bottom:12px; }
+.error-box button { background:var(--surface2);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 24px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s; }
+.error-box button:hover { background:var(--surface3); }
+.spinner { display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.15);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px; }
+.login-footer { margin-top:24px;text-align:center;font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.02em;animation:fadeIn 0.7s 0.3s ease both; }
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="bg-noise"></div>
+<div class="bg-grad"></div>
+
+<div class="login-wrap">
+  <div class="brand">
+    <div class="brand-powered">Powered by Vyaxis</div>
+    <div class="brand-name">Gallatin CDJR</div>
+    <div class="brand-product">ServiceBridge</div>
+    <div class="brand-dealer">Service-to-Sales Platform</div>
+  </div>
+  <div class="login-card">
+    <div id="step-name">
+      <div class="step-label">Step 1 of 2</div>
+      <div class="step-title">Who are you?</div>
+      <div class="step-sub">Select your name to continue</div>
+      <div id="rep-grid-container">
+        <div class="loading-grid" id="rep-loading"><div class="loading-card"></div><div class="loading-card"></div><div class="loading-card"></div><div class="loading-card"></div></div>
+        <div class="rep-grid" id="rep-grid" style="display:none;"></div>
+        <div id="rep-error" style="display:none;"></div>
+      </div>
+      <button onclick="goToPin()" id="next-btn" class="continue-btn">Continue →</button>
+    </div>
+    <div id="step-pin" class="pin-section">
+      <div class="step-label">Step 2 of 2</div>
+      <div class="step-title">Enter your PIN</div>
+      <div class="step-sub" id="pin-sub">Enter your 4-digit PIN</div>
+      <div class="pin-dots"><div class="pin-dot" id="dot-0"></div><div class="pin-dot" id="dot-1"></div><div class="pin-dot" id="dot-2"></div><div class="pin-dot" id="dot-3"></div></div>
+      <div class="pin-pad" id="pin-pad">
+        <button class="pin-key" onclick="pinPress('1')">1</button><button class="pin-key" onclick="pinPress('2')">2</button><button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button><button class="pin-key" onclick="pinPress('5')">5</button><button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button><button class="pin-key" onclick="pinPress('8')">8</button><button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key fn" onclick="goBackToName()">←</button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key fn" onclick="pinDelete()">⌫</button>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+    </div>
+  </div>
+  <div class="login-footer">Secure server-side authentication · Encrypted PINs</div>
+</div>
+
+<script>
+var SUPABASE_URL  = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
+var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
+var AUTH_ENDPOINT = SUPABASE_URL + '/functions/v1/auth';
+var ROLE_REDIRECT = { admin:'app.html', manager:'app.html', sales:'app.html' };
+
+var reps = [], selectedRep = null, pinEntry = '', isAuthenticating = false;
+
+async function init() {
+  var existing = null;
+  try { existing = JSON.parse(sessionStorage.getItem('sb_rep') || 'null'); } catch(e) {}
+  if (existing && existing.name && existing.role) { window.location.replace(ROLE_REDIRECT[existing.role.toLowerCase()] || 'app.html'); return; }
+  await loadReps();
+}
+
+async function loadReps() {
+  var loadingEl = document.getElementById('rep-loading'), gridEl = document.getElementById('rep-grid'), errorEl = document.getElementById('rep-error');
+  loadingEl.style.display = ''; gridEl.style.display = 'none'; errorEl.style.display = 'none';
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/sb_users_public?select=id,name,first_name,role&order=role.asc,name.asc', { headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    reps = await res.json();
+    if (!reps || reps.length === 0) throw new Error('No active users found');
+    renderRepGrid(); loadingEl.style.display = 'none'; gridEl.style.display = '';
+  } catch (err) {
+    console.error('Failed to load reps:', err); loadingEl.style.display = 'none'; errorEl.style.display = '';
+    errorEl.innerHTML = '<div class="error-box"><p>Unable to load team members. Check your connection.</p><button onclick="loadReps()">Retry</button></div>';
+  }
+}
+
+function getInitials(name) { var p = name.trim().split(/\s+/); return p.length === 1 ? p[0].substring(0,2).toUpperCase() : (p[0][0] + p[p.length-1][0]).toUpperCase(); }
+function getRoleClass(r) { r = r.toLowerCase(); return r === 'admin' ? 'role-admin' : r === 'manager' ? 'role-manager' : 'role-sales'; }
+
+function renderRepGrid() {
+  document.getElementById('rep-grid').innerHTML = reps.map(function(r, i) {
+    return '<button class="rep-btn" onclick="selectRep(' + i + ')" id="rep-' + i + '"><div class="rep-avatar">' + getInitials(r.name) + '</div><div class="rep-btn-name">' + r.name + '</div><div class="rep-btn-role ' + getRoleClass(r.role) + '">' + (r.role.charAt(0).toUpperCase() + r.role.slice(1)) + '</div></button>';
+  }).join('');
+}
+
+function selectRep(i) {
+  selectedRep = reps[i];
+  document.querySelectorAll('.rep-btn').forEach(function(b) { b.classList.remove('selected'); });
+  document.getElementById('rep-' + i).classList.add('selected');
+  document.getElementById('next-btn').classList.add('ready');
+}
+
+function goToPin() { if (!selectedRep) return; document.getElementById('step-name').style.display = 'none'; document.getElementById('step-pin').classList.add('show'); document.getElementById('pin-sub').textContent = 'Welcome, ' + selectedRep.first_name + '. Enter your PIN.'; pinEntry = ''; updateDots(); document.getElementById('pin-error').textContent = ''; setPinPadEnabled(true); }
+function goBackToName() { if (isAuthenticating) return; document.getElementById('step-name').style.display = 'block'; document.getElementById('step-pin').classList.remove('show'); pinEntry = ''; updateDots(); document.getElementById('pin-error').textContent = ''; }
+function pinPress(d) { if (isAuthenticating || pinEntry.length >= 4) return; pinEntry += d; updateDots(); if (pinEntry.length === 4) setTimeout(authenticate, 120); }
+function pinDelete() { if (isAuthenticating) return; pinEntry = pinEntry.slice(0, -1); updateDots(); document.getElementById('pin-error').textContent = ''; }
+function updateDots() { for (var i = 0; i < 4; i++) { var dot = document.getElementById('dot-' + i); dot.classList.toggle('filled', i < pinEntry.length); dot.classList.remove('error'); } }
+function setPinPadEnabled(en) { document.querySelectorAll('#pin-pad .pin-key').forEach(function(k) { k.classList.toggle('disabled', !en); }); }
+function showPinError(msg) { for (var i = 0; i < 4; i++) { var d = document.getElementById('dot-' + i); d.classList.remove('filled'); d.classList.add('error'); } document.getElementById('pin-error').textContent = msg; pinEntry = ''; setTimeout(function() { updateDots(); }, 600); }
+
+async function authenticate() {
+  if (isAuthenticating) return; isAuthenticating = true; setPinPadEnabled(false);
+  document.getElementById('pin-error').innerHTML = '<span class="spinner"></span> Verifying…';
+  try {
+    var res = await fetch(AUTH_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }, body: JSON.stringify({ name: selectedRep.name, pin: pinEntry }) });
+    var data = await res.json();
+    if (res.ok && data.success) {
+      sessionStorage.setItem('sb_rep', JSON.stringify({ id: data.user.id, name: data.user.name, first_name: data.user.first_name, role: data.user.role }));
+      window.location.href = ROLE_REDIRECT[data.user.role] || 'app.html'; return;
+    }
+    if (res.status === 403) showPinError(data.error || 'Account deactivated.');
+    else if (res.status === 401) showPinError('Incorrect PIN. Try again.');
+    else showPinError(data.error || 'Login failed. Try again.');
+  } catch (err) { console.error('Auth fetch error:', err); showPinError('Connection error. Check your network.'); }
+  finally { isAuthenticating = false; setPinPadEnabled(true); }
+}
+
+document.addEventListener('keydown', function(e) { var v = document.getElementById('step-pin').classList.contains('show'); if (!v) return; if (e.key >= '0' && e.key <= '9') pinPress(e.key); else if (e.key === 'Backspace') pinDelete(); else if (e.key === 'Escape') goBackToName(); });
+init();
+</script>
+</body>
+</html>

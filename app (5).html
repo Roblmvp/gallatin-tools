@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+(function(){
+  var rep = null;
+  try { rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null'); } catch(e) {}
+  if (!rep || !rep.name || !rep.role) { window.location.replace('/login.html'); }
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ServiceBridge">
+<meta name="theme-color" content="#06080E">
+<title>ServiceBridge</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06080E; --bg2: #0C0F18;
+    --surface: #111520; --surface2: #171C2A; --surface3: #1D2333;
+    --red: #E01B36; --red-soft: rgba(224,27,54,0.10);
+    --gold: #D4A73A; --gold-soft: rgba(212,167,58,0.10);
+    --green: #2DD4A0; --green-soft: rgba(45,212,160,0.10);
+    --blue: #6C70F0; --blue-soft: rgba(108,112,240,0.10);
+    --purple: #A855F7; --purple-soft: rgba(168,85,247,0.10);
+    --teal: #14B8A6; --teal-soft: rgba(20,184,166,0.10);
+    --text: #EDEEF2; --text2: rgba(237,238,242,0.62); --text3: rgba(237,238,242,0.34);
+    --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.10);
+    --r: 14px; --rsm: 10px; --rlg: 18px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%; background: var(--bg); color: var(--text);
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    font-size: 15px; line-height: 1.5; letter-spacing: -0.01em;
+  }
+
+  /* ── Screens ── */
+  .screen { position:fixed;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.3s ease;overflow-y:auto;-webkit-overflow-scrolling:touch; }
+  .screen.active { opacity:1;pointer-events:all; }
+
+  /* ── Background ── */
+  .bg-noise { position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.35;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
+  .bg-glow { position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0; }
+  .bg-glow-red { background:radial-gradient(circle,rgba(224,27,54,0.08) 0%,transparent 70%);top:-200px;left:-100px; }
+  .bg-glow-blue { background:radial-gradient(circle,rgba(108,112,240,0.06) 0%,transparent 70%);bottom:-200px;right:-100px; }
+
+  /* ── Header ── */
+  .app-header {
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px 12px;padding-top:max(14px,env(safe-area-inset-top));
+    border-bottom:1px solid var(--border);
+    background:rgba(6,8,14,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+    position:sticky;top:0;z-index:50;
+  }
+  .header-left { display:flex;align-items:center;gap:10px; }
+  .header-logo { width:30px;height:30px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px; }
+  .header-title { font-family:'Instrument Serif',Georgia,serif;font-size:17px;letter-spacing:-0.01em;color:var(--text); }
+  .header-right { display:flex;align-items:center;gap:8px;position:relative; }
+  .header-user { font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em; }
+  .header-btn { width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all 0.15s;color:var(--text2); }
+  .header-btn:active { background:var(--surface2); }
+
+  /* ── Hamburger ── */
+  .hamburger { background:none;border:1px solid var(--border2);border-radius:8px;width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all 0.18s;padding:0;flex-shrink:0; }
+  .hamburger:hover { border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.03); }
+  .hamburger span { display:block;width:14px;height:1.5px;background:rgba(255,255,255,0.55);border-radius:2px;transition:all 0.2s; }
+  .hamburger.open span:nth-child(1) { transform:translateY(5.5px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity:0; }
+  .hamburger.open span:nth-child(3) { transform:translateY(-5.5px) rotate(-45deg); }
+
+  /* ── Dropdown ── */
+  .nav-overlay { position:fixed;inset:0;z-index:190;display:none; }
+  .nav-overlay.open { display:block; }
+  .nav-dropdown { position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);min-width:230px;padding:6px;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:201;opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;transition:all 0.18s cubic-bezier(0.16,1,0.3,1); }
+  .nav-dropdown.open { opacity:1;transform:translateY(0) scale(1);pointer-events:all; }
+  .dd-item { display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--rsm);font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s; }
+  .dd-item:hover { background:rgba(255,255,255,0.04);color:var(--text); }
+  .dd-item.active-page { background:var(--red-soft);color:#F87171; }
+  .dd-icon { font-size:14px;width:20px;text-align:center; }
+  .dd-divider { height:1px;background:var(--border);margin:4px 0; }
+  .dd-admin { display:none; }
+  .dd-admin.show { display:flex; }
+  .dd-divider.dd-admin.show { display:block; }
+  .nav-user-info { display:flex;align-items:center;justify-content:space-between;padding:8px 14px 4px; }
+  .nav-user-display { font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.08em; }
+  .nav-role-pill { font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:20px; }
+  .role-admin { background:var(--blue-soft);color:var(--blue);border:1px solid rgba(108,112,240,0.2); }
+  .role-manager { background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2); }
+  .role-sales { background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08); }
+
+  /* ── Home content ── */
+  .home-content { padding:24px 20px 100px;flex:1;position:relative;z-index:1; }
+  .home-greeting { margin-bottom:32px; }
+  .home-greeting-sub { font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px; }
+  .home-greeting-name { font-family:'Instrument Serif',Georgia,serif;font-size:34px;letter-spacing:-0.02em;line-height:1.1;color:var(--text); }
+
+  /* ── CTA Cards ── */
+  .cta-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px; }
+  .cta-card {
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);
+    padding:20px 18px;cursor:pointer;transition:all 0.2s cubic-bezier(0.16,1,0.3,1);
+    text-decoration:none;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;
+  }
+  .cta-card:hover { border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 32px -8px rgba(0,0,0,0.3); }
+  .cta-card:active { transform:scale(0.97); }
+  .cta-icon { width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px; }
+  .cta-icon.red { background:var(--red-soft); }
+  .cta-icon.gold { background:var(--gold-soft); }
+  .cta-icon.blue { background:var(--blue-soft); }
+  .cta-icon.green { background:var(--green-soft); }
+  .cta-icon.purple { background:var(--purple-soft); }
+  .cta-icon.teal { background:var(--teal-soft); }
+  .cta-label { font-size:14px;font-weight:700;color:var(--text);line-height:1.2;letter-spacing:-0.01em; }
+  .cta-sub { font-size:12px;font-weight:500;color:var(--text3);margin-top:2px; }
+  .cta-card.wide { grid-column:1/-1;flex-direction:row;align-items:center;padding:16px 20px;gap:14px; }
+  .cta-card.wide .cta-text { flex:1; }
+  .cta-arrow { font-size:14px;color:var(--text3); }
+
+  /* ── Admin panel ── */
+  #screen-admin .home-content { padding-top:0; }
+  .admin-section { margin-bottom:28px; }
+  .admin-section-title { font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;padding:0 2px; }
+  .user-row { background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px; }
+  .user-avatar { width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace; }
+  .user-avatar.sales { background:var(--red-soft);color:var(--red); }
+  .user-avatar.manager { background:var(--gold-soft);color:var(--gold); }
+  .user-avatar.admin { background:var(--blue-soft);color:var(--blue); }
+  .user-info { flex:1;min-width:0; }
+  .user-name { font-size:14px;font-weight:700;color:var(--text); }
+  .user-meta { font-size:11px;color:var(--text3);margin-top:2px; }
+  .role-badge { font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px; }
+  .role-badge.sales { background:var(--red-soft);color:var(--red); }
+  .role-badge.manager { background:var(--gold-soft);color:var(--gold); }
+  .role-badge.admin { background:var(--blue-soft);color:var(--blue); }
+  .stat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px; }
+  .stat-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;text-align:center; }
+  .stat-val { font-family:'Instrument Serif',Georgia,serif;font-size:26px;color:var(--text);line-height:1;margin-bottom:4px; }
+  .stat-lbl { font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase; }
+  .log-item { display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border); }
+  .log-item:last-child { border-bottom:none; }
+  .log-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+  .log-info { flex:1; }
+  .log-name { font-size:13px;font-weight:600;color:var(--text); }
+  .log-time { font-size:11px;color:var(--text3);margin-top:2px; }
+
+  /* ── Nav bar ── */
+  .nav-bar { position:fixed;bottom:0;left:0;right:0;background:rgba(6,8,14,0.95);border-top:1px solid var(--border);padding:12px 0 max(12px,env(safe-area-inset-bottom));display:none;justify-content:space-around;align-items:center;z-index:100;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px); }
+  .nav-bar.visible { display:flex; }
+  .nav-item { display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 16px;border-radius:12px;transition:all 0.15s;min-width:60px; }
+  .nav-item.active .nav-icon { color:var(--red); }
+  .nav-item.active .nav-label { color:var(--text); }
+  .nav-icon { font-size:18px;color:var(--text3);transition:color 0.15s;line-height:1; }
+  .nav-label { font-size:10px;font-weight:700;letter-spacing:0.04em;color:var(--text3);transition:color 0.15s; }
+
+  /* ── Utilities ── */
+  .toast { position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;z-index:999;opacity:0;transition:all 0.3s;pointer-events:none; }
+  .toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
+  .safe-bottom { padding-bottom:max(90px,calc(70px + env(safe-area-inset-bottom))); }
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border2);border-radius:2px; }
+</style>
+</head>
+<body>
+<div class="bg-noise"></div>
+<div class="bg-glow bg-glow-red"></div>
+<div class="bg-glow bg-glow-blue"></div>
+
+<!-- HOME SCREEN -->
+<div class="screen" id="screen-home">
+  <div class="app-header">
+    <div class="header-left">
+      <div class="header-logo">🛡</div>
+      <div class="header-title">ServiceBridge</div>
+    </div>
+    <div class="header-right">
+      <span class="header-user" id="header-user-name"></span>
+      <div class="header-btn" onclick="logout()" title="Sign Out">↩</div>
+      <button class="hamburger" id="home-hamburger" onclick="toggleAppMenu('home')" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="nav-dropdown" id="home-dropdown">
+        <div class="nav-user-info"><span class="nav-user-display" id="home-nav-user"></span><span class="nav-role-pill" id="home-nav-pill"></span></div>
+        <div class="dd-divider"></div>
+        <a href="app.html" class="dd-item active-page"><span class="dd-icon">🏠</span> Home</a>
+        <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
+        <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Dashboard</a>
+        <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
+        <div class="dd-divider dd-admin" id="home-admin-divider"></div>
+        <a href="admin-panel.html" class="dd-item dd-admin" id="home-admin-link"><span class="dd-icon">⚙️</span> Admin Panel</a>
+      </div>
+    </div>
+  </div>
+  <div class="home-content safe-bottom" id="home-content"></div>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div class="screen" id="screen-admin">
+  <div class="app-header">
+    <div class="header-left">
+      <div class="header-logo" style="background:var(--blue)">⚙</div>
+      <div class="header-title">Admin Panel</div>
+    </div>
+    <div class="header-right">
+      <div class="header-btn" onclick="showScreen('screen-home')" title="Back">←</div>
+      <div class="header-btn" onclick="logout()" title="Sign Out">↩</div>
+      <button class="hamburger" id="admin-hamburger" onclick="toggleAppMenu('admin')" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="nav-dropdown" id="admin-dropdown">
+        <div class="nav-user-info"><span class="nav-user-display" id="admin-nav-user"></span><span class="nav-role-pill" id="admin-nav-pill"></span></div>
+        <div class="dd-divider"></div>
+        <a href="app.html" class="dd-item"><span class="dd-icon">🏠</span> Home</a>
+        <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
+        <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Dashboard</a>
+        <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
+        <div class="dd-divider dd-admin show"></div>
+        <a href="admin-panel.html" class="dd-item dd-admin show"><span class="dd-icon">⚙️</span> Admin Panel</a>
+      </div>
+    </div>
+  </div>
+  <div class="home-content safe-bottom" id="admin-content"></div>
+</div>
+
+<div class="nav-bar" id="nav-bar"></div>
+<div class="nav-overlay" id="app-nav-overlay" onclick="closeAllMenus()"></div>
+<div class="toast" id="app-toast"></div>
+
+<script>
+var SUPABASE_URL  = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
+var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
+
+var currentUser = null;
+
+function getSession() { try { var s = JSON.parse(sessionStorage.getItem('sb_rep') || 'null'); return (s && s.name && s.role) ? s : null; } catch(e) { return null; } }
+function clearSession() { sessionStorage.removeItem('sb_rep'); sessionStorage.removeItem('sb_session'); }
+
+function addLoginLog(user) { var logs = getLoginLogs(); logs.unshift({ name: user.name, role: user.role, time: new Date().toISOString() }); localStorage.setItem('sb_login_log', JSON.stringify(logs.slice(0, 50))); }
+function getLoginLogs() { try { return JSON.parse(localStorage.getItem('sb_login_log') || '[]'); } catch(e) { return []; } }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); s.style.pointerEvents = 'none'; });
+  var el = document.getElementById(id);
+  if (el) { el.classList.add('active'); el.style.pointerEvents = 'all'; el.scrollTop = 0; }
+  document.getElementById('nav-bar').classList.toggle('visible', id === 'screen-home' || id === 'screen-admin');
+  updateNav(id);
+}
+function buildNav() {
+  var nav = document.getElementById('nav-bar');
+  if (!currentUser) { nav.innerHTML = ''; return; }
+  var items = [{ icon:'🏠', label:'Home', screen:'screen-home' }];
+  if (currentUser.role === 'admin' || currentUser.role === 'manager') items.push({ icon:'⚙️', label:'Admin', screen:'screen-admin' });
+  nav.innerHTML = items.map(function(i) { return '<div class="nav-item" onclick="navGo(\'' + i.screen + '\')" data-screen="' + i.screen + '"><div class="nav-icon">' + i.icon + '</div><div class="nav-label">' + i.label + '</div></div>'; }).join('');
+}
+function navGo(screen) { if (screen === 'screen-admin') buildAdminPanel(); showScreen(screen); }
+function updateNav(active) { document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.toggle('active', i.dataset.screen === active); }); }
+
+function toggleAppMenu(which) {
+  var hb = document.getElementById(which + '-hamburger'), dd = document.getElementById(which + '-dropdown'), ov = document.getElementById('app-nav-overlay');
+  var isOpen = dd.classList.contains('open'); closeAllMenus();
+  if (!isOpen) { hb.classList.add('open'); dd.classList.add('open'); ov.classList.add('open'); }
+}
+function closeAllMenus() {
+  ['home','admin'].forEach(function(w) { var hb = document.getElementById(w+'-hamburger'), dd = document.getElementById(w+'-dropdown'); if(hb) hb.classList.remove('open'); if(dd) dd.classList.remove('open'); });
+  document.getElementById('app-nav-overlay').classList.remove('open');
+}
+function initAppNav() {
+  if (!currentUser) return;
+  var role = currentUser.role;
+  var rc = role==='admin'?'role-admin':role==='manager'?'role-manager':'role-sales';
+  var rl = role.charAt(0).toUpperCase()+role.slice(1);
+  var fn = currentUser.first_name || currentUser.name.split(' ')[0];
+  ['home','admin'].forEach(function(w) {
+    var ne = document.getElementById(w+'-nav-user'), pe = document.getElementById(w+'-nav-pill');
+    if (ne) ne.textContent = fn; if (pe) { pe.textContent = rl; pe.className = 'nav-role-pill ' + rc; }
+    if (role === 'admin') { var lnk = document.getElementById(w+'-admin-link'), div = document.getElementById(w+'-admin-divider'); if(lnk) lnk.classList.add('show'); if(div) div.classList.add('show'); }
+  });
+}
+
+function buildHome() {
+  var fn = currentUser.first_name || currentUser.name.split(' ')[0];
+  document.getElementById('header-user-name').textContent = fn;
+  var h = new Date().getHours();
+  var greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  var role = currentUser.role, cards = '';
+
+  if (role === 'sales') {
+    cards = '<div class="cta-grid">' +
+      '<div class="cta-card" onclick="goTo(\'service-to-sales-log.html\')"><div class="cta-icon red">📋</div><div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div></div>' +
+      '<div class="cta-card" onclick="goTo(\'scorecards.html\')"><div class="cta-icon blue">🏆</div><div><div class="cta-label">Scoreboard</div><div class="cta-sub">Team standings</div></div></div>' +
+      '</div>' +
+      '<div class="cta-card wide" onclick="goTo(\'manager-dashboard.html\')"><div class="cta-icon green">📊</div><div class="cta-text"><div class="cta-label">View Dashboard</div><div class="cta-sub">All entries & analytics</div></div><div class="cta-arrow">→</div></div>';
+  }
+  if (role === 'manager') {
+    cards = '<div class="cta-grid">' +
+      '<div class="cta-card" onclick="goTo(\'manager-dashboard.html\')"><div class="cta-icon gold">📊</div><div><div class="cta-label">Dashboard</div><div class="cta-sub">All entries</div></div></div>' +
+      '<div class="cta-card" onclick="goTo(\'scorecards.html\')"><div class="cta-icon blue">🏆</div><div><div class="cta-label">Scoreboard</div><div class="cta-sub">Leaderboard</div></div></div>' +
+      '<div class="cta-card" onclick="goTo(\'service-to-sales-log.html\')"><div class="cta-icon red">📋</div><div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div></div>' +
+      '<div class="cta-card" onclick="goTo(\'upboard.html\')"><div class="cta-icon teal">🔄</div><div><div class="cta-label">UP Board</div><div class="cta-sub">Floor rotation</div></div></div>' +
+      '</div>' +
+      '<div class="cta-card wide" onclick="navGo(\'screen-admin\')"><div class="cta-icon purple">⚙️</div><div class="cta-text"><div class="cta-label">Admin Panel</div><div class="cta-sub">Manage users & access</div></div><div class="cta-arrow">→</div></div>';
+  }
+  if (role === 'admin') {
+    cards = '<div class="cta-grid">' +
+      '<div class="cta-card" onclick="goTo(\'manager-dashboard.html\')"><div class="cta-icon gold">📊</div><div><div class="cta-label">Dashboard</div><div class="cta-sub">All entries</div></div></div>' +
+      '<div class="cta-card" onclick="goTo(\'scorecards.html\')"><div class="cta-icon blue">🏆</div><div><div class="cta-label">Scoreboard</div><div class="cta-sub">Leaderboard</div></div></div>' +
+      '<div class="cta-card" onclick="goTo(\'service-to-sales-log.html\')"><div class="cta-icon red">📋</div><div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div></div>' +
+      '<div class="cta-card" onclick="goTo(\'upboard.html\')"><div class="cta-icon teal">🔄</div><div><div class="cta-label">UP Board</div><div class="cta-sub">Floor rotation</div></div></div>' +
+      '</div>' +
+      '<div class="cta-card wide" onclick="goTo(\'admin-panel.html\')"><div class="cta-icon purple">⚙️</div><div class="cta-text"><div class="cta-label">Admin Console</div><div class="cta-sub">Users, data & email settings</div></div><div class="cta-arrow">→</div></div>';
+  }
+
+  document.getElementById('home-content').innerHTML =
+    '<div class="home-greeting"><div class="home-greeting-sub">' + greet + '</div><div class="home-greeting-name">' + fn + '.</div></div>' + cards +
+    '<div style="margin-top:14px;"><button id="notif-toggle-btn" onclick="toggleNotifications()" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 24px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;font-family:\'Plus Jakarta Sans\',sans-serif;width:100%;transition:all 0.18s;letter-spacing:-0.01em;">🔕 Enable Notifications</button></div>';
+  initNotifButton();
+}
+
+function goTo(url) { window.location.href = url; }
+
+async function buildAdminPanel() {
+  var c = document.getElementById('admin-content');
+  c.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:13px;">Loading users…</div>';
+  var users = [];
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/sb_users?select=id,name,first_name,role,active,last_login&order=role.asc,name.asc', { headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON } });
+    if (res.ok) users = await res.json();
+  } catch(e) { console.warn('Failed to load users:', e); }
+
+  var logs = getLoginLogs();
+  var todayLogs = logs.filter(function(l) { return new Date(l.time).toDateString() === new Date().toDateString(); });
+  var activeCount = users.filter(function(u) { return u.active; }).length;
+
+  var userRows = users.length > 0 ? users.map(function(u) {
+    var initial = u.first_name ? u.first_name[0] : u.name[0];
+    var ll = u.last_login ? new Date(u.last_login).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'Never';
+    return '<div class="user-row"><div class="user-avatar ' + u.role + '">' + initial + '</div><div class="user-info"><div class="user-name">' + u.name + '</div><div class="user-meta"><span class="role-badge ' + u.role + '">' + u.role + '</span> · Last: ' + ll + '</div></div><div style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;' + (u.active ? 'background:var(--green-soft);color:var(--green)' : 'background:rgba(255,255,255,0.04);color:var(--text3)') + '">' + (u.active ? 'Active' : 'Inactive') + '</div></div>';
+  }).join('') : '<p style="color:var(--text3);font-size:13px;padding:12px 0;">Could not load user data.</p>';
+
+  var logItems = logs.length === 0 ? '<p style="color:var(--text3);font-size:13px;padding:12px 0;">No login activity yet.</p>'
+    : logs.slice(0,15).map(function(l) { var d = new Date(l.time); var ts = d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); return '<div class="log-item"><div class="log-dot" style="background:' + (l.role==='admin'?'var(--blue)':l.role==='manager'?'var(--gold)':'var(--green)') + '"></div><div class="log-info"><div class="log-name">' + l.name + '</div><div class="log-time">' + ts + '</div></div><span class="role-badge ' + l.role + '">' + l.role + '</span></div>'; }).join('');
+
+  c.innerHTML =
+    '<div class="stat-grid" style="margin-top:20px;"><div class="stat-card"><div class="stat-val">' + users.length + '</div><div class="stat-lbl">Users</div></div><div class="stat-card"><div class="stat-val">' + activeCount + '</div><div class="stat-lbl">Active</div></div><div class="stat-card"><div class="stat-val">' + todayLogs.length + '</div><div class="stat-lbl">Today</div></div></div>' +
+    '<div class="admin-section"><div class="admin-section-title">User Access</div>' + userRows + '</div>' +
+    '<div class="admin-section"><div class="admin-section-title">Recent Login Activity</div><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;">' + logItems + '</div></div>' +
+    '<div class="admin-section"><div class="admin-section-title">Quick Actions</div>' +
+    '<div class="cta-card wide" onclick="clearLoginLog()" style="margin-bottom:10px;"><div class="cta-icon red">🗑</div><div class="cta-text"><div class="cta-label">Clear Login Log</div><div class="cta-sub">Remove all login history</div></div></div>' +
+    '<div class="cta-card wide" onclick="goTo(\'admin-panel.html\')"><div class="cta-icon gold">⚙️</div><div class="cta-text"><div class="cta-label">Full Admin Console</div><div class="cta-sub">Email, data & dealer settings</div></div><div class="cta-arrow">→</div></div></div>';
+}
+
+function clearLoginLog() { if(!confirm('Clear all login history?')) return; localStorage.removeItem('sb_login_log'); buildAdminPanel(); showToast('Login log cleared'); }
+function logout() { currentUser = null; clearSession(); unsubscribeFromPush(); document.getElementById('nav-bar').classList.remove('visible'); window.location.replace('/login.html'); }
+function showToast(msg) { var t = document.getElementById('app-toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 2500); }
+
+var VAPID_PUBLIC_KEY = 'BFYqM0IN3sQtNJiq1iTFIh1Ex3LCEboUq7hB966WA5UT_Z5_q58_VPbuIUY__m36IyinsOTKlTHhg-PG5JN-JU4';
+function urlBase64ToUint8Array(b){var p='='.repeat((4-b.length%4)%4);var d=(b+p).replace(/-/g,'+').replace(/_/g,'/');return Uint8Array.from([].slice.call(atob(d)).map(function(c){return c.charCodeAt(0)}));}
+async function subscribeToPush(user){if(!('Notification' in window)||!('serviceWorker' in navigator)) return;if(Notification.permission==='denied') return;try{var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(!sub){var perm=await Notification.requestPermission();if(perm!=='granted') return;sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});}await fetch('/api/save-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),user_id:user.id||'',user_name:user.name,user_role:user.role})});}catch(e){console.warn('Push failed:',e);}}
+async function unsubscribeFromPush(){try{var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(sub){await fetch('/api/save-subscription',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe();}}catch(e){}}
+async function toggleNotifications(){try{var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(sub){await unsubscribeFromPush();updateNotifButton(false);}else{await subscribeToPush(currentUser);updateNotifButton(true);}}catch(e){showToast('Notifications not available');}}
+async function checkNotifStatus(){if(!('PushManager' in window)) return false;try{var reg=await navigator.serviceWorker.ready;return !!(await reg.pushManager.getSubscription());}catch(e){return false;}}
+function updateNotifButton(en){var btn=document.getElementById('notif-toggle-btn');if(!btn) return;btn.textContent=en?'🔔 Notifications On':'🔕 Enable Notifications';btn.style.borderColor=en?'rgba(45,212,160,0.3)':'var(--border)';btn.style.color=en?'var(--green)':'var(--text3)';btn.style.background=en?'var(--green-soft)':'var(--surface)';}
+async function initNotifButton(){updateNotifButton(await checkNotifStatus());}
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})});}
+
+function init() {
+  currentUser = getSession();
+  if (!currentUser) { window.location.replace('/login.html'); return; }
+  addLoginLog(currentUser);
+  buildHome(); buildNav(); initAppNav(); showScreen('screen-home');
+  subscribeToPush(currentUser);
+}
+init();
+</script>
+</body>
+</html>
