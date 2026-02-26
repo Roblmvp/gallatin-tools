@@ -18,35 +18,50 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .bg-orb1{position:fixed;top:-200px;right:-150px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(91,79,232,0.12) 0%,transparent 70%);pointer-events:none;z-index:0;}
 .bg-orb2{position:fixed;bottom:-200px;left:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,0.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
 
-nav{position:sticky;top:0;z-index:100;background:rgba(7,7,14,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;}
+/* ── HAMBURGER NAV ── */
+nav{position:sticky;top:0;z-index:200;background:rgba(7,7,14,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;}
 nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--purple),transparent,var(--gold),transparent);}
 .nav-brand{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.06em;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.nav-link{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:7px;transition:all 0.18s;}
-.nav-link:hover{color:var(--text);background:rgba(255,255,255,0.05);}
-.nav-right{display:flex;align-items:center;gap:12px;}
+.nav-left{display:flex;align-items:center;gap:12px;}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-role-pill{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:20px;}
+.role-admin{background:rgba(99,102,241,0.2);color:#818CF8;border:1px solid rgba(99,102,241,0.3);}
+.role-manager{background:rgba(232,184,75,0.15);color:var(--gold);border:1px solid rgba(232,184,75,0.25);}
+.role-sales{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);}
+.nav-user{font-size:12px;font-weight:600;color:var(--muted);}
+.hamburger{background:none;border:1px solid var(--border2);border-radius:8px;width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:all 0.18s;padding:0;}
+.hamburger:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.04);}
+.hamburger span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,0.7);border-radius:2px;transition:all 0.2s;}
+.hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+.nav-overlay{position:fixed;inset:0;z-index:190;display:none;}
+.nav-overlay.open{display:block;}
+.nav-dropdown{position:absolute;top:calc(100% + 8px);right:20px;background:#0F0F1A;border:1px solid var(--border2);border-radius:14px;min-width:220px;padding:6px;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:201;opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;transition:all 0.18s cubic-bezier(0.16,1,0.3,1);}
+.nav-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+.dd-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;cursor:pointer;transition:all 0.15s;}
+.dd-item:hover{background:rgba(255,255,255,0.05);color:var(--text);}
+.dd-item.active{background:rgba(91,79,232,0.15);color:var(--purple2);}
+.dd-icon{font-size:15px;width:20px;text-align:center;}
+.dd-divider{height:1px;background:var(--border);margin:4px 0;}
+.dd-admin{display:none;}
+.dd-admin.show{display:flex;}
 
 .page{max-width:1300px;margin:0 auto;padding:28px 28px 80px;position:relative;z-index:1;}
-
-/* Page header */
 .page-header{margin-bottom:32px;}
 .page-eyebrow{font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .page-eyebrow::before{content:'';display:inline-block;width:20px;height:2px;background:var(--gold);border-radius:2px;}
 .page-title{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:0.03em;line-height:1;margin-bottom:8px;}
 .page-sub{font-size:14px;color:var(--muted);}
-
-/* Period selector */
 .period-tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content;margin-bottom:28px;}
 .period-tab{padding:7px 18px;border-radius:7px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:'DM Sans',sans-serif;transition:all 0.18s;}
 .period-tab.active{background:var(--surface3);color:var(--text);}
-
-/* Top 3 podium */
 .podium{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px;align-items:end;}
 .podium-card{border-radius:20px;overflow:hidden;border:1px solid var(--border);transition:transform 0.25s;}
 .podium-card:hover{transform:translateY(-4px);}
 .podium-card.rank1{background:linear-gradient(160deg,#1C1810 0%,#2A2010 100%);border-color:rgba(232,184,75,0.3);box-shadow:0 20px 60px rgba(232,184,75,0.12);}
 .podium-card.rank2{background:linear-gradient(160deg,#131320 0%,#1A1A2E 100%);border-color:rgba(148,163,184,0.2);}
 .podium-card.rank3{background:linear-gradient(160deg,#1A1008 0%,#221408 100%);border-color:rgba(200,123,75,0.2);}
-
 .podium-top{padding:28px 24px 20px;text-align:center;position:relative;}
 .podium-rank-icon{font-size:32px;margin-bottom:12px;}
 .podium-avatar{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;}
@@ -61,13 +76,10 @@ nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;backg
 .rank2 .podium-score{color:#94A3B8;}
 .rank3 .podium-score{color:#C87B4B;}
 .podium-score-lbl{font-size:10px;color:var(--muted2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;}
-
 .podium-stats{border-top:1px solid var(--border);padding:16px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;}
 .ps-val{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;}
 .ps-lbl{font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);margin-top:2px;}
 .rank1 .ps-val{color:var(--gold);}
-
-/* Full leaderboard */
 .leaderboard{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
 .lb-hd{background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 24px;display:grid;grid-template-columns:44px 1fr 90px 90px 90px 90px 110px;align-items:center;gap:8px;}
 .lb-col{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted2);text-align:center;}
@@ -91,8 +103,6 @@ nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;backg
 .conv-hi{background:rgba(34,197,94,0.15);color:#4ADE80;border:1px solid rgba(34,197,94,0.2);}
 .conv-mid{background:rgba(232,184,75,0.15);color:var(--gold);border:1px solid rgba(232,184,75,0.2);}
 .conv-lo{background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border);}
-
-/* Trend bars */
 .trend-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:28px;}
 .trend-title{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
 .trend-title::before{content:'';display:inline-block;width:16px;height:2px;background:var(--gold);border-radius:2px;}
@@ -103,8 +113,6 @@ nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;backg
 .trend-bar{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
 .trend-val{font-size:12px;font-weight:700;width:40px;text-align:right;flex-shrink:0;}
 .trend-label{font-size:10px;color:var(--muted2);width:80px;flex-shrink:0;}
-
-/* Stats grid */
 .insights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 .insight-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;}
 .insight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
@@ -118,14 +126,12 @@ nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;backg
 .ic-purple .insight-val{color:var(--purple2);}
 .ic-green .insight-val{color:#4ADE80;}
 .insight-desc{font-size:12px;color:var(--muted);}
-
 .loading{text-align:center;padding:60px;color:var(--muted);}
 .dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--purple);margin:0 3px;animation:dotpulse 1.2s ease infinite;}
 .dots span:nth-child(2){animation-delay:0.2s;} .dots span:nth-child(3){animation-delay:0.4s;}
 @keyframes dotpulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 .fade-in{animation:fadeUp 0.4s ease both;}
-
 @media(max-width:900px){
   .podium{grid-template-columns:1fr;}
   .insights-grid{grid-template-columns:1fr 1fr;}
@@ -139,16 +145,27 @@ nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;backg
 <div class="bg-orb2"></div>
 
 <nav>
-  <div style="display:flex;align-items:center;gap:16px;">
+  <div class="nav-left">
     <div class="nav-brand">ServiceBridge</div>
     <span style="font-size:12px;color:var(--muted);font-weight:500;">/ Rep Scorecards</span>
   </div>
   <div class="nav-right">
-    <a href="manager-dashboard.html" class="nav-link">Dashboard</a>
-    <a href="login.html" class="nav-link">Rep Login</a>
-    <a href="admin-panel.html" class="nav-link">Admin</a>
+    <span class="nav-user" id="nav-user-name"></span>
+    <span class="nav-role-pill" id="nav-role-pill"></span>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="nav-dropdown" id="nav-dropdown">
+    <a href="app.html" class="dd-item"><span class="dd-icon">🏠</span> Home</a>
+    <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
+    <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Performance Dashboard</a>
+    <a href="scorecards.html" class="dd-item active"><span class="dd-icon">🏆</span> Scorecards</a>
+    <div class="dd-divider dd-admin" id="dd-admin-divider"></div>
+    <a href="admin-panel.html" class="dd-item dd-admin" id="dd-admin-link"><span class="dd-icon">⚙️</span> Admin Panel</a>
   </div>
 </nav>
+<div class="nav-overlay" id="nav-overlay" onclick="closeMenu()"></div>
 
 <div class="page">
   <div class="page-header fade-in">
@@ -169,6 +186,40 @@ nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;backg
 </div>
 
 <script>
+// ── NAV ──
+function initNav() {
+  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
+  if (!rep) return;
+  const nameEl = document.getElementById('nav-user-name');
+  const pillEl = document.getElementById('nav-role-pill');
+  if (nameEl) nameEl.textContent = rep.name ? rep.name.split(' ')[0] : '';
+  if (pillEl) {
+    const role = (rep.role || 'sales').toLowerCase();
+    pillEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+    pillEl.className = 'nav-role-pill ' + (role === 'admin' ? 'role-admin' : role === 'manager' ? 'role-manager' : 'role-sales');
+    if (role === 'admin') {
+      document.getElementById('dd-admin-link').classList.add('show');
+      document.getElementById('dd-admin-divider').classList.add('show');
+    }
+  }
+}
+function toggleMenu() {
+  const hb = document.getElementById('hamburger');
+  const dd = document.getElementById('nav-dropdown');
+  const ov = document.getElementById('nav-overlay');
+  const isOpen = dd.classList.contains('open');
+  hb.classList.toggle('open', !isOpen);
+  dd.classList.toggle('open', !isOpen);
+  ov.classList.toggle('open', !isOpen);
+}
+function closeMenu() {
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('nav-dropdown').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('open');
+}
+initNav();
+
+// ── DATA ──
 const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
 const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
@@ -222,7 +273,6 @@ function calcStats(repName, entries) {
   const temps = mine.filter(e => e.eng_score).map(e => parseInt(e.eng_score));
   const avgTemp = temps.length ? (temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1) : 0;
   const conv = total > 0 ? Math.round((sold/total)*100) : 0;
-  // Score = weighted composite
   const score = (total * 2) + (hot * 3) + (sold * 5) + (appt * 2) + parseFloat(avgTemp);
   return { total, hot, sold, appt, avgTemp, conv, score: Math.round(score) };
 }
@@ -237,18 +287,12 @@ function render() {
   const filtered = filterByPeriod(allEntries);
   const repStats = REPS.map((r,i) => ({ ...r, ...calcStats(r.name, filtered), idx:i }));
   repStats.sort((a,b) => b.score - a.score);
-
   const maxScore = repStats[0]?.score || 1;
   const podiumOrder = [repStats[1], repStats[0], repStats[2]].filter(Boolean);
-  const rankClasses = ['rank2','rank1','rank3'];
-  const rankIcons = ['🥈','🥇','🥉'];
-  const avClasses = ['av2','av1','av3'];
 
   const html = `
-  <!-- Podium -->
   <div class="podium fade-in">
     ${podiumOrder.map((rep, pi) => {
-      const actualRank = repStats.indexOf(rep) + 1;
       const rClass = ['rank2','rank1','rank3'][pi];
       const icon = ['🥈','🥇','🥉'][pi];
       return `
@@ -270,7 +314,6 @@ function render() {
     }).join('')}
   </div>
 
-  <!-- Full Leaderboard -->
   <div class="leaderboard fade-in">
     <div class="lb-hd">
       <div class="lb-col">#</div>
@@ -301,7 +344,6 @@ function render() {
     }).join('')}
   </div>
 
-  <!-- Trend: contacts bar -->
   <div class="trend-section fade-in">
     <div class="trend-title">Contacts Logged</div>
     ${repStats.map(rep => `
@@ -331,7 +373,6 @@ function render() {
     </div>`).join('')}
   </div>
 
-  <!-- Insights -->
   <div class="insights-grid fade-in">
     <div class="insight-card ic-gold">
       <div class="insight-icon">🏆</div>
