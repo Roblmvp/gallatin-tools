@@ -543,7 +543,7 @@ async function doForgotPassword() {
     const res = await fetch(SB_URL + '/auth/v1/recover', {
       method: 'POST',
       headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email, gotrue_meta_security: {}, options: {} })
     });
     showMsg('forgot-msg', 'If an account exists with this email, you will receive a password reset link.', 'success');
   } catch(e) {
@@ -562,6 +562,11 @@ async function doSetPassword() {
   if (pw.length < 8) { showMsg('setpw-msg', 'Password must be at least 8 characters.', 'error'); return; }
   if (pw !== confirm) { showMsg('setpw-msg', 'Passwords do not match.', 'error'); return; }
 
+  if (!pendingUser || !pendingUser.auth_token) {
+    showMsg('setpw-msg', 'Session expired. Please use "Forgot password" to get a new link.', 'error');
+    return;
+  }
+
   try {
     // Update password via Supabase Auth
     const res = await fetch(SB_URL + '/auth/v1/user', {
@@ -571,15 +576,29 @@ async function doSetPassword() {
     });
 
     if (res.ok) {
-      // Clear the must_reset flag
-      await fetch(SB_URL + '/rest/v1/user_profiles?id=eq.' + pendingUser.id, {
-        method: 'PATCH',
-        headers: { ...H, 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ must_reset_password: false })
-      });
-      completeLogin(pendingUser, pendingUser.auth_token);
+      // Clear the must_reset flag if we have a profile ID
+      if (pendingUser.id) {
+        await fetch(SB_URL + '/rest/v1/user_profiles?id=eq.' + pendingUser.id, {
+          method: 'PATCH',
+          headers: { ...H, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ must_reset_password: false })
+        }).catch(() => {});
+      }
+
+      // If this was a reset flow (not first login through email/pw), show success and redirect to login
+      if (pendingUser.fromReset) {
+        showMsg('setpw-msg', 'Password set successfully! Redirecting to sign in...', 'success');
+        setTimeout(() => {
+          showStep('step-login');
+          hideMsg('setpw-msg');
+          showMsg('login-msg', 'Password updated. Sign in with your new password.', 'success');
+        }, 1500);
+      } else {
+        completeLogin(pendingUser, pendingUser.auth_token);
+      }
     } else {
-      showMsg('setpw-msg', 'Could not set password. Please try again.', 'error');
+      const errData = await res.json().catch(() => ({}));
+      showMsg('setpw-msg', errData.msg || errData.error_description || 'Could not set password. The link may have expired — try "Forgot password" again.', 'error');
     }
   } catch(e) {
     showMsg('setpw-msg', 'Connection error. Please try again.', 'error');
@@ -710,8 +729,55 @@ document.addEventListener('keydown', (e) => {
   if (active.id === 'step-2fa') verify2FA();
 });
 
+// ── DETECT PASSWORD RESET TOKEN FROM URL ──
+function checkForResetToken() {
+  // Supabase sends tokens in the URL hash: #access_token=xxx&type=recovery
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  const accessToken = params.get('access_token');
+  const type = params.get('type');
+
+  // Also check query params (some Supabase versions use these)
+  const query = new URLSearchParams(window.location.search);
+  const qToken = query.get('access_token');
+  const qType = query.get('type');
+
+  const token = accessToken || qToken;
+  const tokenType = type || qType;
+
+  if (token && (tokenType === 'recovery' || tokenType === 'signup' || tokenType === 'invite')) {
+    // We have a valid recovery/invite token — show set password form
+    pendingUser = { auth_token: token, fromReset: true };
+
+    // Try to get the user info from the token
+    fetch(SB_URL + '/auth/v1/user', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token }
+    }).then(r => r.json()).then(userData => {
+      if (userData && userData.email) {
+        // Find matching profile
+        const profile = profiles.find(p => p.email && p.email.toLowerCase() === userData.email.toLowerCase());
+        if (profile) {
+          pendingUser = { ...profile, auth_token: token, fromReset: true };
+          document.getElementById('set-pw-sub').textContent = `Welcome back, ${profile.first_name || profile.name.split(' ')[0]}! Set your new password below.`;
+        } else {
+          document.getElementById('set-pw-sub').textContent = `Set your new password for ${userData.email}.`;
+        }
+      }
+    }).catch(() => {});
+
+    // Clean the URL so the token isn't visible
+    history.replaceState(null, '', window.location.pathname);
+
+    showStep('step-set-password');
+    return true;
+  }
+  return false;
+}
+
 // ── INIT ──
-loadProfiles();
+loadProfiles().then(() => {
+  checkForResetToken();
+});
 </script>
 </body>
 </html>
