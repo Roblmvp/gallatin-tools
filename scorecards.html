@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Rep Scorecards — ServiceBridge</title>
+<!-- ══ SUPABASE AUTH ══ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/auth-guard.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -270,7 +273,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,11,20,0.85);backdrop-fil
 <script>
 const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
-const H = {'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json'};
+let H = {'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json'};
+function _refreshH(){ const t=window.sbSession?.access_token||SB_KEY; H={'apikey':SB_KEY,'Authorization':'Bearer '+t,'Content-Type':'application/json'}; }
 
 const REPS = [
   {name:'Andrew Kirk',initials:'AK',role:'Sales Rep'},
@@ -286,18 +290,17 @@ let refreshInterval = null;
 let tickerInterval = null;
 
 // ── NAV ──
-function initNav() {
-  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
-  if (!rep) return;
+function initNav(user) {
+  if (!user) return;
   const nameEl = document.getElementById('nav-user-name');
   const pillEl = document.getElementById('nav-role-pill');
-  if (nameEl) nameEl.textContent = rep.name ? rep.name.split(' ')[0] : '';
+  if (nameEl) nameEl.textContent = user.first;
   if (pillEl) {
-    const role = (rep.role || 'sales').toLowerCase();
-    pillEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+    const role = user.role.toLowerCase();
+    pillEl.textContent = user.role;
     pillEl.className = 'nav-role-pill ' + (role === 'admin' ? 'role-admin' : role === 'manager' ? 'role-manager' : '');
   }
-  if (rep.role === 'admin') {
+  if (user.role === 'Admin') {
     const d = document.getElementById('dd-admin-divider'); if(d) d.style.display='block';
     const l = document.getElementById('dd-admin-link'); if(l) l.style.display='flex';
   }
@@ -724,7 +727,9 @@ function startAutoRefresh() {
 
 // ── INIT ──
 async function load() {
-  initNav();
+  const { currentUser } = await SB_AUTH.init({ requiredRole: 'any' });
+  initNav(currentUser);
+  _refreshH();
   await loadAll();
   startAutoRefresh();
 }
