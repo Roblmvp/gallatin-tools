@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- ══ SUPABASE AUTH ══ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/auth-guard.js"></script>
 <title>Service to Sales Log — Gallatin CDJR</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
 <style>
@@ -1507,28 +1510,31 @@ textarea { resize: vertical; min-height: 88px; line-height: 1.65; }
 // ══════════════════════════════════════════════════════
 const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
-const SB_HEADERS = {
+let SB_HEADERS = {
   'Content-Type': 'application/json',
   'apikey': SB_KEY,
-  'Authorization': `Bearer ${SB_KEY}`,
+  'Authorization': 'Bearer ' + SB_KEY,
   'Prefer': 'return=minimal'
 };
+function _refreshSBH() {
+  const t = window.sbSession?.access_token || SB_KEY;
+  SB_HEADERS = { 'Content-Type':'application/json', 'apikey':SB_KEY, 'Authorization':'Bearer '+t, 'Prefer':'return=minimal' };
+}
 
 // ══════════════════════════════════════════════════════
 // NAV MENU
 // ══════════════════════════════════════════════════════
-function initS2SNav() {
-  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
-  if (!rep) return;
-  const n = rep.name || '';
-  const initials = n.split(' ').map(w => w[0]).join('').slice(0, 2);
+function initS2SNav(user) {
+  if (!user) return;
+  const n = user.name || '';
+  const initials = user.initials || n.split(' ').map(w => w[0]).join('').slice(0, 2);
   const avatarEl = document.getElementById('s2s-nav-avatar');
   const nameEl = document.getElementById('s2s-nav-name');
   const roleEl = document.getElementById('s2s-nav-role');
   if (avatarEl) avatarEl.textContent = initials;
   if (nameEl) nameEl.textContent = n;
-  if (roleEl) roleEl.textContent = rep.role || 'Sales';
-  if (rep.role === 'Admin' || rep.role === 'admin') {
+  if (roleEl) roleEl.textContent = user.role || 'Sales';
+  if (user.role === 'Admin') {
     const link = document.getElementById('s2s-admin-link');
     if (link) link.classList.add('show');
   }
@@ -1548,10 +1554,15 @@ function closeS2SMenu() {
   document.getElementById('s2s-nav-overlay').classList.remove('open');
 }
 function s2sSignOut() {
-  sessionStorage.removeItem('sb_rep');
-  window.location.replace('/login.html');
+  if (window.signOut) window.signOut();
+  else { sessionStorage.removeItem('sb_rep'); window.location.replace('/login.html'); }
 }
-initS2SNav();
+// Auth-gated init
+(async function() {
+  const { currentUser } = await SB_AUTH.init({ requiredRole: 'any' });
+  _refreshSBH();
+  initS2SNav(currentUser);
+})();
 
 // ══════════════════════════════════════════════════════
 // CLOCK
