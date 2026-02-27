@@ -2,233 +2,716 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ServiceBridge — Gallatin CDJR</title>
-
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://servicebridge.vyaxis.com/login.html">
 <meta property="og:title" content="ServiceBridge — Vyaxis">
 <meta property="og:description" content="Service → Sales Platform. Log S2S contacts, track hot leads, and view your personal performance dashboard.">
 <meta property="og:image" content="https://res.cloudinary.com/di5ujiwjp/image/upload/v1771987751/servicebridge-preview_fynjod.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://res.cloudinary.com/di5ujiwjp/image/upload/v1771987751/servicebridge-preview_fynjod.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#06080E">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #06080E; --bg2: #0C0F18;
-  --surface: #111520; --surface2: #171C2A; --surface3: #1D2333;
-  --red: #E01B36; --red-soft: rgba(224,27,54,0.12);
-  --blue: #6C70F0; --blue-soft: rgba(108,112,240,0.12);
-  --gold: #D4A73A; --green: #2DD4A0;
-  --text: #EDEEF2; --text2: rgba(237,238,242,0.62); --text3: rgba(237,238,242,0.34);
-  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.12); --border-active: rgba(108,112,240,0.5);
-  --r: 14px; --rsm: 10px; --rlg: 20px;
+  --ink: #0A0A0F; --ink2: #111118;
+  --purple: #6366F1; --purple-light: #818CF8; --purple-glow: rgba(91,79,232,0.35);
+  --red: #C8102E; --red-glow: rgba(200,16,46,0.25);
+  --gold: #E8B84B; --green: #22C55E;
+  --surface: #16161F; --surface2: #1C1C27;
+  --border: rgba(255,255,255,0.08); --border-bright: rgba(255,255,255,0.15);
+  --text: #F0EEF8; --muted: rgba(240,238,248,0.45); --muted2: rgba(240,238,248,0.25);
+  --r: 12px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: var(--bg); color: var(--text);
-  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-  min-height: 100vh; overflow-x: hidden;
-  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-  font-size: 15px; line-height: 1.5; letter-spacing: -0.01em;
+body { background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+.bg-grid { position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none; }
+.bg-orb1 { position:fixed;top:-200px;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(91,79,232,0.18) 0%,transparent 70%);pointer-events:none;z-index:0; }
+.bg-orb2 { position:fixed;bottom:-200px;left:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,0.12) 0%,transparent 70%);pointer-events:none;z-index:0; }
+
+.page-wrap { display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;position:relative;z-index:1; }
+
+/* ── BRAND ── */
+.brand-lockup { text-align:center;margin-bottom:48px;animation:fadeDown 0.6s ease both; }
+.brand-powered { font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px; }
+.brand-name { font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:0.04em;background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.6) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1; }
+.brand-product { display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:linear-gradient(135deg,var(--purple),var(--purple-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.08em; }
+.brand-dealer { font-size:11px;font-weight:500;color:var(--muted);margin-top:6px;letter-spacing:0.06em; }
+
+/* ── CARD ── */
+.login-card { background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:440px;box-shadow:0 32px 80px rgba(0,0,0,0.5);animation:fadeUp 0.6s 0.1s ease both;position:relative;overflow:hidden; }
+.login-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--purple-light),var(--red)); }
+
+.step-label { font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:8px; }
+.step-label .step-badge { background:rgba(99,102,241,0.15);color:var(--purple-light);padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700; }
+.card-title { font-size:22px;font-weight:700;margin-bottom:6px; }
+.card-sub { font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.5; }
+
+/* ── TABS (Email vs PIN) ── */
+.login-tabs { display:flex;gap:0;margin-bottom:28px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border); }
+.login-tab { flex:1;padding:10px;text-align:center;font-size:12px;font-weight:700;letter-spacing:0.04em;color:var(--muted);cursor:pointer;transition:all 0.18s;background:transparent; }
+.login-tab.active { background:rgba(99,102,241,0.15);color:var(--purple-light); }
+.login-tab:hover:not(.active) { background:rgba(255,255,255,0.03); }
+
+/* ── FORM INPUTS ── */
+.form-field { margin-bottom:18px; }
+.form-label { display:block;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px; }
+.form-input {
+  width:100%;padding:12px 16px;
+  background:var(--surface2);border:1.5px solid var(--border-bright);border-radius:var(--r);
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);
+  transition:border-color 0.18s,box-shadow 0.18s;
+  outline:none;
 }
+.form-input:focus { border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-glow); }
+.form-input::placeholder { color:var(--muted2); }
+.form-input.error { border-color:var(--red);box-shadow:0 0 0 3px var(--red-glow); }
 
-.bg-noise { position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.4;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
-.bg-grad { position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 20% 0%,rgba(224,27,54,0.07) 0%,transparent 70%),radial-gradient(ellipse 50% 60% at 80% 100%,rgba(108,112,240,0.05) 0%,transparent 70%); }
+.form-row { display:flex;gap:12px; }
+.form-row .form-field { flex:1; }
 
-.login-wrap { position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px; }
+/* ── BUTTONS ── */
+.btn-primary {
+  width:100%;padding:14px;border:none;border-radius:var(--r);
+  background:linear-gradient(135deg,var(--purple),var(--purple-light));
+  color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all 0.18s;letter-spacing:0.04em;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-primary:hover { filter:brightness(1.1);transform:translateY(-1px); }
+.btn-primary:active { transform:scale(0.98); }
+.btn-primary:disabled { opacity:0.4;cursor:not-allowed;filter:none;transform:none; }
 
-/* Brand */
-.brand { text-align:center;margin-bottom:40px;animation:fadeIn 0.7s ease both; }
-.brand-powered { font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-bottom:12px; }
-.brand-name { font-family:'Instrument Serif',Georgia,serif;font-size:44px;font-weight:400;letter-spacing:-0.02em;color:var(--text);line-height:1; }
-@media(min-width:480px){.brand-name{font-size:52px;}}
-.brand-product { display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue); }
-.brand-product::before { content:'';width:18px;height:2px;background:var(--blue);border-radius:1px;opacity:0.5; }
-.brand-dealer { font-size:12px;font-weight:500;color:var(--text3);margin-top:8px;letter-spacing:0.02em; }
+.btn-secondary {
+  width:100%;padding:12px;border:1.5px solid var(--border-bright);border-radius:var(--r);
+  background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;transition:all 0.18s;
+  margin-top:10px;
+}
+.btn-secondary:hover { border-color:var(--purple);color:var(--purple-light); }
 
-/* Card */
-.login-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:36px 32px;width:100%;max-width:440px;box-shadow:0 24px 80px -12px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.02) inset;animation:slideUp 0.6s 0.1s ease both;position:relative; }
-.login-card::before { content:'';position:absolute;top:0;left:24px;right:24px;height:1px;background:linear-gradient(90deg,transparent,var(--blue),var(--red),transparent);opacity:0.5; }
+.text-link { font-size:12px;color:var(--purple-light);text-decoration:none;font-weight:600;cursor:pointer;transition:color 0.15s; }
+.text-link:hover { color:#A5B4FC; }
 
-.step-label { font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:16px; }
-.step-title { font-family:'Instrument Serif',Georgia,serif;font-size:26px;font-weight:400;letter-spacing:-0.02em;color:var(--text);margin-bottom:6px; }
-.step-sub { font-size:14px;font-weight:450;color:var(--text2);margin-bottom:28px;line-height:1.5; }
+/* ── ERROR / SUCCESS ── */
+.msg-box { padding:12px 16px;border-radius:var(--r);font-size:12px;font-weight:600;margin-bottom:18px;display:none; }
+.msg-box.show { display:block; }
+.msg-box.error { background:rgba(200,16,46,0.12);color:#FC8181;border:1px solid rgba(200,16,46,0.2); }
+.msg-box.success { background:rgba(34,197,94,0.12);color:#86EFAC;border:1px solid rgba(34,197,94,0.2); }
+.msg-box.info { background:rgba(99,102,241,0.12);color:#A5B4FC;border:1px solid rgba(99,102,241,0.2); }
 
-/* Rep grid */
-.rep-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px; }
-.rep-btn { background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 14px;cursor:pointer;transition:all 0.2s cubic-bezier(0.16,1,0.3,1);text-align:left;position:relative;overflow:hidden; }
-.rep-btn:hover { border-color:var(--border2);background:var(--surface2);transform:translateY(-1px); }
-.rep-btn.selected { border-color:var(--border-active);background:var(--blue-soft);box-shadow:0 0 0 1px var(--border-active),0 4px 20px -4px rgba(108,112,240,0.15); }
-.rep-btn.selected::after { content:'✓';position:absolute;top:10px;right:12px;font-size:11px;color:var(--blue);font-weight:700; }
-.rep-avatar { width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--surface3),var(--surface2));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;font-family:'JetBrains Mono',monospace;letter-spacing:0.02em; }
-.rep-btn.selected .rep-avatar { background:linear-gradient(135deg,var(--blue),var(--red));color:#fff;border-color:transparent; }
-.rep-btn-name { font-size:14px;font-weight:650;color:var(--text);line-height:1.25; }
-.rep-btn-role { font-size:11px;font-weight:600;margin-top:3px;letter-spacing:0.03em; }
-.role-admin { color:var(--gold); }
-.role-manager { color:var(--blue); }
-.role-sales { color:var(--text3); }
+/* ── USER SELECT GRID (legacy mode) ── */
+.rep-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px; }
+.rep-btn { background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 12px;cursor:pointer;transition:all 0.18s;text-align:left;position:relative;overflow:hidden; }
+.rep-btn:hover { border-color:var(--border-bright);background:rgba(255,255,255,0.06); }
+.rep-btn.selected { border-color:var(--purple);background:rgba(91,79,232,0.12);box-shadow:0 0 0 1px var(--purple); }
+.rep-btn.selected::after { content:'✓';position:absolute;top:8px;right:10px;font-size:11px;color:var(--purple);font-weight:700; }
+.rep-avatar { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;margin-bottom:8px; }
+.rep-avatar.role-admin { background:linear-gradient(135deg,var(--purple),#4338CA); }
+.rep-avatar.role-manager,.rep-avatar.role-s2s-manager { background:linear-gradient(135deg,var(--gold),#D97706); }
+.rep-avatar.role-sales { background:linear-gradient(135deg,#059669,#10B981); }
+.rep-avatar.role-finance-manager { background:linear-gradient(135deg,#1E3A8A,#3B82F6); }
+.rep-btn-name { font-size:13px;font-weight:600;color:var(--text);line-height:1.2; }
+.rep-btn-role { font-size:10px;margin-top:2px;font-weight:600;letter-spacing:0.04em; }
+.role-admin   { color: var(--purple-light); }
+.role-manager,.role-s2s-manager { color: var(--gold); }
+.role-sales   { color: var(--muted); }
+.role-finance-manager { color: #60A5FA; }
 
-/* Continue */
-.continue-btn { width:100%;background:var(--blue);border:none;border-radius:var(--rsm);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;padding:14px;cursor:pointer;transition:all 0.2s;opacity:0.35;pointer-events:none;letter-spacing:0.02em; }
-.continue-btn.ready { opacity:1;pointer-events:auto; }
-.continue-btn.ready:hover { background:#7B7EF5;transform:translateY(-1px);box-shadow:0 8px 24px -4px rgba(108,112,240,0.3); }
-.continue-btn.ready:active { transform:scale(0.98); }
-
-/* PIN */
+/* ── PIN PAD ── */
 .pin-section { display:none; }
 .pin-section.show { display:block; }
-.pin-dots { display:flex;gap:12px;justify-content:center;margin-bottom:24px; }
-.pin-dot { width:13px;height:13px;border-radius:50%;border:2px solid var(--border2);transition:all 0.18s cubic-bezier(0.16,1,0.3,1); }
-.pin-dot.filled { background:var(--blue);border-color:var(--blue);box-shadow:0 0 12px rgba(108,112,240,0.35);transform:scale(1.1); }
-.pin-dot.error { background:var(--red);border-color:var(--red);box-shadow:0 0 12px rgba(224,27,54,0.35);animation:shake 0.35s ease; }
-.pin-pad { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px; }
-.pin-key { background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);height:54px;font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--text);cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;user-select:none; }
-.pin-key:hover { background:var(--surface2);border-color:var(--border2); }
-.pin-key:active { transform:scale(0.93);background:var(--blue-soft);border-color:var(--border-active); }
-.pin-key.disabled { opacity:0.3;pointer-events:none; }
-.pin-key.fn { font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;color:var(--text2); }
-.pin-error { text-align:center;font-size:13px;font-weight:600;color:#F87171;min-height:20px;margin-bottom:4px; }
+.pin-dots { display:flex;gap:10px;justify-content:center;margin-bottom:20px; }
+.pin-dot { width:14px;height:14px;border-radius:50%;border:2px solid var(--border-bright);transition:all 0.15s; }
+.pin-dot.filled { background:var(--purple);border-color:var(--purple);box-shadow:0 0 8px var(--purple-glow); }
+.pin-dot.error { background:var(--red);border-color:var(--red);animation:shake 0.3s ease; }
+.pin-pad { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px; }
+.pin-key { background:var(--surface2);border:1px solid var(--border);border-radius:10px;height:52px;font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:var(--text);cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;user-select:none; }
+.pin-key:hover { background:rgba(255,255,255,0.08);border-color:var(--border-bright); }
+.pin-key:active { transform:scale(0.94);background:rgba(91,79,232,0.2);border-color:var(--purple); }
+.pin-error { text-align:center;font-size:12px;color:#FC8181;font-weight:500;height:18px;margin-bottom:8px; }
 
-/* Loading */
-.loading-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px; }
-.loading-card { background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);height:96px;position:relative;overflow:hidden; }
-.loading-card::after { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.03) 50%,transparent 100%);animation:shimmer 1.8s infinite; }
-.error-box { background:var(--red-soft);border:1px solid rgba(224,27,54,0.2);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:20px; }
-.error-box p { font-size:14px;font-weight:500;color:#F87171;margin-bottom:12px; }
-.error-box button { background:var(--surface2);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 24px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s; }
-.error-box button:hover { background:var(--surface3); }
-.spinner { display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.15);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px; }
-.login-footer { margin-top:24px;text-align:center;font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.02em;animation:fadeIn 0.7s 0.3s ease both; }
+/* ── 2FA CODE INPUT ── */
+.code-inputs { display:flex;gap:8px;justify-content:center;margin-bottom:24px; }
+.code-digit {
+  width:48px;height:56px;text-align:center;
+  background:var(--surface2);border:1.5px solid var(--border-bright);border-radius:var(--r);
+  font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--text);
+  outline:none;transition:border-color 0.18s,box-shadow 0.18s;
+}
+.code-digit:focus { border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-glow); }
 
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
-@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ── LOADING ── */
+.btn-loading { position:relative;color:transparent!important; }
+.btn-loading::after {
+  content:'';position:absolute;width:20px;height:20px;
+  border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;
+  border-radius:50%;animation:spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── STEP TRANSITIONS ── */
+.step { display:none; }
+.step.active { display:block;animation:fadeUp 0.3s ease both; }
+
+/* ── DIVIDER ── */
+.divider { display:flex;align-items:center;gap:12px;margin:24px 0; }
+.divider::before,.divider::after { content:'';flex:1;height:1px;background:var(--border); }
+.divider span { font-size:11px;font-weight:600;color:var(--muted2);letter-spacing:0.06em; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity:0;transform:translateY(16px); } to { opacity:1;transform:translateY(0); } }
+@keyframes fadeDown { from { opacity:0;transform:translateY(-12px); } to { opacity:1;transform:translateY(0); } }
+@keyframes shake { 0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);} }
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px) {
+  .brand-name { font-size:40px; }
+  .brand-product { font-size:22px; }
+  .login-card { padding:32px 24px; }
+  .code-digit { width:42px;height:50px;font-size:20px; }
+}
 </style>
 </head>
 <body>
-<div class="bg-noise"></div>
-<div class="bg-grad"></div>
+<div class="bg-grid"></div>
+<div class="bg-orb1"></div>
+<div class="bg-orb2"></div>
 
-<div class="login-wrap">
-  <div class="brand">
+<div class="page-wrap">
+  <div class="brand-lockup">
     <div class="brand-powered">Powered by Vyaxis</div>
-    <div class="brand-name">Gallatin CDJR</div>
-    <div class="brand-product">ServiceBridge</div>
-    <div class="brand-dealer">Service-to-Sales Platform</div>
+    <div class="brand-name">GALLATIN CDJR</div>
+    <div class="brand-product">⚡ ServiceBridge</div>
+    <div class="brand-dealer">Service → Sales Platform · S2S Team Access</div>
   </div>
+
   <div class="login-card">
-    <div id="step-name">
-      <div class="step-label">Step 1 of 2</div>
-      <div class="step-title">Who are you?</div>
-      <div class="step-sub">Select your name to continue</div>
-      <div id="rep-grid-container">
-        <div class="loading-grid" id="rep-loading"><div class="loading-card"></div><div class="loading-card"></div><div class="loading-card"></div><div class="loading-card"></div></div>
-        <div class="rep-grid" id="rep-grid" style="display:none;"></div>
-        <div id="rep-error" style="display:none;"></div>
+    <!-- ══ STEP 1: LOGIN METHOD ══ -->
+    <div class="step active" id="step-login">
+      <div class="step-label"><span class="step-badge">Secure Login</span></div>
+      <div class="card-title">Sign in</div>
+      <div class="card-sub">Enter your email and password to access ServiceBridge.</div>
+
+      <div class="msg-box" id="login-msg"></div>
+
+      <div class="form-field">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="login-email" type="email" placeholder="name@gallatincdjr.com" autocomplete="email" autofocus>
       </div>
-      <button onclick="goToPin()" id="next-btn" class="continue-btn">Continue →</button>
+      <div class="form-field">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="login-password" type="password" placeholder="Enter your password" autocomplete="current-password">
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
+        <span class="text-link" onclick="showStep('step-forgot')">Forgot password?</span>
+      </div>
+
+      <button class="btn-primary" id="btn-login" onclick="doEmailLogin()">Sign In →</button>
+
+      <div class="divider"><span>or</span></div>
+
+      <button class="btn-secondary" onclick="showStep('step-pin-select')">Sign in with PIN (legacy)</button>
     </div>
-    <div id="step-pin" class="pin-section">
-      <div class="step-label">Step 2 of 2</div>
-      <div class="step-title">Enter your PIN</div>
-      <div class="step-sub" id="pin-sub">Enter your 4-digit PIN</div>
-      <div class="pin-dots"><div class="pin-dot" id="dot-0"></div><div class="pin-dot" id="dot-1"></div><div class="pin-dot" id="dot-2"></div><div class="pin-dot" id="dot-3"></div></div>
-      <div class="pin-pad" id="pin-pad">
+
+    <!-- ══ STEP 2: 2FA VERIFICATION ══ -->
+    <div class="step" id="step-2fa">
+      <div class="step-label"><span class="step-badge">2-Factor Auth</span></div>
+      <div class="card-title">Verify your identity</div>
+      <div class="card-sub" id="2fa-sub">We sent a 6-digit code to your phone ending in ****1234.</div>
+
+      <div class="msg-box" id="2fa-msg"></div>
+
+      <div class="code-inputs">
+        <input class="code-digit" id="code-0" type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+        <input class="code-digit" id="code-1" type="text" maxlength="1" inputmode="numeric">
+        <input class="code-digit" id="code-2" type="text" maxlength="1" inputmode="numeric">
+        <input class="code-digit" id="code-3" type="text" maxlength="1" inputmode="numeric">
+        <input class="code-digit" id="code-4" type="text" maxlength="1" inputmode="numeric">
+        <input class="code-digit" id="code-5" type="text" maxlength="1" inputmode="numeric">
+      </div>
+
+      <button class="btn-primary" id="btn-verify" onclick="verify2FA()">Verify →</button>
+
+      <div style="text-align:center;margin-top:16px;">
+        <span class="text-link" id="resend-link" onclick="resend2FA()">Resend code</span>
+        <span style="color:var(--muted2);font-size:11px;margin-left:8px;" id="resend-timer"></span>
+      </div>
+
+      <button class="btn-secondary" onclick="showStep('step-login')">← Back to sign in</button>
+    </div>
+
+    <!-- ══ STEP 3: FORGOT PASSWORD ══ -->
+    <div class="step" id="step-forgot">
+      <div class="step-label"><span class="step-badge">Password Reset</span></div>
+      <div class="card-title">Reset your password</div>
+      <div class="card-sub">Enter your email and we'll send you a link to create a new password.</div>
+
+      <div class="msg-box" id="forgot-msg"></div>
+
+      <div class="form-field">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="forgot-email" type="email" placeholder="name@gallatincdjr.com">
+      </div>
+
+      <button class="btn-primary" onclick="doForgotPassword()">Send Reset Link →</button>
+      <button class="btn-secondary" onclick="showStep('step-login')">← Back to sign in</button>
+    </div>
+
+    <!-- ══ STEP 4: SET NEW PASSWORD (first login / reset) ══ -->
+    <div class="step" id="step-set-password">
+      <div class="step-label"><span class="step-badge">First Time Setup</span></div>
+      <div class="card-title">Set your password</div>
+      <div class="card-sub" id="set-pw-sub">Welcome! Create a secure password for your account.</div>
+
+      <div class="msg-box" id="setpw-msg"></div>
+
+      <div class="form-field">
+        <label class="form-label">New Password</label>
+        <input class="form-input" id="new-password" type="password" placeholder="At least 8 characters">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Confirm Password</label>
+        <input class="form-input" id="confirm-password" type="password" placeholder="Re-enter your password">
+      </div>
+
+      <button class="btn-primary" onclick="doSetPassword()">Set Password & Continue →</button>
+    </div>
+
+    <!-- ══ STEP 5: LEGACY PIN SELECT ══ -->
+    <div class="step" id="step-pin-select">
+      <div class="step-label"><span class="step-badge">Legacy Login</span></div>
+      <div class="card-title">Who are you?</div>
+      <div class="card-sub">Select your name to continue with PIN login.</div>
+
+      <div class="rep-grid" id="rep-grid"></div>
+
+      <button class="btn-primary" id="next-btn" onclick="goToPin()" disabled>Continue →</button>
+      <button class="btn-secondary" onclick="showStep('step-login')">← Sign in with email</button>
+    </div>
+
+    <!-- ══ STEP 6: LEGACY PIN ENTRY ══ -->
+    <div class="step" id="step-pin-enter">
+      <div class="step-label"><span class="step-badge">Legacy Login</span></div>
+      <div class="card-title">Enter your PIN</div>
+      <div class="card-sub" id="pin-sub">Enter your 4-digit PIN</div>
+
+      <div class="pin-dots">
+        <div class="pin-dot" id="dot-0"></div><div class="pin-dot" id="dot-1"></div>
+        <div class="pin-dot" id="dot-2"></div><div class="pin-dot" id="dot-3"></div>
+      </div>
+      <div class="pin-pad">
         <button class="pin-key" onclick="pinPress('1')">1</button><button class="pin-key" onclick="pinPress('2')">2</button><button class="pin-key" onclick="pinPress('3')">3</button>
         <button class="pin-key" onclick="pinPress('4')">4</button><button class="pin-key" onclick="pinPress('5')">5</button><button class="pin-key" onclick="pinPress('6')">6</button>
         <button class="pin-key" onclick="pinPress('7')">7</button><button class="pin-key" onclick="pinPress('8')">8</button><button class="pin-key" onclick="pinPress('9')">9</button>
-        <button class="pin-key fn" onclick="goBackToName()">←</button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key fn" onclick="pinDelete()">⌫</button>
+        <button class="pin-key" onclick="showStep('step-pin-select')">←</button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key" onclick="pinDelete()">⌫</button>
       </div>
       <div class="pin-error" id="pin-error"></div>
     </div>
   </div>
-  <div class="login-footer">Secure server-side authentication · Encrypted PINs</div>
 </div>
 
 <script>
-var SUPABASE_URL  = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
-var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
-var AUTH_ENDPOINT = SUPABASE_URL + '/functions/v1/auth';
-var ROLE_REDIRECT = { admin:'app.html', manager:'app.html', sales:'app.html' };
+const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
+const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 
-var reps = [], selectedRep = null, pinEntry = '', isAuthenticating = false;
+let profiles = [];
+let selectedProfile = null;
+let pinEntry = '';
+let pendingUser = null;
+let resendCooldown = 0;
 
-async function init() {
-  var existing = null;
-  try { existing = JSON.parse(sessionStorage.getItem('sb_rep') || 'null'); } catch(e) {}
-  if (existing && existing.name && existing.role) { window.location.replace(ROLE_REDIRECT[existing.role.toLowerCase()] || 'app.html'); return; }
-  await loadReps();
+// ── Load profiles from Supabase on page load ──
+async function loadProfiles() {
+  try {
+    const res = await fetch(SB_URL + '/rest/v1/user_profiles?active=eq.true&order=name.asc', { headers: H });
+    if (res.ok) {
+      profiles = await res.json();
+    }
+  } catch(e) {
+    console.warn('Could not load profiles from Supabase, falling back to defaults');
+  }
+  // Fallback if table doesn't exist yet
+  if (!profiles.length) {
+    profiles = [
+      {name:'Robert Lisowski', first_name:'Robert', initials:'RL', role:'Admin',       title:'General Sales Manager', email:'Rob.l@gallatincdjr.com', pin:'5757', two_factor_enabled:false},
+      {name:'Tyler Doyle',     first_name:'Tyler',  initials:'TD', role:'S2S Manager',  title:'S2S Manager',           email:'Tyler.d@gallatincdjr.com', pin:'1234', two_factor_enabled:false},
+      {name:'Andrew Kirk',     first_name:'Andrew', initials:'AK', role:'Sales',        title:'Sales Consultant',      email:'', pin:'1234', two_factor_enabled:false},
+      {name:'DJ Rogers',       first_name:'DJ',     initials:'DR', role:'Sales',        title:'Sales Consultant',      email:'', pin:'1234', two_factor_enabled:false},
+      {name:'Kody McCann',     first_name:'Kody',   initials:'KM', role:'Sales',        title:'Sales Consultant',      email:'', pin:'1234', two_factor_enabled:false},
+      {name:'Joe Smith',       first_name:'Joe',    initials:'JS', role:'Sales',        title:'Sales Consultant',      email:'Joe.s@gallatincdjr.com', pin:'', two_factor_enabled:false},
+      {name:'Dominick Ferrara',first_name:'Dominick',initials:'DF',role:'Sales',        title:'Sales Consultant',      email:'dominick.f@gallatincdjr.com', pin:'', two_factor_enabled:false},
+      {name:'Mich Shelton',    first_name:'Mich',   initials:'MS', role:'Sales',        title:'Sales Consultant',      email:'Mich.s@gallatincdjr.com', pin:'', two_factor_enabled:false},
+    ];
+  }
+  renderRepGrid();
 }
 
-async function loadReps() {
-  var loadingEl = document.getElementById('rep-loading'), gridEl = document.getElementById('rep-grid'), errorEl = document.getElementById('rep-error');
-  loadingEl.style.display = ''; gridEl.style.display = 'none'; errorEl.style.display = 'none';
+// ── Step Navigation ──
+function showStep(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  // Auto-focus first input
+  setTimeout(() => {
+    const input = el.querySelector('input:not([type="hidden"])');
+    if (input) input.focus();
+  }, 100);
+}
+
+function showMsg(boxId, msg, type) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  box.textContent = msg;
+  box.className = 'msg-box show ' + type;
+}
+
+function hideMsg(boxId) {
+  const box = document.getElementById(boxId);
+  if (box) box.className = 'msg-box';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EMAIL/PASSWORD LOGIN
+// ═══════════════════════════════════════════════════════════
+async function doEmailLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  hideMsg('login-msg');
+
+  if (!email || !email.includes('@')) { showMsg('login-msg', 'Please enter a valid email address.', 'error'); return; }
+  if (!password) { showMsg('login-msg', 'Please enter your password.', 'error'); return; }
+
+  const btn = document.getElementById('btn-login');
+  btn.classList.add('btn-loading'); btn.disabled = true;
+
   try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/sb_users_public?select=id,name,first_name,role&order=role.asc,name.asc', { headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON } });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    reps = await res.json();
-    if (!reps || reps.length === 0) throw new Error('No active users found');
-    renderRepGrid(); loadingEl.style.display = 'none'; gridEl.style.display = '';
-  } catch (err) {
-    console.error('Failed to load reps:', err); loadingEl.style.display = 'none'; errorEl.style.display = '';
-    errorEl.innerHTML = '<div class="error-box"><p>Unable to load team members. Check your connection.</p><button onclick="loadReps()">Retry</button></div>';
+    // Authenticate with Supabase Auth
+    const res = await fetch(SB_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      showMsg('login-msg', data.error_description || data.msg || 'Invalid email or password.', 'error');
+      btn.classList.remove('btn-loading'); btn.disabled = false;
+      return;
+    }
+
+    // Find matching profile
+    const profile = profiles.find(p => p.email && p.email.toLowerCase() === email);
+    if (!profile) {
+      showMsg('login-msg', 'No ServiceBridge profile found for this email. Contact your admin.', 'error');
+      btn.classList.remove('btn-loading'); btn.disabled = false;
+      return;
+    }
+
+    // Check if must reset password on first login
+    if (profile.must_reset_password) {
+      pendingUser = { ...profile, auth_token: data.access_token };
+      document.getElementById('set-pw-sub').textContent = `Welcome, ${profile.first_name}! Create a secure password for your account.`;
+      btn.classList.remove('btn-loading'); btn.disabled = false;
+      showStep('step-set-password');
+      return;
+    }
+
+    // Check if 2FA is enabled
+    if (profile.two_factor_enabled && profile.two_factor_phone) {
+      pendingUser = { ...profile, auth_token: data.access_token };
+      const masked = maskPhone(profile.two_factor_phone || profile.phone);
+      document.getElementById('2fa-sub').textContent = `We sent a 6-digit code to your phone ending in ${masked}.`;
+      btn.classList.remove('btn-loading'); btn.disabled = false;
+      send2FACode(profile);
+      showStep('step-2fa');
+      return;
+    }
+
+    // Success — no 2FA
+    completeLogin(profile, data.access_token);
+
+  } catch(e) {
+    showMsg('login-msg', 'Connection error. Please try again.', 'error');
+    btn.classList.remove('btn-loading'); btn.disabled = false;
   }
 }
 
-function getInitials(name) { var p = name.trim().split(/\s+/); return p.length === 1 ? p[0].substring(0,2).toUpperCase() : (p[0][0] + p[p.length-1][0]).toUpperCase(); }
-function getRoleClass(r) { r = r.toLowerCase(); return r === 'admin' ? 'role-admin' : r === 'manager' ? 'role-manager' : 'role-sales'; }
+// ═══════════════════════════════════════════════════════════
+//  2FA (SMS)
+// ═══════════════════════════════════════════════════════════
+async function send2FACode(profile) {
+  try {
+    await fetch(SB_URL + '/functions/v1/send-2fa-sms', {
+      method: 'POST',
+      headers: { ...H, 'Authorization': 'Bearer ' + SB_KEY },
+      body: JSON.stringify({ phone: profile.two_factor_phone || profile.phone, user_id: profile.id })
+    });
+  } catch(e) { console.warn('2FA send failed:', e); }
 
+  // Start cooldown
+  resendCooldown = 60;
+  const timer = document.getElementById('resend-timer');
+  const link = document.getElementById('resend-link');
+  link.style.opacity = '0.4'; link.style.pointerEvents = 'none';
+  const interval = setInterval(() => {
+    resendCooldown--;
+    timer.textContent = resendCooldown > 0 ? `(${resendCooldown}s)` : '';
+    if (resendCooldown <= 0) {
+      clearInterval(interval);
+      link.style.opacity = '1'; link.style.pointerEvents = 'auto';
+    }
+  }, 1000);
+}
+
+function resend2FA() {
+  if (resendCooldown > 0 || !pendingUser) return;
+  send2FACode(pendingUser);
+  showMsg('2fa-msg', 'New code sent!', 'success');
+  setTimeout(() => hideMsg('2fa-msg'), 3000);
+}
+
+async function verify2FA() {
+  const code = Array.from({length:6}, (_, i) => document.getElementById('code-'+i).value).join('');
+  if (code.length < 6) { showMsg('2fa-msg', 'Please enter all 6 digits.', 'error'); return; }
+  hideMsg('2fa-msg');
+
+  const btn = document.getElementById('btn-verify');
+  btn.classList.add('btn-loading'); btn.disabled = true;
+
+  try {
+    const res = await fetch(SB_URL + '/functions/v1/verify-2fa-sms', {
+      method: 'POST',
+      headers: { ...H, 'Authorization': 'Bearer ' + SB_KEY },
+      body: JSON.stringify({ code, user_id: pendingUser.id })
+    });
+    const data = await res.json();
+
+    if (data.valid) {
+      completeLogin(pendingUser, pendingUser.auth_token);
+    } else {
+      showMsg('2fa-msg', 'Invalid code. Please try again.', 'error');
+      // Clear inputs
+      for (let i=0; i<6; i++) document.getElementById('code-'+i).value = '';
+      document.getElementById('code-0').focus();
+      btn.classList.remove('btn-loading'); btn.disabled = false;
+    }
+  } catch(e) {
+    showMsg('2fa-msg', 'Verification failed. Please try again.', 'error');
+    btn.classList.remove('btn-loading'); btn.disabled = false;
+  }
+}
+
+// ── 2FA code input auto-advance ──
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.code-digit').forEach((input, idx) => {
+    input.addEventListener('input', (e) => {
+      const val = e.target.value.replace(/\D/g, '');
+      e.target.value = val.slice(0, 1);
+      if (val && idx < 5) document.getElementById('code-' + (idx + 1)).focus();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+        document.getElementById('code-' + (idx - 1)).focus();
+      }
+    });
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const paste = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+      paste.split('').forEach((ch, i) => {
+        const el = document.getElementById('code-' + i);
+        if (el) el.value = ch;
+      });
+      if (paste.length === 6) document.getElementById('code-5').focus();
+    });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  FORGOT PASSWORD
+// ═══════════════════════════════════════════════════════════
+async function doForgotPassword() {
+  const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+  hideMsg('forgot-msg');
+  if (!email || !email.includes('@')) { showMsg('forgot-msg', 'Please enter a valid email.', 'error'); return; }
+
+  try {
+    const res = await fetch(SB_URL + '/auth/v1/recover', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    showMsg('forgot-msg', 'If an account exists with this email, you will receive a password reset link.', 'success');
+  } catch(e) {
+    showMsg('forgot-msg', 'Could not send reset email. Please try again.', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SET PASSWORD (first login)
+// ═══════════════════════════════════════════════════════════
+async function doSetPassword() {
+  const pw = document.getElementById('new-password').value;
+  const confirm = document.getElementById('confirm-password').value;
+  hideMsg('setpw-msg');
+
+  if (pw.length < 8) { showMsg('setpw-msg', 'Password must be at least 8 characters.', 'error'); return; }
+  if (pw !== confirm) { showMsg('setpw-msg', 'Passwords do not match.', 'error'); return; }
+
+  try {
+    // Update password via Supabase Auth
+    const res = await fetch(SB_URL + '/auth/v1/user', {
+      method: 'PUT',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + pendingUser.auth_token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+
+    if (res.ok) {
+      // Clear the must_reset flag
+      await fetch(SB_URL + '/rest/v1/user_profiles?id=eq.' + pendingUser.id, {
+        method: 'PATCH',
+        headers: { ...H, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ must_reset_password: false })
+      });
+      completeLogin(pendingUser, pendingUser.auth_token);
+    } else {
+      showMsg('setpw-msg', 'Could not set password. Please try again.', 'error');
+    }
+  } catch(e) {
+    showMsg('setpw-msg', 'Connection error. Please try again.', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LEGACY PIN LOGIN
+// ═══════════════════════════════════════════════════════════
 function renderRepGrid() {
-  document.getElementById('rep-grid').innerHTML = reps.map(function(r, i) {
-    return '<button class="rep-btn" onclick="selectRep(' + i + ')" id="rep-' + i + '"><div class="rep-avatar">' + getInitials(r.name) + '</div><div class="rep-btn-name">' + r.name + '</div><div class="rep-btn-role ' + getRoleClass(r.role) + '">' + (r.role.charAt(0).toUpperCase() + r.role.slice(1)) + '</div></button>';
+  const grid = document.getElementById('rep-grid');
+  if (!grid) return;
+  grid.innerHTML = profiles.map((p, i) => {
+    const roleClass = 'role-' + (p.role || 'Sales').toLowerCase().replace(/\s+/g, '-');
+    const initials = p.initials || p.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const displayRole = p.title || p.role || 'Sales';
+    return `<button class="rep-btn" onclick="selectRep(${i})" id="rep-${i}">
+      <div class="rep-avatar ${roleClass}">${initials}</div>
+      <div class="rep-btn-name">${p.name}</div>
+      <div class="rep-btn-role ${roleClass}">${displayRole}</div>
+    </button>`;
   }).join('');
 }
 
 function selectRep(i) {
-  selectedRep = reps[i];
-  document.querySelectorAll('.rep-btn').forEach(function(b) { b.classList.remove('selected'); });
-  document.getElementById('rep-' + i).classList.add('selected');
-  document.getElementById('next-btn').classList.add('ready');
+  selectedProfile = profiles[i];
+  document.querySelectorAll('.rep-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('rep-'+i).classList.add('selected');
+  document.getElementById('next-btn').disabled = false;
 }
 
-function goToPin() { if (!selectedRep) return; document.getElementById('step-name').style.display = 'none'; document.getElementById('step-pin').classList.add('show'); document.getElementById('pin-sub').textContent = 'Welcome, ' + selectedRep.first_name + '. Enter your PIN.'; pinEntry = ''; updateDots(); document.getElementById('pin-error').textContent = ''; setPinPadEnabled(true); }
-function goBackToName() { if (isAuthenticating) return; document.getElementById('step-name').style.display = 'block'; document.getElementById('step-pin').classList.remove('show'); pinEntry = ''; updateDots(); document.getElementById('pin-error').textContent = ''; }
-function pinPress(d) { if (isAuthenticating || pinEntry.length >= 4) return; pinEntry += d; updateDots(); if (pinEntry.length === 4) setTimeout(authenticate, 120); }
-function pinDelete() { if (isAuthenticating) return; pinEntry = pinEntry.slice(0, -1); updateDots(); document.getElementById('pin-error').textContent = ''; }
-function updateDots() { for (var i = 0; i < 4; i++) { var dot = document.getElementById('dot-' + i); dot.classList.toggle('filled', i < pinEntry.length); dot.classList.remove('error'); } }
-function setPinPadEnabled(en) { document.querySelectorAll('#pin-pad .pin-key').forEach(function(k) { k.classList.toggle('disabled', !en); }); }
-function showPinError(msg) { for (var i = 0; i < 4; i++) { var d = document.getElementById('dot-' + i); d.classList.remove('filled'); d.classList.add('error'); } document.getElementById('pin-error').textContent = msg; pinEntry = ''; setTimeout(function() { updateDots(); }, 600); }
+function goToPin() {
+  if (!selectedProfile) return;
+  document.getElementById('pin-sub').textContent = `Welcome, ${selectedProfile.first_name || selectedProfile.name.split(' ')[0]}. Enter your PIN.`;
+  pinEntry = ''; updateDots();
+  showStep('step-pin-enter');
+}
 
-async function authenticate() {
-  if (isAuthenticating) return; isAuthenticating = true; setPinPadEnabled(false);
-  document.getElementById('pin-error').innerHTML = '<span class="spinner"></span> Verifying…';
-  try {
-    var res = await fetch(AUTH_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }, body: JSON.stringify({ name: selectedRep.name, pin: pinEntry }) });
-    var data = await res.json();
-    if (res.ok && data.success) {
-      sessionStorage.setItem('sb_rep', JSON.stringify({ id: data.user.id, name: data.user.name, first_name: data.user.first_name, role: data.user.role }));
-      window.location.href = ROLE_REDIRECT[data.user.role] || 'app.html'; return;
+function pinPress(d) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += d; updateDots();
+  if (pinEntry.length === 4) setTimeout(checkPin, 120);
+}
+
+function pinDelete() { pinEntry = pinEntry.slice(0,-1); updateDots(); document.getElementById('pin-error').textContent = ''; }
+
+function updateDots() {
+  for (let i=0; i<4; i++) {
+    const dot = document.getElementById('dot-'+i);
+    dot.classList.toggle('filled', i < pinEntry.length);
+    dot.classList.remove('error');
+  }
+}
+
+function checkPin() {
+  if (pinEntry === (selectedProfile.pin || '')) {
+    if (!selectedProfile.pin) {
+      document.getElementById('pin-error').textContent = 'No PIN set. Use email login or contact admin.';
+      pinEntry = '';
+      setTimeout(updateDots, 600);
+      return;
     }
-    if (res.status === 403) showPinError(data.error || 'Account deactivated.');
-    else if (res.status === 401) showPinError('Incorrect PIN. Try again.');
-    else showPinError(data.error || 'Login failed. Try again.');
-  } catch (err) { console.error('Auth fetch error:', err); showPinError('Connection error. Check your network.'); }
-  finally { isAuthenticating = false; setPinPadEnabled(true); }
+    completeLogin(selectedProfile);
+  } else {
+    for (let i=0; i<4; i++) {
+      const dot = document.getElementById('dot-'+i);
+      dot.classList.remove('filled');
+      dot.classList.add('error');
+    }
+    document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+    pinEntry = '';
+    setTimeout(updateDots, 600);
+  }
 }
 
-document.addEventListener('keydown', function(e) { var v = document.getElementById('step-pin').classList.contains('show'); if (!v) return; if (e.key >= '0' && e.key <= '9') pinPress(e.key); else if (e.key === 'Backspace') pinDelete(); else if (e.key === 'Escape') goBackToName(); });
-init();
+// ═══════════════════════════════════════════════════════════
+//  COMPLETE LOGIN — SHARED ACROSS ALL METHODS
+// ═══════════════════════════════════════════════════════════
+function completeLogin(profile, authToken) {
+  const roleLabel = profile.role === 'Admin' ? 'Admin'
+    : profile.role.includes('Manager') ? 'Manager'
+    : 'Sales';
+  const initials = profile.initials || profile.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+
+  // Set session for all other pages
+  sessionStorage.setItem('sb_rep', JSON.stringify({
+    name:     profile.name,
+    initials: initials,
+    role:     roleLabel,
+    title:    profile.title || profile.role,
+    email:    profile.email || '',
+  }));
+
+  if (authToken) {
+    sessionStorage.setItem('sb_auth_token', authToken);
+  }
+
+  // Update last_login in Supabase
+  if (profile.id) {
+    fetch(SB_URL + '/rest/v1/user_profiles?id=eq.' + profile.id, {
+      method: 'PATCH',
+      headers: { ...H, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ last_login: new Date().toISOString() })
+    }).catch(() => {});
+  }
+
+  // Redirect based on role
+  const redirect = roleLabel === 'Admin' ? 'app.html'
+    : roleLabel === 'Manager' ? 'app.html'
+    : 'app.html';
+  window.location.href = redirect;
+}
+
+function maskPhone(phone) {
+  if (!phone) return '****';
+  const digits = phone.replace(/\D/g, '');
+  return '****' + digits.slice(-4);
+}
+
+// ── Enter key handling ──
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.step.active');
+  if (!active) return;
+  if (active.id === 'step-login') doEmailLogin();
+  if (active.id === 'step-forgot') doForgotPassword();
+  if (active.id === 'step-set-password') doSetPassword();
+  if (active.id === 'step-2fa') verify2FA();
+});
+
+// ── INIT ──
+loadProfiles();
 </script>
 </body>
 </html>
