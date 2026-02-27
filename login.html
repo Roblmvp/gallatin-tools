@@ -442,33 +442,22 @@ async function doEmailLogin() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  2FA (SMS) — Twilio Verify API
-//  Handles code generation, sending, and verification
+//  2FA (SMS) — via Supabase Edge Functions → Twilio Verify
 // ═══════════════════════════════════════════════════════════
-const TWILIO_SID  = 'AC5cc95b34834d0a145c3e4423b3fd8be0';
-const TWILIO_TOK  = 'c872954e2df6ae422c4961caa67ef288';
-const VERIFY_SID  = 'VA7fe45868a971de956ce54518bd99f619';
 
 async function send2FACode(profile) {
   const phone = profile.two_factor_phone || profile.phone;
   if (!phone) { console.warn('No phone for 2FA'); return; }
 
-  let toPhone = phone.replace(/\D/g, '');
-  if (toPhone.length === 10) toPhone = '1' + toPhone;
-  if (!toPhone.startsWith('+')) toPhone = '+' + toPhone;
-
   try {
-    const res = await fetch(`https://verify.twilio.com/v2/Services/${VERIFY_SID}/Verifications`, {
+    const res = await fetch(SB_URL + '/functions/v1/send-2fa', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + btoa(TWILIO_SID + ':' + TWILIO_TOK)
-      },
-      body: new URLSearchParams({ To: toPhone, Channel: 'sms' })
+      headers: { 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'apikey': SB_KEY },
+      body: JSON.stringify({ phone })
     });
     const data = await res.json();
-    if (!res.ok) console.warn('Verify send error:', data);
-  } catch(e) { console.warn('Twilio Verify send failed:', e); }
+    if (!data.success) console.warn('2FA send issue:', data);
+  } catch(e) { console.warn('2FA send failed:', e); }
 
   // Start cooldown
   resendCooldown = 60;
@@ -501,22 +490,16 @@ async function verify2FA() {
   btn.classList.add('btn-loading'); btn.disabled = true;
 
   const phone = pendingUser.two_factor_phone || pendingUser.phone;
-  let toPhone = phone.replace(/\D/g, '');
-  if (toPhone.length === 10) toPhone = '1' + toPhone;
-  if (!toPhone.startsWith('+')) toPhone = '+' + toPhone;
 
   try {
-    const res = await fetch(`https://verify.twilio.com/v2/Services/${VERIFY_SID}/VerificationCheck`, {
+    const res = await fetch(SB_URL + '/functions/v1/verify-2fa', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + btoa(TWILIO_SID + ':' + TWILIO_TOK)
-      },
-      body: new URLSearchParams({ To: toPhone, Code: code })
+      headers: { 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'apikey': SB_KEY },
+      body: JSON.stringify({ phone, code })
     });
     const data = await res.json();
 
-    if (data.status === 'approved') {
+    if (data.valid) {
       completeLogin(pendingUser, pendingUser.auth_token);
     } else {
       showMsg('2fa-msg', 'Invalid code. Please try again.', 'error');
