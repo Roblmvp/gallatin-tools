@@ -1,24 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-(function(){
-  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
-  // Accept both 'Admin' (from login.html) and 'admin' (from app.html session)
-  if (!rep || (rep.role !== 'Admin' && rep.role !== 'admin')) {
-    // Also check sb_session as fallback — app.html uses this key
-    try {
-      const sess = JSON.parse(sessionStorage.getItem('sb_session') || 'null');
-      if (sess && sess.id === 'rl') {
-        // Robert Lisowski — reconstruct sb_rep so future pages work
-        sessionStorage.setItem('sb_rep', JSON.stringify({name:'Robert Lisowski', role:'Admin', initials:'RL'}));
-        return; // allow through
-      }
-    } catch(e){}
-    window.location.replace('/login.html');
-  }
-})();
-</script>
+  <!-- ══ SUPABASE AUTH ══ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/auth-guard.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ServiceBridge Admin — Vyaxis</title>
@@ -607,7 +592,8 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
 <script>
 const SB_URL  = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
-const HEADERS = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+let HEADERS = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+function _refreshH(){ const t=window.sbSession?.access_token||SB_KEY; HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+t,'Content-Type':'application/json'}; }
 
 let RECIPIENTS = ['Rob.l@gallatincdjr.com','Tyler.d@gallatincdjr.com','Joe.s@gallatincdjr.com','Jbarba@weauto.us','dominick.f@gallatincdjr.com','Mich.s@gallatincdjr.com'];
 
@@ -639,13 +625,13 @@ let expandedCards = {};
 let editingCards = {};
 
 // ── Session & Nav ──────────────────────────────────────
-const currentRep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
-(function initNav(){
-  if (!currentRep) return;
-  document.getElementById('nav-avatar').textContent = currentRep.initials || currentRep.name.slice(0,2).toUpperCase();
-  document.getElementById('nav-name').textContent = currentRep.name.split(' ')[0];
-  document.getElementById('dd-name').textContent = currentRep.name;
-})();
+let currentRep = null;
+function _initNavAuth(user) {
+  currentRep = { name: user.name, role: user.role, initials: user.initials };
+  document.getElementById('nav-avatar').textContent = user.initials;
+  document.getElementById('nav-name').textContent = user.first;
+  document.getElementById('dd-name').textContent = user.name;
+}
 
 // ── Hamburger ──────────────────────────────────────────
 function toggleMenu(e){
@@ -659,13 +645,13 @@ document.addEventListener('click', () => {
 });
 document.getElementById('nav-dropdown').addEventListener('click', e => e.stopPropagation());
 
-function signOut(){
-  sessionStorage.removeItem('sb_rep');
-  window.location.replace('/login.html');
-}
+function signOut(){ if(window.signOut) window.signOut(); else { sessionStorage.removeItem('sb_rep'); window.location.replace('/login.html'); } }
 
 // ── Init ───────────────────────────────────────────────
-(async function init(){
+(async function _authBoot(){
+  const { currentUser } = await SB_AUTH.init({ requiredRole: ['Admin','Manager'] });
+  _initNavAuth(currentUser);
+  _refreshH();
   await loadEntries();
   renderOverview();
   renderGallatinStats();
