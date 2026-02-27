@@ -442,16 +442,56 @@ async function doEmailLogin() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  2FA (SMS)
+//  2FA (SMS) — Direct Twilio API + Supabase table
+//  No Edge Functions required
 // ═══════════════════════════════════════════════════════════
+const TWILIO_SID  = 'AC5cc95b34834d0a145c3e4423b3fd8be0';
+const TWILIO_TOK  = 'c872954e2df6ae422c4961caa67ef288';
+const TWILIO_FROM = '+16292495579';
+
+function generate2FACode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
 async function send2FACode(profile) {
+  const phone = profile.two_factor_phone || profile.phone;
+  if (!phone) { console.warn('No phone for 2FA'); return; }
+
+  // Generate code and store in Supabase
+  const code = generate2FACode();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+  // Delete any existing code for this user, then insert new one
+  await fetch(SB_URL + '/rest/v1/two_factor_codes?user_id=eq.' + profile.id, {
+    method: 'DELETE', headers: { ...H, 'Prefer': 'return=minimal' }
+  }).catch(() => {});
+
+  await fetch(SB_URL + '/rest/v1/two_factor_codes', {
+    method: 'POST',
+    headers: { ...H, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ user_id: profile.id, code, expires_at: expiresAt, used: false })
+  });
+
+  // Send SMS via Twilio
+  let toPhone = phone.replace(/\D/g, '');
+  if (toPhone.length === 10) toPhone = '1' + toPhone;
+  if (!toPhone.startsWith('+')) toPhone = '+' + toPhone;
+
   try {
-    await fetch(SB_URL + '/functions/v1/send-2fa-sms', {
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`;
+    await fetch(twilioUrl, {
       method: 'POST',
-      headers: { ...H, 'Authorization': 'Bearer ' + SB_KEY },
-      body: JSON.stringify({ phone: profile.two_factor_phone || profile.phone, user_id: profile.id })
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + btoa(TWILIO_SID + ':' + TWILIO_TOK)
+      },
+      body: new URLSearchParams({
+        To: toPhone,
+        From: TWILIO_FROM,
+        Body: `Your ServiceBridge verification code is: ${code}. It expires in 5 minutes.`
+      })
     });
-  } catch(e) { console.warn('2FA send failed:', e); }
+  } catch(e) { console.warn('Twilio send failed:', e); }
 
   // Start cooldown
   resendCooldown = 60;
@@ -484,20 +524,44 @@ async function verify2FA() {
   btn.classList.add('btn-loading'); btn.disabled = true;
 
   try {
-    const res = await fetch(SB_URL + '/functions/v1/verify-2fa-sms', {
-      method: 'POST',
-      headers: { ...H, 'Authorization': 'Bearer ' + SB_KEY },
-      body: JSON.stringify({ code, user_id: pendingUser.id })
+    // Look up the code in Supabase
+    const res = await fetch(SB_URL + '/rest/v1/two_factor_codes?user_id=eq.' + pendingUser.id + '&used=eq.false&select=*', {
+      headers: H
     });
-    const data = await res.json();
+    const rows = await res.json();
+    const record = rows && rows[0];
 
-    if (data.valid) {
-      completeLogin(pendingUser, pendingUser.auth_token);
-    } else {
+    if (!record) {
+      showMsg('2fa-msg', 'No active code found. Request a new one.', 'error');
+      btn.classList.remove('btn-loading'); btn.disabled = false;
+      return;
+    }
+
+    // Check expiry
+    if (new Date(record.expires_at) < new Date()) {
+      showMsg('2fa-msg', 'Code expired. Request a new one.', 'error');
+      btn.classList.remove('btn-loading'); btn.disabled = false;
+      return;
+    }
+
+    // Check match
+    if (record.code !== code) {
       showMsg('2fa-msg', 'Invalid code. Please try again.', 'error');
-      // Clear inputs
       for (let i=0; i<6; i++) document.getElementById('code-'+i).value = '';
       document.getElementById('code-0').focus();
+      btn.classList.remove('btn-loading'); btn.disabled = false;
+      return;
+    }
+
+    // Mark as used
+    await fetch(SB_URL + '/rest/v1/two_factor_codes?id=eq.' + record.id, {
+      method: 'PATCH',
+      headers: { ...H, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ used: true })
+    });
+
+    // Success
+    completeLogin(pendingUser, pendingUser.auth_token);
       btn.classList.remove('btn-loading'); btn.disabled = false;
     }
   } catch(e) {
