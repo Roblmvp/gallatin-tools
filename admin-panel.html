@@ -4,7 +4,17 @@
   <script>
 (function(){
   const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
-  if (!rep || rep.role !== 'Admin') {
+  // Accept both 'Admin' (from login.html) and 'admin' (from app.html session)
+  if (!rep || (rep.role !== 'Admin' && rep.role !== 'admin')) {
+    // Also check sb_session as fallback — app.html uses this key
+    try {
+      const sess = JSON.parse(sessionStorage.getItem('sb_session') || 'null');
+      if (sess && sess.id === 'rl') {
+        // Robert Lisowski — reconstruct sb_rep so future pages work
+        sessionStorage.setItem('sb_rep', JSON.stringify({name:'Robert Lisowski', role:'Admin', initials:'RL'}));
+        return; // allow through
+      }
+    } catch(e){}
     window.location.replace('/login.html');
   }
 })();
