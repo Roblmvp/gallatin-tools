@@ -175,6 +175,13 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,11,20,0.85);backdrop-fil
 .ticker-temp-cool{background:rgba(255,255,255,0.06);color:var(--muted);border:1px solid var(--border);}
 .ticker-empty{padding:40px 20px;text-align:center;color:var(--muted2);font-size:13px;}
 
+/* Verified sold indicator */
+.sold-detail{font-size:11px;margin-top:2px;display:flex;align-items:center;gap:6px;}
+.sold-verified{color:#4ADE80;font-weight:600;}
+.sold-pending{color:var(--gold);font-weight:600;}
+.sold-check{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(34,197,94,0.12);color:#4ADE80;border:1px solid rgba(34,197,94,0.2);}
+.sold-pend-badge{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(249,115,22,0.12);color:var(--gold);border:1px solid rgba(249,115,22,0.2);}
+
 /* Loading */
 .loading{text-align:center;padding:80px 20px;}
 .dots{display:inline-flex;gap:6px;}
@@ -352,10 +359,13 @@ function calcStats(repName, entries) {
   const mine = entries.filter(e => (e.submitter || '') === repName);
   const total = mine.length;
   const hot = mine.filter(e => parseInt(e.eng_score) >= 8).length;
-  const sold = mine.filter(e => {
+  const soldEntries = mine.filter(e => {
     const o = (e.outcome || '').toLowerCase();
-    return o.includes('sold') || o.includes('new') || o.includes('used');
-  }).length;
+    return o.includes('sold') || o.includes('new vehicle') || o.includes('used vehicle');
+  });
+  const verifiedSold = soldEntries.filter(e => e.verified_sold === true).length;
+  const pendingSold = soldEntries.filter(e => !e.verified_sold).length;
+  const sold = soldEntries.length;
   const appt = mine.filter(e => {
     const o = (e.outcome || '').toLowerCase();
     return o.includes('appt') || o.includes('appointment');
@@ -363,8 +373,10 @@ function calcStats(repName, entries) {
   const temps = mine.map(e => parseInt(e.eng_score)).filter(t => !isNaN(t) && t > 0);
   const avgTemp = temps.length > 0 ? (temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1) : 0;
   const conv = total > 0 ? Math.round((sold/total)*100) : 0;
-  const score = (total * 2) + (hot * 3) + (sold * 5) + (appt * 2) + parseFloat(avgTemp);
-  return { total, hot, sold, appt, avgTemp, conv, score: Math.round(score) };
+  // Verified sold = 5 pts, pending sold = 2.5 pts (half credit)
+  const soldScore = (verifiedSold * 5) + (pendingSold * 2.5);
+  const score = (total * 2) + (hot * 3) + soldScore + (appt * 2) + parseFloat(avgTemp);
+  return { total, hot, sold, verifiedSold, pendingSold, appt, avgTemp, conv, score: Math.round(score) };
 }
 
 // ── STREAK TRACKER ──
@@ -505,7 +517,11 @@ function render() {
         <div class="podium-stats">
           <div><div class="ps-val">${rep.total}</div><div class="ps-lbl">Contacts</div></div>
           <div><div class="ps-val">${rep.hot}</div><div class="ps-lbl">Hot Leads</div></div>
-          <div><div class="ps-val">${rep.sold}</div><div class="ps-lbl">Sold</div></div>
+          <div>
+            <div class="ps-val">${rep.sold}</div>
+            <div class="ps-lbl">Sold</div>
+            ${rep.sold > 0 ? `<div class="sold-detail">${rep.verifiedSold ? `<span class="sold-check">✅ ${rep.verifiedSold}</span>` : ''}${rep.pendingSold ? `<span class="sold-pend-badge">⏳ ${rep.pendingSold}</span>` : ''}</div>` : ''}
+          </div>
         </div>
       </div>`;
     }).join('')}
@@ -540,7 +556,7 @@ function render() {
         </div>
         <div class="lb-cell">${rep.total}</div>
         <div class="lb-cell cell-hot">${rep.hot}</div>
-        <div class="lb-cell cell-sold">${rep.sold}</div>
+        <div class="lb-cell cell-sold">${rep.sold}${rep.sold > 0 ? `<div class="sold-detail" style="justify-content:center;">${rep.verifiedSold ? `<span class="sold-check">✅${rep.verifiedSold}</span>` : ''}${rep.pendingSold ? `<span class="sold-pend-badge">⏳${rep.pendingSold}</span>` : ''}</div>` : ''}</div>
         <div class="lb-cell">${rep.avgTemp || '—'}</div>
         <div class="lb-cell">${convPill(rep.conv)}</div>
       </div>`;
