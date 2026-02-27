@@ -163,6 +163,18 @@
   /* ── Utilities ── */
   .toast { position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;z-index:999;opacity:0;transition:all 0.3s;pointer-events:none; }
   .toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
+
+  /* ── Notification Preferences ── */
+  .np-row { background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.15s;margin-bottom:6px; }
+  .np-row:hover { border-color:rgba(255,255,255,0.12); }
+  .np-row.disabled { opacity:0.4;pointer-events:none; }
+  .np-info { flex:1; }
+  .np-label { font-size:13px;font-weight:700;color:var(--text); }
+  .np-desc { font-size:11px;color:var(--text3);margin-top:1px; }
+  .np-tog { width:38px;height:22px;border-radius:22px;background:var(--surface3);position:relative;transition:background 0.2s;flex-shrink:0; }
+  .np-tog::after { content:'';position:absolute;width:16px;height:16px;top:3px;left:3px;border-radius:50%;background:#fff;transition:transform 0.2s cubic-bezier(0.16,1,0.3,1);box-shadow:0 1px 3px rgba(0,0,0,0.3); }
+  .np-tog.on { background:var(--green); }
+  .np-tog.on::after { transform:translateX(16px); }
   .safe-bottom { padding-bottom:max(90px,calc(70px + env(safe-area-inset-bottom))); }
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
@@ -316,8 +328,20 @@ function buildHome() {
 
   document.getElementById('home-content').innerHTML =
     '<div class="home-greeting"><div class="home-greeting-sub">' + greet + '</div><div class="home-greeting-name">' + fn + '.</div></div>' + cards +
-    '<div style="margin-top:14px;"><button id="notif-toggle-btn" onclick="toggleNotifications()" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 24px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;font-family:\'Plus Jakarta Sans\',sans-serif;width:100%;transition:all 0.18s;letter-spacing:-0.01em;">🔕 Enable Notifications</button></div>';
-  initNotifButton();
+    '<div class="notif-panel" id="notif-panel" style="margin-top:14px;">' +
+      '<div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">🔔 Notifications</div>' +
+      '<div class="notif-master" id="notif-master-row" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.18s;margin-bottom:8px;" onclick="toggleNotifications()">' +
+        '<div><div style="font-size:13px;font-weight:700;color:var(--text);" id="notif-master-label">🔕 Enable Push Notifications</div><div style="font-size:11px;color:var(--text3);margin-top:1px;" id="notif-master-sub">Get alerts for hot leads and follow-ups</div></div>' +
+        '<div style="font-size:18px;" id="notif-master-icon">→</div>' +
+      '</div>' +
+      '<div id="notif-prefs-wrap" style="display:none;">' +
+        '<div class="np-row" onclick="npToggle(\'hot_leads\',this)"><div class="np-info"><div class="np-label">🔥 Hot Leads</div><div class="np-desc">Score 8+ immediate alert</div></div><div class="np-tog" id="np-hot_leads"></div></div>' +
+        '<div class="np-row" onclick="npToggle(\'all_entries\',this)"><div class="np-info"><div class="np-label">📋 All Entries</div><div class="np-desc">Every new S2S entry logged</div></div><div class="np-tog" id="np-all_entries"></div></div>' +
+        '<div class="np-row" onclick="npToggle(\'overdue_alerts\',this)"><div class="np-info"><div class="np-label">⏰ Overdue Alerts</div><div class="np-desc">When follow-ups pass due</div></div><div class="np-tog" id="np-overdue_alerts"></div></div>' +
+        '<div class="np-row" onclick="npToggle(\'daily_digest\',this)"><div class="np-info"><div class="np-label">📊 Daily Digest</div><div class="np-desc">Morning summary of activity</div></div><div class="np-tog" id="np-daily_digest"></div></div>' +
+      '</div>' +
+    '</div>';
+  loadNotifPrefs();
 }
 
 function goTo(url) { window.location.href = url; }
@@ -357,14 +381,142 @@ function clearLoginLog() { if(!confirm('Clear all login history?')) return; loca
 function logout() { currentUser = null; clearSession(); unsubscribeFromPush(); document.getElementById('nav-bar').classList.remove('visible'); window.location.replace('/login.html'); }
 function showToast(msg) { var t = document.getElementById('app-toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 2500); }
 
-var VAPID_PUBLIC_KEY = 'BFYqM0IN3sQtNJiq1iTFIh1Ex3LCEboUq7hB966WA5UT_Z5_q58_VPbuIUY__m36IyinsOTKlTHhg-PG5JN-JU4';
+var VAPID_PUBLIC_KEY = 'BKTD8xwqJo60NqxmuiBdKZnwkH_SouZqDiEVBm8IqEyxcdaJpdZRuQV2s4jsDjqoB3tSfG841-yygb3jsaE3A3o';
+var H_SB = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' };
 function urlBase64ToUint8Array(b){var p='='.repeat((4-b.length%4)%4);var d=(b+p).replace(/-/g,'+').replace(/_/g,'/');return Uint8Array.from([].slice.call(atob(d)).map(function(c){return c.charCodeAt(0)}));}
-async function subscribeToPush(user){if(!('Notification' in window)||!('serviceWorker' in navigator)) return;if(Notification.permission==='denied') return;try{var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(!sub){var perm=await Notification.requestPermission();if(perm!=='granted') return;sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});}await fetch('/api/save-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),user_id:user.id||'',user_name:user.name,user_role:user.role})});}catch(e){console.warn('Push failed:',e);}}
-async function unsubscribeFromPush(){try{var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(sub){await fetch('/api/save-subscription',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe();}}catch(e){}}
-async function toggleNotifications(){try{var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(sub){await unsubscribeFromPush();updateNotifButton(false);}else{await subscribeToPush(currentUser);updateNotifButton(true);}}catch(e){showToast('Notifications not available');}}
-async function checkNotifStatus(){if(!('PushManager' in window)) return false;try{var reg=await navigator.serviceWorker.ready;return !!(await reg.pushManager.getSubscription());}catch(e){return false;}}
-function updateNotifButton(en){var btn=document.getElementById('notif-toggle-btn');if(!btn) return;btn.textContent=en?'🔔 Notifications On':'🔕 Enable Notifications';btn.style.borderColor=en?'rgba(45,212,160,0.3)':'var(--border)';btn.style.color=en?'var(--green)':'var(--text3)';btn.style.background=en?'var(--green-soft)':'var(--surface)';}
-async function initNotifButton(){updateNotifButton(await checkNotifStatus());}
+
+// ── Push subscription (server-side storage) ──
+async function subscribeToPush(user){
+  if(!('Notification' in window)||!('serviceWorker' in navigator)) return;
+  if(Notification.permission==='denied') return;
+  try{
+    var reg=await navigator.serviceWorker.ready;
+    var sub=await reg.pushManager.getSubscription();
+    if(!sub){
+      var perm=await Notification.requestPermission();
+      if(perm!=='granted') return;
+      sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
+    }
+    var keys=sub.toJSON();
+    // Save to Supabase via RPC (upserts on endpoint)
+    await fetch(SUPABASE_URL+'/rest/v1/rpc/upsert_push_subscription',{
+      method:'POST',headers:H_SB,
+      body:JSON.stringify({
+        p_user_id:user.id||null,
+        p_user_name:user.name,
+        p_user_role:user.role,
+        p_endpoint:keys.endpoint,
+        p_auth:keys.keys.auth,
+        p_p256dh:keys.keys.p256dh
+      })
+    });
+    updateNotifMaster(true);
+  }catch(e){console.warn('Push subscribe failed:',e);}
+}
+
+async function unsubscribeFromPush(){
+  try{
+    var reg=await navigator.serviceWorker.ready;
+    var sub=await reg.pushManager.getSubscription();
+    if(sub){
+      // Remove from Supabase
+      await fetch(SUPABASE_URL+'/rest/v1/rpc/delete_push_subscription',{
+        method:'POST',headers:H_SB,
+        body:JSON.stringify({p_endpoint:sub.endpoint})
+      });
+      await sub.unsubscribe();
+    }
+    updateNotifMaster(false);
+  }catch(e){console.warn('Push unsubscribe failed:',e);}
+}
+
+async function toggleNotifications(){
+  try{
+    var reg=await navigator.serviceWorker.ready;
+    var sub=await reg.pushManager.getSubscription();
+    if(sub){
+      await unsubscribeFromPush();
+      showToast('Notifications disabled');
+    }else{
+      await subscribeToPush(currentUser);
+      showToast('Notifications enabled ✓');
+    }
+  }catch(e){showToast('Notifications not available on this device');}
+}
+
+async function checkNotifStatus(){
+  if(!('PushManager' in window)) return false;
+  try{var reg=await navigator.serviceWorker.ready;return !!(await reg.pushManager.getSubscription());}catch(e){return false;}
+}
+
+function updateNotifMaster(enabled){
+  var lbl=document.getElementById('notif-master-label');
+  var sub=document.getElementById('notif-master-sub');
+  var ico=document.getElementById('notif-master-icon');
+  var row=document.getElementById('notif-master-row');
+  var prefs=document.getElementById('notif-prefs-wrap');
+  if(!lbl) return;
+  if(enabled){
+    lbl.textContent='🔔 Push Notifications On';
+    sub.textContent='Tap to disable';
+    ico.textContent='✓';
+    row.style.borderColor='rgba(45,212,160,0.3)';
+    row.style.background='var(--green-soft)';
+    lbl.style.color='var(--green)';
+    if(prefs) prefs.style.display='block';
+  }else{
+    lbl.textContent='🔕 Enable Push Notifications';
+    sub.textContent='Get alerts for hot leads and follow-ups';
+    ico.textContent='→';
+    row.style.borderColor='var(--border)';
+    row.style.background='var(--surface)';
+    lbl.style.color='var(--text)';
+    if(prefs) prefs.style.display='none';
+  }
+}
+
+// ── Notification Preferences ──
+var NOTIF_PREFS = { hot_leads:true, all_entries:false, daily_digest:true, overdue_alerts:true };
+
+async function loadNotifPrefs(){
+  var enabled=await checkNotifStatus();
+  updateNotifMaster(enabled);
+  if(!currentUser) return;
+  try{
+    var res=await fetch(SUPABASE_URL+'/rest/v1/sb_notification_prefs?user_name=eq.'+encodeURIComponent(currentUser.name)+'&limit=1',{headers:H_SB});
+    if(res.ok){
+      var rows=await res.json();
+      if(rows.length>0) NOTIF_PREFS=rows[0];
+    }
+  }catch(e){}
+  renderPrefToggles();
+}
+
+function renderPrefToggles(){
+  ['hot_leads','all_entries','overdue_alerts','daily_digest'].forEach(function(k){
+    var el=document.getElementById('np-'+k);
+    if(el) el.classList.toggle('on',!!NOTIF_PREFS[k]);
+  });
+}
+
+async function npToggle(key){
+  NOTIF_PREFS[key]=!NOTIF_PREFS[key];
+  renderPrefToggles();
+  if(!currentUser) return;
+  try{
+    await fetch(SUPABASE_URL+'/rest/v1/rpc/upsert_notification_prefs',{
+      method:'POST',headers:H_SB,
+      body:JSON.stringify({
+        p_user_name:currentUser.name,
+        p_hot_leads:!!NOTIF_PREFS.hot_leads,
+        p_all_entries:!!NOTIF_PREFS.all_entries,
+        p_daily_digest:!!NOTIF_PREFS.daily_digest,
+        p_overdue_alerts:!!NOTIF_PREFS.overdue_alerts
+      })
+    });
+  }catch(e){console.warn('Pref save failed:',e);}
+}
+
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})});}
 
 function init() {
