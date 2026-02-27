@@ -910,10 +910,25 @@ const gv=id=>{const e=document.getElementById(id);return e?(e.value||'—'):'—
 // ── Push to CRM (toggle — fires after submit) ──
 function isCRMEnabled(){ return document.getElementById('crm-cb').checked; }
 
-function executeCRMPush(entry){
+async function executeCRMPush(entry){
   document.getElementById('crm').value='Yes — pushed to CRM';
-  // Replace this timeout with actual CRM API integration (VinSolutions, DealerSocket, etc.)
-  console.log('CRM push fired for:',entry.first_name,entry.last_name,entry.phone);
+  try{
+    const res=await fetch(`${SB_URL}/functions/v1/crm-push`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify(entry)
+    });
+    if(!res.ok){
+      const err=await res.json().catch(()=>({}));
+      console.error('CRM push failed:',err);
+      showToast('⚠ CRM push failed — entry still saved',true);
+      return;
+    }
+    console.log('CRM push success');
+  }catch(e){
+    console.error('CRM push error:',e);
+    showToast('⚠ CRM push failed — entry still saved',true);
+  }
 }
 
 // ── Phone auto-format ──
