@@ -3,9 +3,8 @@
 <head>
   <script>
 (function(){
-  var rep = null;
-  try { rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null'); } catch(e) {}
-  if (!rep || !rep.name || !rep.role) { window.location.replace('/login.html'); }
+  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
+  if (!rep) { window.location.replace('/login.html'); }
 })();
 </script>
 <meta charset="UTF-8">
@@ -13,176 +12,373 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ServiceBridge">
-<meta name="theme-color" content="#06080E">
+<meta name="theme-color" content="#080B14">
 <title>ServiceBridge</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #06080E; --bg2: #0C0F18;
-    --surface: #111520; --surface2: #171C2A; --surface3: #1D2333;
-    --red: #E01B36; --red-soft: rgba(224,27,54,0.10);
-    --gold: #D4A73A; --gold-soft: rgba(212,167,58,0.10);
-    --green: #2DD4A0; --green-soft: rgba(45,212,160,0.10);
-    --blue: #6C70F0; --blue-soft: rgba(108,112,240,0.10);
-    --purple: #A855F7; --purple-soft: rgba(168,85,247,0.10);
-    --teal: #14B8A6; --teal-soft: rgba(20,184,166,0.10);
-    --text: #EDEEF2; --text2: rgba(237,238,242,0.62); --text3: rgba(237,238,242,0.34);
-    --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.10);
-    --r: 14px; --rsm: 10px; --rlg: 18px;
+    --ink: #080B14; --ink2: #0F1628; --ink3: #182040;
+    --red: #C8102E; --gold: #C49A2A; --green: #22C55E; --blue: #6366F1;
+    --text: #FFFFFF; --muted: rgba(255,255,255,0.45); --muted2: rgba(255,255,255,0.22);
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --card: rgba(255,255,255,0.04); --card2: rgba(255,255,255,0.07);
+    --r: 16px; --rsm: 10px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    height: 100%; background: var(--bg); color: var(--text);
-    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    font-size: 15px; line-height: 1.5; letter-spacing: -0.01em;
+  html, body { height: 100%; background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-serif; overflow: hidden; }
+  .screen { position: fixed; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .screen.active { opacity: 1; pointer-events: all; }
+
+  /* ── ATMOSPHERIC BG ── */
+  .bg-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+  .bg-glow { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; opacity: 0; animation: glowIn 1.2s ease forwards; }
+  .bg-glow-red  { width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,16,46,0.1) 0%, transparent 70%); top: -180px; left: -80px; animation-delay: 0.2s; }
+  .bg-glow-blue { width: 450px; height: 450px; background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%); bottom: -150px; right: -80px; animation-delay: 0.4s; }
+  @keyframes glowIn { to { opacity: 1; } }
+
+  /* ── NAV BAR (BOTTOM) ── */
+  .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(8,11,20,0.95); border-top: 1px solid var(--border); padding: 12px 0 max(12px, env(safe-area-inset-bottom)); display: none; justify-content: space-around; align-items: center; z-index: 100; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .nav-bar.visible { display: flex; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 6px 16px; border-radius: 12px; transition: all 0.15s; min-width: 60px; }
+  .nav-item.active .nav-icon { color: var(--red); }
+  .nav-item.active .nav-label { color: var(--text); }
+  .nav-icon  { font-size: 20px; color: var(--muted); transition: color 0.15s; line-height: 1; }
+  .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); transition: color 0.15s; }
+
+  /* ── HEADER ── */
+  .app-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; padding-top: max(16px, env(safe-area-inset-top)); border-bottom: 1px solid var(--border); background: rgba(8,11,20,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 50; }
+  .header-left  { display: flex; align-items: center; gap: 10px; }
+  .header-logo  { width: 32px; height: 32px; background: var(--red); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .header-title { font-family: 'DM Serif Display', serif; font-size: 17px; letter-spacing: -0.01em; }
+  .header-right { display: flex; align-items: center; gap: 10px; position: relative; }
+  .header-user  { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .header-logout { width: 32px; height: 32px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.15s; }
+  .header-logout:active { background: var(--card2); }
+
+  /* ── HAMBURGER ── */
+  .hamburger { background: none; border: 1px solid var(--border2); border-radius: 8px; width: 32px; height: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: all 0.18s; padding: 0; flex-shrink: 0; }
+  .hamburger:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
+  .hamburger span { display: block; width: 14px; height: 1.5px; background: rgba(255,255,255,0.7); border-radius: 2px; transition: all 0.2s; }
+  .hamburger.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+  /* ── OVERLAY + DROPDOWN ── */
+  .nav-overlay { position: fixed; inset: 0; z-index: 190; display: none; }
+  .nav-overlay.open { display: block; }
+  .nav-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: #0F1628; border: 1px solid var(--border2); border-radius: 14px; min-width: 220px; padding: 6px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); z-index: 201; opacity: 0; transform: translateY(-8px) scale(0.97); pointer-events: none; transition: all 0.18s cubic-bezier(0.16,1,0.3,1); }
+  .nav-dropdown.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+  .dd-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: none; cursor: pointer; transition: all 0.15s; }
+  .dd-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+  .dd-item.active-page { background: rgba(200,16,46,0.12); color: #FC8181; }
+  .dd-icon { font-size: 15px; width: 20px; text-align: center; }
+  .dd-divider { height: 1px; background: var(--border); margin: 4px 0; }
+  .dd-admin { display: none; }
+  .dd-admin.show { display: flex; }
+  .dd-divider.dd-admin.show { display: block; }
+  .nav-user-info { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px 4px; }
+  .nav-user-display { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; }
+  .nav-role-pill { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; }
+  .role-admin { background: rgba(99,102,241,0.2); color: #818CF8; border: 1px solid rgba(99,102,241,0.3); }
+  .role-manager { background: rgba(196,154,42,0.15); color: var(--gold); border: 1px solid rgba(196,154,42,0.25); }
+  .role-sales { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15); }
+
+  /* ══════════════════════════════════════════════════════
+     HOME BODY — REDESIGNED
+     ══════════════════════════════════════════════════════ */
+  .home-content { padding: 0 20px 120px; flex: 1; position: relative; z-index: 1; }
+
+  /* ── HERO GREETING ── */
+  .hero {
+    padding: 32px 0 28px;
+    position: relative;
+  }
+  .hero-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 8px;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.1s;
+  }
+  .hero-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px; letter-spacing: -0.02em; line-height: 1.1;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.2s;
+  }
+  .hero-sub {
+    font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.5;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.3s;
+  }
+  .hero-sub strong { color: rgba(255,255,255,0.7); font-weight: 600; }
+  .hero-date {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 14px; padding: 6px 14px;
+    background: var(--card); border: 1px solid var(--border2); border-radius: 100px;
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.4s;
+  }
+  .hero-date .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; }
+
+  /* ── LIVE STATS ROW ── */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 24px;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.45s;
+  }
+  .stat-tile {
+    background: var(--ink2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 14px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .stat-tile:active { transform: scale(0.97); }
+  .stat-tile::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .stat-tile.s-red::before { background: linear-gradient(90deg, var(--red), rgba(200,16,46,0.3)); }
+  .stat-tile.s-green::before { background: linear-gradient(90deg, var(--green), rgba(34,197,94,0.3)); }
+  .stat-tile.s-gold::before { background: linear-gradient(90deg, var(--gold), rgba(196,154,42,0.3)); }
+  .stat-num {
+    font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 700;
+    line-height: 1; margin-bottom: 4px;
+  }
+  .stat-tile.s-red .stat-num { color: #FC8181; }
+  .stat-tile.s-green .stat-num { color: #86EFAC; }
+  .stat-tile.s-gold .stat-num { color: #FCD34D; }
+  .stat-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted);
   }
 
-  /* ── Screens ── */
-  .screen { position:fixed;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.3s ease;overflow-y:auto;-webkit-overflow-scrolling:touch; }
-  .screen.active { opacity:1;pointer-events:all; }
-
-  /* ── Background ── */
-  .bg-noise { position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.35;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
-  .bg-glow { position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0; }
-  .bg-glow-red { background:radial-gradient(circle,rgba(224,27,54,0.08) 0%,transparent 70%);top:-200px;left:-100px; }
-  .bg-glow-blue { background:radial-gradient(circle,rgba(108,112,240,0.06) 0%,transparent 70%);bottom:-200px;right:-100px; }
-
-  /* ── Header ── */
-  .app-header {
-    display:flex;align-items:center;justify-content:space-between;
-    padding:14px 20px 12px;padding-top:max(14px,env(safe-area-inset-top));
-    border-bottom:1px solid var(--border);
-    background:rgba(6,8,14,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-    position:sticky;top:0;z-index:50;
+  /* ── SECTION TITLES ── */
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px; padding-left: 2px;
+    display: flex; align-items: center; gap: 8px;
   }
-  .header-left { display:flex;align-items:center;gap:10px; }
-  .header-logo { width:30px;height:30px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px; }
-  .header-title { font-family:'Instrument Serif',Georgia,serif;font-size:17px;letter-spacing:-0.01em;color:var(--text); }
-  .header-right { display:flex;align-items:center;gap:8px;position:relative; }
-  .header-user { font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em; }
-  .header-btn { width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all 0.15s;color:var(--text2); }
-  .header-btn:active { background:var(--surface2); }
-
-  /* ── Hamburger ── */
-  .hamburger { background:none;border:1px solid var(--border2);border-radius:8px;width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all 0.18s;padding:0;flex-shrink:0; }
-  .hamburger:hover { border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.03); }
-  .hamburger span { display:block;width:14px;height:1.5px;background:rgba(255,255,255,0.55);border-radius:2px;transition:all 0.2s; }
-  .hamburger.open span:nth-child(1) { transform:translateY(5.5px) rotate(45deg); }
-  .hamburger.open span:nth-child(2) { opacity:0; }
-  .hamburger.open span:nth-child(3) { transform:translateY(-5.5px) rotate(-45deg); }
-
-  /* ── Dropdown ── */
-  .nav-overlay { position:fixed;inset:0;z-index:190;display:none; }
-  .nav-overlay.open { display:block; }
-  .nav-dropdown { position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);min-width:230px;padding:6px;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:201;opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;transition:all 0.18s cubic-bezier(0.16,1,0.3,1); }
-  .nav-dropdown.open { opacity:1;transform:translateY(0) scale(1);pointer-events:all; }
-  .dd-item { display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--rsm);font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s; }
-  .dd-item:hover { background:rgba(255,255,255,0.04);color:var(--text); }
-  .dd-item.active-page { background:var(--red-soft);color:#F87171; }
-  .dd-icon { font-size:14px;width:20px;text-align:center; }
-  .dd-divider { height:1px;background:var(--border);margin:4px 0; }
-  .dd-admin { display:none; }
-  .dd-admin.show { display:flex; }
-  .dd-divider.dd-admin.show { display:block; }
-  .nav-user-info { display:flex;align-items:center;justify-content:space-between;padding:8px 14px 4px; }
-  .nav-user-display { font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.08em; }
-  .nav-role-pill { font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:20px; }
-  .role-admin { background:var(--blue-soft);color:var(--blue);border:1px solid rgba(108,112,240,0.2); }
-  .role-manager { background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2); }
-  .role-sales { background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08); }
-
-  /* ── Home content ── */
-  .home-content { padding:24px 20px 100px;flex:1;position:relative;z-index:1; }
-  .home-greeting { margin-bottom:32px; }
-  .home-greeting-sub { font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px; }
-  .home-greeting-name { font-family:'Instrument Serif',Georgia,serif;font-size:34px;letter-spacing:-0.02em;line-height:1.1;color:var(--text); }
-
-  /* ── CTA Cards ── */
-  .cta-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px; }
-  .cta-card {
-    background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);
-    padding:20px 18px;cursor:pointer;transition:all 0.2s cubic-bezier(0.16,1,0.3,1);
-    text-decoration:none;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
   }
-  .cta-card:hover { border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 32px -8px rgba(0,0,0,0.3); }
-  .cta-card:active { transform:scale(0.97); }
-  .cta-icon { width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px; }
-  .cta-icon.red { background:var(--red-soft); }
-  .cta-icon.gold { background:var(--gold-soft); }
-  .cta-icon.blue { background:var(--blue-soft); }
-  .cta-icon.green { background:var(--green-soft); }
-  .cta-icon.purple { background:var(--purple-soft); }
-  .cta-icon.teal { background:var(--teal-soft); }
-  .cta-label { font-size:14px;font-weight:700;color:var(--text);line-height:1.2;letter-spacing:-0.01em; }
-  .cta-sub { font-size:12px;font-weight:500;color:var(--text3);margin-top:2px; }
-  .cta-card.wide { grid-column:1/-1;flex-direction:row;align-items:center;padding:16px 20px;gap:14px; }
-  .cta-card.wide .cta-text { flex:1; }
-  .cta-arrow { font-size:14px;color:var(--text3); }
 
-  /* ── Admin panel ── */
-  #screen-admin .home-content { padding-top:0; }
-  .admin-section { margin-bottom:28px; }
-  .admin-section-title { font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;padding:0 2px; }
-  .user-row { background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px; }
-  .user-avatar { width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace; }
-  .user-avatar.sales { background:var(--red-soft);color:var(--red); }
-  .user-avatar.manager { background:var(--gold-soft);color:var(--gold); }
-  .user-avatar.admin { background:var(--blue-soft);color:var(--blue); }
-  .user-info { flex:1;min-width:0; }
-  .user-name { font-size:14px;font-weight:700;color:var(--text); }
-  .user-meta { font-size:11px;color:var(--text3);margin-top:2px; }
-  .role-badge { font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px; }
-  .role-badge.sales { background:var(--red-soft);color:var(--red); }
-  .role-badge.manager { background:var(--gold-soft);color:var(--gold); }
-  .role-badge.admin { background:var(--blue-soft);color:var(--blue); }
-  .stat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px; }
-  .stat-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;text-align:center; }
-  .stat-val { font-family:'Instrument Serif',Georgia,serif;font-size:26px;color:var(--text);line-height:1;margin-bottom:4px; }
-  .stat-lbl { font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase; }
-  .log-item { display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border); }
-  .log-item:last-child { border-bottom:none; }
-  .log-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
-  .log-info { flex:1; }
-  .log-name { font-size:13px;font-weight:600;color:var(--text); }
-  .log-time { font-size:11px;color:var(--text3);margin-top:2px; }
+  /* ── NAVIGATION CARDS ── */
+  .nav-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 24px;
+  }
+  .nav-card {
+    background: var(--ink2); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 0; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
+    text-decoration: none; position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .nav-card:active { transform: scale(0.96); }
+  .nav-card:hover { border-color: var(--border2); }
 
-  /* ── Nav bar ── */
-  .nav-bar { position:fixed;bottom:0;left:0;right:0;background:rgba(6,8,14,0.95);border-top:1px solid var(--border);padding:12px 0 max(12px,env(safe-area-inset-bottom));display:none;justify-content:space-around;align-items:center;z-index:100;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px); }
-  .nav-bar.visible { display:flex; }
-  .nav-item { display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 16px;border-radius:12px;transition:all 0.15s;min-width:60px; }
-  .nav-item.active .nav-icon { color:var(--red); }
-  .nav-item.active .nav-label { color:var(--text); }
-  .nav-icon { font-size:18px;color:var(--text3);transition:color 0.15s;line-height:1; }
-  .nav-label { font-size:10px;font-weight:700;letter-spacing:0.04em;color:var(--text3);transition:color 0.15s; }
+  .nav-card-top {
+    padding: 20px 18px 16px;
+    flex: 1;
+    position: relative;
+  }
+  .nav-card-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+    position: relative;
+  }
+  .nav-card-icon::after {
+    content: ''; position: absolute; inset: -4px; border-radius: 16px;
+    opacity: 0.15; z-index: -1;
+  }
+  .nav-card.c-red .nav-card-icon    { background: rgba(200,16,46,0.15); }
+  .nav-card.c-red .nav-card-icon::after { background: rgba(200,16,46,0.4); }
+  .nav-card.c-gold .nav-card-icon   { background: rgba(196,154,42,0.15); }
+  .nav-card.c-gold .nav-card-icon::after { background: rgba(196,154,42,0.4); }
+  .nav-card.c-blue .nav-card-icon   { background: rgba(99,102,241,0.15); }
+  .nav-card.c-blue .nav-card-icon::after { background: rgba(99,102,241,0.4); }
+  .nav-card.c-teal .nav-card-icon   { background: rgba(20,184,166,0.15); }
+  .nav-card.c-teal .nav-card-icon::after { background: rgba(20,184,166,0.4); }
+  .nav-card.c-green .nav-card-icon  { background: rgba(34,197,94,0.15); }
+  .nav-card.c-green .nav-card-icon::after { background: rgba(34,197,94,0.4); }
+  .nav-card.c-purple .nav-card-icon { background: rgba(168,85,247,0.15); }
+  .nav-card.c-purple .nav-card-icon::after { background: rgba(168,85,247,0.4); }
 
-  /* ── Utilities ── */
-  .toast { position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;z-index:999;opacity:0;transition:all 0.3s;pointer-events:none; }
-  .toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
+  .nav-card-label {
+    font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.2;
+    margin-bottom: 3px;
+  }
+  .nav-card-desc {
+    font-size: 11px; color: var(--muted); line-height: 1.4;
+  }
+  .nav-card-footer {
+    padding: 10px 18px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-card-stat {
+    font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; color: var(--muted2);
+    letter-spacing: 0.02em;
+  }
+  .nav-card-arrow {
+    font-size: 12px; color: var(--muted2); transition: transform 0.2s, color 0.2s;
+  }
+  .nav-card:hover .nav-card-arrow { transform: translateX(3px); color: var(--muted); }
 
-  /* ── Notification Preferences ── */
-  .np-row { background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.15s;margin-bottom:6px; }
-  .np-row:hover { border-color:rgba(255,255,255,0.12); }
-  .np-row.disabled { opacity:0.4;pointer-events:none; }
-  .np-info { flex:1; }
-  .np-label { font-size:13px;font-weight:700;color:var(--text); }
-  .np-desc { font-size:11px;color:var(--text3);margin-top:1px; }
-  .np-tog { width:38px;height:22px;border-radius:22px;background:var(--surface3);position:relative;transition:background 0.2s;flex-shrink:0; }
-  .np-tog::after { content:'';position:absolute;width:16px;height:16px;top:3px;left:3px;border-radius:50%;background:#fff;transition:transform 0.2s cubic-bezier(0.16,1,0.3,1);box-shadow:0 1px 3px rgba(0,0,0,0.3); }
-  .np-tog.on { background:var(--green); }
-  .np-tog.on::after { transform:translateX(16px); }
-  .safe-bottom { padding-bottom:max(90px,calc(70px + env(safe-area-inset-bottom))); }
-  ::-webkit-scrollbar { width:4px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:var(--border2);border-radius:2px; }
+  /* Wide full-width card */
+  .nav-card.wide {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+  }
+  .nav-card.wide .nav-card-top {
+    flex-direction: row; display: flex; align-items: center; gap: 16px;
+    padding: 16px 18px;
+  }
+  .nav-card.wide .nav-card-icon { margin-bottom: 0; }
+  .nav-card.wide .nav-card-info { flex: 1; }
+  .nav-card.wide .nav-card-footer {
+    border-top: none; border-left: 1px solid var(--border);
+    padding: 16px 18px;
+    flex-direction: column; justify-content: center;
+  }
+
+  /* ── RECENT ACTIVITY FEED ── */
+  .activity-feed {
+    margin-bottom: 24px;
+  }
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    opacity: 0; animation: fadeUp 0.4s ease forwards;
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot {
+    width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+  }
+  .activity-dot.hot { background: var(--red); box-shadow: 0 0 8px rgba(200,16,46,0.5); }
+  .activity-dot.warm { background: var(--gold); }
+  .activity-dot.cool { background: var(--muted2); }
+  .activity-dot.sold { background: var(--green); box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+  .activity-body { flex: 1; min-width: 0; }
+  .activity-title {
+    font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .activity-meta {
+    font-size: 11px; color: var(--muted); margin-top: 2px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .activity-tag {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .activity-tag.tag-hot { background: rgba(200,16,46,0.15); color: #FC8181; }
+  .activity-tag.tag-sold { background: rgba(34,197,94,0.15); color: #86EFAC; }
+  .activity-tag.tag-appt { background: rgba(99,102,241,0.15); color: #A5B4FC; }
+  .activity-temp {
+    font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 700;
+    min-width: 32px; text-align: center;
+    padding: 4px 0; border-radius: 6px;
+    flex-shrink: 0; align-self: center;
+  }
+  .activity-temp.t-hot { background: rgba(200,16,46,0.15); color: #FC8181; }
+  .activity-temp.t-warm { background: rgba(196,154,42,0.15); color: #FCD34D; }
+  .activity-temp.t-cool { background: rgba(255,255,255,0.06); color: var(--muted); }
+
+  .activity-empty {
+    text-align: center; padding: 32px 16px; color: var(--muted);
+  }
+  .activity-empty-icon { font-size: 32px; margin-bottom: 8px; opacity: 0.4; }
+  .activity-empty-text { font-size: 13px; font-weight: 500; }
+
+  /* ── NOTIFICATIONS SECTION ── */
+  .notif-section {
+    margin-bottom: 20px;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.7s;
+  }
+  .notif-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .notif-card:active { transform: scale(0.97); }
+  .notif-card.on { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.06); }
+  .notif-left { display: flex; align-items: center; gap: 12px; }
+  .notif-icon { font-size: 18px; }
+  .notif-text { font-size: 13px; font-weight: 600; color: var(--muted); }
+  .notif-card.on .notif-text { color: var(--green); }
+  .notif-check {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: transparent; transition: all 0.2s;
+  }
+  .notif-card.on .notif-check {
+    background: var(--green); border-color: var(--green); color: #fff;
+  }
+
+  /* ── ADMIN SCREEN (existing) ── */
+  #screen-admin .home-content { padding-top: 0; }
+  .admin-section { margin-bottom: 28px; }
+  .admin-section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; padding: 0 2px; }
+  .user-row { background: var(--ink2); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .user-avatar { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; font-family: 'DM Serif Display', serif; }
+  .user-avatar.sales   { background: rgba(200,16,46,0.15); color: var(--red); }
+  .user-avatar.manager { background: rgba(196,154,42,0.15); color: var(--gold); }
+  .user-avatar.admin   { background: rgba(99,102,241,0.15); color: var(--blue); }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 14px; font-weight: 700; }
+  .user-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .user-controls { display: flex; align-items: center; gap: 8px; }
+  .toggle-switch { width: 44px; height: 24px; border-radius: 12px; background: var(--border); position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; border: none; }
+  .toggle-switch.on { background: var(--green); }
+  .toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+  .toggle-switch.on::after { transform: translateX(20px); }
+  .role-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; }
+  .role-badge.sales   { background: rgba(200,16,46,0.15); color: var(--red); }
+  .role-badge.manager { background: rgba(196,154,42,0.15); color: var(--gold); }
+  .role-badge.admin   { background: rgba(99,102,241,0.15); color: var(--blue); }
+  .log-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .log-item:last-child { border-bottom: none; }
+  .log-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .log-info { flex: 1; }
+  .log-name { font-size: 13px; font-weight: 600; }
+  .log-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+  .stat-card { background: var(--ink2); border: 1px solid var(--border); border-radius: 14px; padding: 14px 12px; text-align: center; }
+  .stat-val { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--text); line-height: 1; margin-bottom: 4px; }
+  .stat-lbl { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  /* ── TOAST ── */
+  .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink3); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 20px; font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; z-index: 999; opacity: 0; transition: all 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .safe-bottom { padding-bottom: max(90px, calc(70px + env(safe-area-inset-bottom))); }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ── LOADING SKELETON ── */
+  .skel { background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 </style>
 </head>
 <body>
-<div class="bg-noise"></div>
+<div class="bg-grid"></div>
 <div class="bg-glow bg-glow-red"></div>
 <div class="bg-glow bg-glow-blue"></div>
 
@@ -195,14 +391,19 @@
     </div>
     <div class="header-right">
       <span class="header-user" id="header-user-name"></span>
-      <div class="header-btn" onclick="logout()" title="Sign Out">↩</div>
-      <button class="hamburger" id="home-hamburger" onclick="toggleAppMenu('home')" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="header-logout" onclick="logout()" title="Sign Out">↩</div>
+      <button class="hamburger" id="home-hamburger" onclick="toggleAppMenu('home')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
       <div class="nav-dropdown" id="home-dropdown">
-        <div class="nav-user-info"><span class="nav-user-display" id="home-nav-user"></span><span class="nav-role-pill" id="home-nav-pill"></span></div>
+        <div class="nav-user-info">
+          <span class="nav-user-display" id="home-nav-user"></span>
+          <span class="nav-role-pill" id="home-nav-pill"></span>
+        </div>
         <div class="dd-divider"></div>
         <a href="app.html" class="dd-item active-page"><span class="dd-icon">🏠</span> Home</a>
         <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
-        <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Dashboard</a>
+        <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Performance Dashboard</a>
         <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
         <div class="dd-divider dd-admin" id="home-admin-divider"></div>
         <a href="admin-panel.html" class="dd-item dd-admin" id="home-admin-link"><span class="dd-icon">⚙️</span> Admin Panel</a>
@@ -220,18 +421,23 @@
       <div class="header-title">Admin Panel</div>
     </div>
     <div class="header-right">
-      <div class="header-btn" onclick="showScreen('screen-home')" title="Back">←</div>
-      <div class="header-btn" onclick="logout()" title="Sign Out">↩</div>
-      <button class="hamburger" id="admin-hamburger" onclick="toggleAppMenu('admin')" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="header-logout" onclick="showScreen('screen-home')" title="Back">←</div>
+      <div class="header-logout" onclick="logout()" title="Sign Out">↩</div>
+      <button class="hamburger" id="admin-hamburger" onclick="toggleAppMenu('admin')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
       <div class="nav-dropdown" id="admin-dropdown">
-        <div class="nav-user-info"><span class="nav-user-display" id="admin-nav-user"></span><span class="nav-role-pill" id="admin-nav-pill"></span></div>
+        <div class="nav-user-info">
+          <span class="nav-user-display" id="admin-nav-user"></span>
+          <span class="nav-role-pill" id="admin-nav-pill"></span>
+        </div>
         <div class="dd-divider"></div>
         <a href="app.html" class="dd-item"><span class="dd-icon">🏠</span> Home</a>
         <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
-        <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Dashboard</a>
+        <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Performance Dashboard</a>
         <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
-        <div class="dd-divider dd-admin show"></div>
-        <a href="admin-panel.html" class="dd-item dd-admin show"><span class="dd-icon">⚙️</span> Admin Panel</a>
+        <div class="dd-divider dd-admin show" id="admin-admin-divider"></div>
+        <a href="admin-panel.html" class="dd-item dd-admin show" id="admin-admin-link"><span class="dd-icon">⚙️</span> Admin Panel</a>
       </div>
     </div>
   </div>
@@ -243,288 +449,424 @@
 <div class="toast" id="app-toast"></div>
 
 <script>
-var SUPABASE_URL  = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
-var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
+const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
+const SB_HEADERS = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 
-var currentUser = null;
+const USERS = [
+  { id: 'rl', name: 'Robert Lisowski', first: 'Robert', role: 'admin',   pin: '5757' },
+  { id: 'td', name: 'Tyler Doyle',     first: 'Tyler',  role: 'manager', pin: '1234' },
+  { id: 'ak', name: 'Andrew Kirk',     first: 'Andrew', role: 'sales',   pin: '1234' },
+  { id: 'dj', name: 'DJ Rogers',       first: 'DJ',     role: 'sales',   pin: '1234' },
+  { id: 'km', name: 'Kody McCann',     first: 'Kody',   role: 'sales',   pin: '1234' },
+];
+let currentUser = null;
+let homeEntries = [];
 
-function getSession() { try { var s = JSON.parse(sessionStorage.getItem('sb_rep') || 'null'); return (s && s.name && s.role) ? s : null; } catch(e) { return null; } }
-function clearSession() { sessionStorage.removeItem('sb_rep'); sessionStorage.removeItem('sb_session'); }
+function saveSession(user) { sessionStorage.setItem('sb_session', JSON.stringify({ id: user.id, time: Date.now() })); }
+function loadSession() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem('sb_session') || 'null');
+    if (!s || Date.now() - s.time > 8*60*60*1000) return null;
+    return USERS.find(u => u.id === s.id) || null;
+  } catch { return null; }
+}
+function clearSession() { sessionStorage.removeItem('sb_session'); sessionStorage.removeItem('sb_rep'); }
+function ensureSbRep(user) {
+  const roleLabel = user.role === 'admin' ? 'Admin' : user.role === 'manager' ? 'Manager' : 'Sales';
+  const initials = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  sessionStorage.setItem('sb_rep', JSON.stringify({name:user.name, role:roleLabel, initials:initials}));
+}
+function addLoginLog(user) {
+  const logs = getLoginLogs();
+  logs.unshift({ name: user.name, role: user.role, time: new Date().toISOString(), id: user.id });
+  localStorage.setItem('sb_login_log', JSON.stringify(logs.slice(0, 50)));
+}
+function getLoginLogs() { try { return JSON.parse(localStorage.getItem('sb_login_log') || '[]'); } catch { return []; } }
+function getUserActive(id) { const s = localStorage.getItem('sb_active_' + id); return s === null ? true : s === 'true'; }
+function setUserActive(id, val) { localStorage.setItem('sb_active_' + id, val); }
 
-function addLoginLog(user) { var logs = getLoginLogs(); logs.unshift({ name: user.name, role: user.role, time: new Date().toISOString() }); localStorage.setItem('sb_login_log', JSON.stringify(logs.slice(0, 50))); }
-function getLoginLogs() { try { return JSON.parse(localStorage.getItem('sb_login_log') || '[]'); } catch(e) { return []; } }
-
+// ── SCREENS ──
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); s.style.pointerEvents = 'none'; });
-  var el = document.getElementById(id);
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.pointerEvents = 'none'; });
+  const el = document.getElementById(id);
   if (el) { el.classList.add('active'); el.style.pointerEvents = 'all'; el.scrollTop = 0; }
   document.getElementById('nav-bar').classList.toggle('visible', id === 'screen-home' || id === 'screen-admin');
   updateNav(id);
 }
 function buildNav() {
-  var nav = document.getElementById('nav-bar');
+  const nav = document.getElementById('nav-bar');
   if (!currentUser) { nav.innerHTML = ''; return; }
-  var items = [{ icon:'🏠', label:'Home', screen:'screen-home' }];
-  if (currentUser.role === 'admin' || currentUser.role === 'manager') items.push({ icon:'⚙️', label:'Admin', screen:'screen-admin' });
-  nav.innerHTML = items.map(function(i) { return '<div class="nav-item" onclick="navGo(\'' + i.screen + '\')" data-screen="' + i.screen + '"><div class="nav-icon">' + i.icon + '</div><div class="nav-label">' + i.label + '</div></div>'; }).join('');
+  const items = [{ icon: '🏠', label: 'Home', screen: 'screen-home' }];
+  if (currentUser.role === 'admin' || currentUser.role === 'manager') items.push({ icon: '⚙️', label: 'Admin', screen: 'screen-admin' });
+  nav.innerHTML = items.map(i => `<div class="nav-item" onclick="navGo('${i.screen}')" data-screen="${i.screen}"><div class="nav-icon">${i.icon}</div><div class="nav-label">${i.label}</div></div>`).join('');
 }
-function navGo(screen) { if (screen === 'screen-admin') buildAdminPanel(); showScreen(screen); }
-function updateNav(active) { document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.toggle('active', i.dataset.screen === active); }); }
+function navGo(screen) {
+  if (screen === 'screen-admin') {
+    window.location.href = 'https://servicebridge.vyaxis.com/admin-panel.html';
+    return;
+  }
+  showScreen(screen);
+}
+function updateNav(activeScreen) { document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.screen === activeScreen)); }
 
+// ── HAMBURGER ──
 function toggleAppMenu(which) {
-  var hb = document.getElementById(which + '-hamburger'), dd = document.getElementById(which + '-dropdown'), ov = document.getElementById('app-nav-overlay');
-  var isOpen = dd.classList.contains('open'); closeAllMenus();
+  const hb = document.getElementById(which + '-hamburger');
+  const dd = document.getElementById(which + '-dropdown');
+  const ov = document.getElementById('app-nav-overlay');
+  const isOpen = dd.classList.contains('open');
+  closeAllMenus();
   if (!isOpen) { hb.classList.add('open'); dd.classList.add('open'); ov.classList.add('open'); }
 }
 function closeAllMenus() {
-  ['home','admin'].forEach(function(w) { var hb = document.getElementById(w+'-hamburger'), dd = document.getElementById(w+'-dropdown'); if(hb) hb.classList.remove('open'); if(dd) dd.classList.remove('open'); });
+  ['home','admin'].forEach(w => {
+    const hb = document.getElementById(w+'-hamburger'); const dd = document.getElementById(w+'-dropdown');
+    if (hb) hb.classList.remove('open'); if (dd) dd.classList.remove('open');
+  });
   document.getElementById('app-nav-overlay').classList.remove('open');
 }
 function initAppNav() {
   if (!currentUser) return;
-  var role = currentUser.role;
-  var rc = role==='admin'?'role-admin':role==='manager'?'role-manager':'role-sales';
-  var rl = role.charAt(0).toUpperCase()+role.slice(1);
-  var fn = currentUser.first_name || currentUser.name.split(' ')[0];
-  ['home','admin'].forEach(function(w) {
-    var ne = document.getElementById(w+'-nav-user'), pe = document.getElementById(w+'-nav-pill');
-    if (ne) ne.textContent = fn; if (pe) { pe.textContent = rl; pe.className = 'nav-role-pill ' + rc; }
-    if (role === 'admin') { var lnk = document.getElementById(w+'-admin-link'), div = document.getElementById(w+'-admin-divider'); if(lnk) lnk.classList.add('show'); if(div) div.classList.add('show'); }
+  const role = currentUser.role;
+  const rc = role==='admin'?'role-admin':role==='manager'?'role-manager':'role-sales';
+  const rl = role.charAt(0).toUpperCase()+role.slice(1);
+  ['home','admin'].forEach(w => {
+    const ne = document.getElementById(w+'-nav-user'); const pe = document.getElementById(w+'-nav-pill');
+    if (ne) ne.textContent = currentUser.first;
+    if (pe) { pe.textContent = rl; pe.className = 'nav-role-pill ' + rc; }
+    if (role === 'admin') {
+      const lnk = document.getElementById(w+'-admin-link'); const div = document.getElementById(w+'-admin-divider');
+      if (lnk) lnk.classList.add('show'); if (div) div.classList.add('show');
+    }
   });
 }
 
-function buildHome() {
-  var fn = currentUser.first_name || currentUser.name.split(' ')[0];
-  document.getElementById('header-user-name').textContent = fn;
-  var h = new Date().getHours();
-  var greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-  var role = currentUser.role, cards = '';
+// ═══════════════════════════════════════════════════════════
+//  BUILD HOME — REDESIGNED
+// ═══════════════════════════════════════════════════════════
+async function buildHome() {
+  document.getElementById('header-user-name').textContent = currentUser.first;
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const role = currentUser.role;
+  const isAdmin = role === 'admin';
+  const isManager = role === 'manager';
 
-  if (role === 'sales') {
-    cards = '<div class="cta-grid">' +
-      '<div class="cta-card" onclick="goTo(\'service-to-sales-log.html\')"><div class="cta-icon red">📋</div><div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div></div>' +
-      '<div class="cta-card" onclick="goTo(\'scorecards.html\')"><div class="cta-icon blue">🏆</div><div><div class="cta-label">Scoreboard</div><div class="cta-sub">Team standings</div></div></div>' +
-      '</div>' +
-      '<div class="cta-card wide" onclick="goTo(\'manager-dashboard.html\')"><div class="cta-icon green">📊</div><div class="cta-text"><div class="cta-label">View Dashboard</div><div class="cta-sub">All entries & analytics</div></div><div class="cta-arrow">→</div></div>';
-  }
-  if (role === 'manager') {
-    cards = '<div class="cta-grid">' +
-      '<div class="cta-card" onclick="goTo(\'manager-dashboard.html\')"><div class="cta-icon gold">📊</div><div><div class="cta-label">Dashboard</div><div class="cta-sub">All entries</div></div></div>' +
-      '<div class="cta-card" onclick="goTo(\'scorecards.html\')"><div class="cta-icon blue">🏆</div><div><div class="cta-label">Scoreboard</div><div class="cta-sub">Leaderboard</div></div></div>' +
-      '<div class="cta-card" onclick="goTo(\'service-to-sales-log.html\')"><div class="cta-icon red">📋</div><div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div></div>' +
-      '<div class="cta-card" onclick="goTo(\'upboard.html\')"><div class="cta-icon teal">🔄</div><div><div class="cta-label">UP Board</div><div class="cta-sub">Floor rotation</div></div></div>' +
-      '</div>' +
-      '<div class="cta-card wide" onclick="navGo(\'screen-admin\')"><div class="cta-icon purple">⚙️</div><div class="cta-text"><div class="cta-label">Admin Panel</div><div class="cta-sub">Manage users & access</div></div><div class="cta-arrow">→</div></div>';
-  }
-  if (role === 'admin') {
-    cards = '<div class="cta-grid">' +
-      '<div class="cta-card" onclick="goTo(\'manager-dashboard.html\')"><div class="cta-icon gold">📊</div><div><div class="cta-label">Dashboard</div><div class="cta-sub">All entries</div></div></div>' +
-      '<div class="cta-card" onclick="goTo(\'scorecards.html\')"><div class="cta-icon blue">🏆</div><div><div class="cta-label">Scoreboard</div><div class="cta-sub">Leaderboard</div></div></div>' +
-      '<div class="cta-card" onclick="goTo(\'service-to-sales-log.html\')"><div class="cta-icon red">📋</div><div><div class="cta-label">S2S Entry</div><div class="cta-sub">Log a lead</div></div></div>' +
-      '<div class="cta-card" onclick="goTo(\'upboard.html\')"><div class="cta-icon teal">🔄</div><div><div class="cta-label">UP Board</div><div class="cta-sub">Floor rotation</div></div></div>' +
-      '</div>' +
-      '<div class="cta-card wide" onclick="goTo(\'admin-panel.html\')"><div class="cta-icon purple">⚙️</div><div class="cta-text"><div class="cta-label">Admin Console</div><div class="cta-sub">Users, data & email settings</div></div><div class="cta-arrow">→</div></div>';
+  // Role-specific subtitle
+  let roleLine = '';
+  if (isAdmin) roleLine = 'Admin overview — <strong>Gallatin CDJR</strong>';
+  else if (isManager) roleLine = 'S2S Manager — <strong>Gallatin CDJR</strong>';
+  else roleLine = 'Sales Consultant — <strong>Gallatin CDJR</strong>';
+
+  // Show skeleton while loading
+  const container = document.getElementById('home-content');
+  container.innerHTML = `
+    <div class="hero">
+      <div class="hero-eyebrow">${greet}</div>
+      <div class="hero-name">${currentUser.first}.</div>
+      <div class="hero-sub">${roleLine}</div>
+      <div class="hero-date"><span class="pulse"></span> ${dateStr}</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-tile s-red"><div class="stat-num skel" style="width:40px;height:24px;">&nbsp;</div><div class="stat-label">Entries</div></div>
+      <div class="stat-tile s-green"><div class="stat-num skel" style="width:40px;height:24px;">&nbsp;</div><div class="stat-label">Sold</div></div>
+      <div class="stat-tile s-gold"><div class="stat-num skel" style="width:40px;height:24px;">&nbsp;</div><div class="stat-label">Hot Leads</div></div>
+    </div>
+    <div class="section-label">Quick Actions</div>
+    <div id="home-nav-cards"></div>
+    <div class="section-label" id="activity-label" style="display:none;">Recent Activity</div>
+    <div class="activity-feed" id="activity-feed"></div>
+    <div class="notif-section">
+      <div class="section-label">Notifications</div>
+      <div class="notif-card" id="notif-toggle-card" onclick="toggleNotifications()">
+        <div class="notif-left">
+          <span class="notif-icon">🔔</span>
+          <span class="notif-text" id="notif-text">Push Notifications</span>
+        </div>
+        <div class="notif-check" id="notif-check">✓</div>
+      </div>
+    </div>`;
+
+  // Build nav cards based on role
+  buildNavCards(role);
+
+  // Fetch live data from Supabase
+  try {
+    const res = await fetch(SB_URL + '/rest/v1/s2s_entries?select=*&order=id.desc&limit=200', { headers: SB_HEADERS });
+    homeEntries = await res.json();
+  } catch(e) { homeEntries = []; }
+
+  renderStats();
+  renderActivity();
+  initNotifButton();
+}
+
+function buildNavCards(role) {
+  const isAdmin = role === 'admin';
+  const isManager = role === 'manager';
+  const base = 'https://servicebridge.vyaxis.com';
+  let html = '<div class="nav-cards">';
+
+  if (isAdmin || isManager) {
+    html += navCard('c-gold', '📊', 'Dashboard', 'All entries & analytics', base+'/manager-dashboard.html', '');
+    html += navCard('c-blue', '🏆', 'Scorecards', 'Team leaderboard', base+'/scorecards.html', '');
   }
 
-  document.getElementById('home-content').innerHTML =
-    '<div class="home-greeting"><div class="home-greeting-sub">' + greet + '</div><div class="home-greeting-name">' + fn + '.</div></div>' + cards +
-    '<div class="notif-panel" id="notif-panel" style="margin-top:14px;">' +
-      '<div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">🔔 Notifications</div>' +
-      '<div class="notif-master" id="notif-master-row" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.18s;margin-bottom:8px;" onclick="toggleNotifications()">' +
-        '<div><div style="font-size:13px;font-weight:700;color:var(--text);" id="notif-master-label">🔕 Enable Push Notifications</div><div style="font-size:11px;color:var(--text3);margin-top:1px;" id="notif-master-sub">Get alerts for hot leads and follow-ups</div></div>' +
-        '<div style="font-size:18px;" id="notif-master-icon">→</div>' +
-      '</div>' +
-      '<div id="notif-prefs-wrap" style="display:none;">' +
-        '<div class="np-row" onclick="npToggle(\'hot_leads\',this)"><div class="np-info"><div class="np-label">🔥 Hot Leads</div><div class="np-desc">Score 8+ immediate alert</div></div><div class="np-tog" id="np-hot_leads"></div></div>' +
-        '<div class="np-row" onclick="npToggle(\'all_entries\',this)"><div class="np-info"><div class="np-label">📋 All Entries</div><div class="np-desc">Every new S2S entry logged</div></div><div class="np-tog" id="np-all_entries"></div></div>' +
-        '<div class="np-row" onclick="npToggle(\'overdue_alerts\',this)"><div class="np-info"><div class="np-label">⏰ Overdue Alerts</div><div class="np-desc">When follow-ups pass due</div></div><div class="np-tog" id="np-overdue_alerts"></div></div>' +
-        '<div class="np-row" onclick="npToggle(\'daily_digest\',this)"><div class="np-info"><div class="np-label">📊 Daily Digest</div><div class="np-desc">Morning summary of activity</div></div><div class="np-tog" id="np-daily_digest"></div></div>' +
-      '</div>' +
-    '</div>';
-  loadNotifPrefs();
+  html += navCard('c-red', '📋', 'S2S Entry', 'Log a new service lead', base+'/service-to-sales-log.html', '');
+  html += navCard('c-teal', '🔄', 'UP Board', 'Floor rotation tracker', base+'/upboard.html', '');
+
+  if (!isAdmin && !isManager) {
+    html += navCard('c-green', '📊', 'View Dashboard', 'All entries & analytics', base+'/manager-dashboard.html', '', true);
+  }
+
+  if (isAdmin) {
+    html += navCard('c-purple', '⚙️', 'Admin Console', 'Users, data & email settings', base+'/admin-panel.html', '', true);
+  }
+  if (isManager) {
+    html += navCard('c-purple', '⚙️', 'Admin Panel', 'Manage users & access', base+'/admin-panel.html', '', true);
+  }
+
+  html += '</div>';
+  document.getElementById('home-nav-cards').innerHTML = html;
+
+  // Stagger animation
+  document.querySelectorAll('.nav-card').forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.animation = `fadeUp 0.4s ease forwards ${0.5 + i * 0.08}s`;
+  });
+}
+
+function navCard(cls, icon, label, desc, url, stat, wide) {
+  if (wide) {
+    return `<div class="nav-card ${cls} wide" onclick="goTo('${url}')">
+      <div class="nav-card-top">
+        <div class="nav-card-icon">${icon}</div>
+        <div class="nav-card-info">
+          <div class="nav-card-label">${label}</div>
+          <div class="nav-card-desc">${desc}</div>
+        </div>
+      </div>
+      <div class="nav-card-footer">
+        <span class="nav-card-arrow">→</span>
+      </div>
+    </div>`;
+  }
+  return `<div class="nav-card ${cls}" onclick="goTo('${url}')">
+    <div class="nav-card-top">
+      <div class="nav-card-icon">${icon}</div>
+      <div class="nav-card-label">${label}</div>
+      <div class="nav-card-desc">${desc}</div>
+    </div>
+    <div class="nav-card-footer">
+      <span class="nav-card-stat">${stat}</span>
+      <span class="nav-card-arrow">→</span>
+    </div>
+  </div>`;
+}
+
+function renderStats() {
+  const now = new Date();
+  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay()); startOfWeek.setHours(0,0,0,0);
+
+  let pool = homeEntries;
+  // For sales reps, show only their entries
+  if (currentUser.role === 'sales') {
+    pool = homeEntries.filter(e => e.submitter === currentUser.name);
+  }
+
+  const weekEntries = pool.filter(e => new Date(e.created_at) >= startOfWeek);
+  const totalWeek = weekEntries.length;
+  const soldWeek = weekEntries.filter(e => e.outcome && (e.outcome.includes('Sold') || e.outcome.includes('New') || e.outcome.includes('Used'))).length;
+  const hotWeek = weekEntries.filter(e => parseInt(e.eng_score) >= 8).length;
+
+  const tiles = document.querySelectorAll('.stat-tile');
+  if (tiles[0]) tiles[0].innerHTML = `<div class="stat-num">${totalWeek}</div><div class="stat-label">This Week</div>`;
+  if (tiles[1]) tiles[1].innerHTML = `<div class="stat-num">${soldWeek}</div><div class="stat-label">Sold</div>`;
+  if (tiles[2]) tiles[2].innerHTML = `<div class="stat-num">${hotWeek}</div><div class="stat-label">Hot Leads</div>`;
+
+  // Update nav card stats
+  document.querySelectorAll('.nav-card-stat').forEach(el => {
+    const card = el.closest('.nav-card');
+    if (!card) return;
+    const label = card.querySelector('.nav-card-label');
+    if (!label) return;
+    const text = label.textContent;
+    if (text === 'S2S Entry') el.textContent = totalWeek + ' this week';
+    if (text === 'Dashboard') el.textContent = homeEntries.length + ' total';
+    if (text === 'Scorecards') el.textContent = soldWeek + ' sold';
+    if (text === 'UP Board') el.textContent = 'Live';
+  });
+}
+
+function renderActivity() {
+  const feed = document.getElementById('activity-feed');
+  const label = document.getElementById('activity-label');
+
+  let pool = homeEntries;
+  if (currentUser.role === 'sales') {
+    pool = homeEntries.filter(e => e.submitter === currentUser.name);
+  }
+
+  const recent = pool.slice(0, 6);
+  if (!recent.length) {
+    feed.innerHTML = `<div class="activity-empty"><div class="activity-empty-icon">📋</div><div class="activity-empty-text">No entries yet — log your first S2S lead</div></div>`;
+    label.style.display = 'flex';
+    return;
+  }
+
+  label.style.display = 'flex';
+  feed.innerHTML = recent.map((e, i) => {
+    const sc = parseInt(e.eng_score) || 0;
+    const dotClass = sc >= 8 ? 'hot' : sc >= 5 ? 'warm' : 'cool';
+    const tempClass = sc >= 8 ? 't-hot' : sc >= 5 ? 't-warm' : 't-cool';
+    const isSold = e.outcome && (e.outcome.includes('Sold') || e.outcome.includes('New') || e.outcome.includes('Used'));
+    if (isSold) { /* override */ }
+    const d = new Date(e.created_at);
+    const ago = timeAgo(d);
+    const name = ((e.customer_first || e.first_name || '') + ' ' + (e.customer_last || e.last_name || '')).trim() || 'Unknown';
+    const vehicle = [e.vehicle_year || e.veh_year, e.vehicle_make || e.veh_make, e.vehicle_model || e.veh_model].filter(Boolean).join(' ');
+
+    let tags = '';
+    if (sc >= 8) tags += '<span class="activity-tag tag-hot">🔥 Hot</span>';
+    if (isSold) tags += '<span class="activity-tag tag-sold">✓ Sold</span>';
+    if (e.outcome && e.outcome.includes('Appt')) tags += '<span class="activity-tag tag-appt">📅 Appt</span>';
+
+    return `<div class="activity-item" style="animation-delay:${0.6 + i * 0.07}s">
+      <div class="activity-dot ${isSold ? 'sold' : dotClass}"></div>
+      <div class="activity-body">
+        <div class="activity-title">${name}</div>
+        <div class="activity-meta">
+          <span>${e.submitter || '—'}</span>
+          ${vehicle ? `<span>· ${vehicle}</span>` : ''}
+          <span>· ${ago}</span>
+          ${tags}
+        </div>
+      </div>
+      <div class="activity-temp ${tempClass}">${sc || '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function timeAgo(date) {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return days + 'd ago';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function goTo(url) { window.location.href = url; }
 
-async function buildAdminPanel() {
-  var c = document.getElementById('admin-content');
-  c.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:13px;">Loading users…</div>';
-  var users = [];
-  try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/sb_users?select=id,name,first_name,role,active,last_login&order=role.asc,name.asc', { headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON } });
-    if (res.ok) users = await res.json();
-  } catch(e) { console.warn('Failed to load users:', e); }
-
-  var logs = getLoginLogs();
-  var todayLogs = logs.filter(function(l) { return new Date(l.time).toDateString() === new Date().toDateString(); });
-  var activeCount = users.filter(function(u) { return u.active; }).length;
-
-  var userRows = users.length > 0 ? users.map(function(u) {
-    var initial = u.first_name ? u.first_name[0] : u.name[0];
-    var ll = u.last_login ? new Date(u.last_login).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'Never';
-    return '<div class="user-row"><div class="user-avatar ' + u.role + '">' + initial + '</div><div class="user-info"><div class="user-name">' + u.name + '</div><div class="user-meta"><span class="role-badge ' + u.role + '">' + u.role + '</span> · Last: ' + ll + '</div></div><div style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;' + (u.active ? 'background:var(--green-soft);color:var(--green)' : 'background:rgba(255,255,255,0.04);color:var(--text3)') + '">' + (u.active ? 'Active' : 'Inactive') + '</div></div>';
-  }).join('') : '<p style="color:var(--text3);font-size:13px;padding:12px 0;">Could not load user data.</p>';
-
-  var logItems = logs.length === 0 ? '<p style="color:var(--text3);font-size:13px;padding:12px 0;">No login activity yet.</p>'
-    : logs.slice(0,15).map(function(l) { var d = new Date(l.time); var ts = d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); return '<div class="log-item"><div class="log-dot" style="background:' + (l.role==='admin'?'var(--blue)':l.role==='manager'?'var(--gold)':'var(--green)') + '"></div><div class="log-info"><div class="log-name">' + l.name + '</div><div class="log-time">' + ts + '</div></div><span class="role-badge ' + l.role + '">' + l.role + '</span></div>'; }).join('');
-
-  c.innerHTML =
-    '<div class="stat-grid" style="margin-top:20px;"><div class="stat-card"><div class="stat-val">' + users.length + '</div><div class="stat-lbl">Users</div></div><div class="stat-card"><div class="stat-val">' + activeCount + '</div><div class="stat-lbl">Active</div></div><div class="stat-card"><div class="stat-val">' + todayLogs.length + '</div><div class="stat-lbl">Today</div></div></div>' +
-    '<div class="admin-section"><div class="admin-section-title">User Access</div>' + userRows + '</div>' +
-    '<div class="admin-section"><div class="admin-section-title">Recent Login Activity</div><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;">' + logItems + '</div></div>' +
-    '<div class="admin-section"><div class="admin-section-title">Quick Actions</div>' +
-    '<div class="cta-card wide" onclick="clearLoginLog()" style="margin-bottom:10px;"><div class="cta-icon red">🗑</div><div class="cta-text"><div class="cta-label">Clear Login Log</div><div class="cta-sub">Remove all login history</div></div></div>' +
-    '<div class="cta-card wide" onclick="goTo(\'admin-panel.html\')"><div class="cta-icon gold">⚙️</div><div class="cta-text"><div class="cta-label">Full Admin Console</div><div class="cta-sub">Email, data & dealer settings</div></div><div class="cta-arrow">→</div></div></div>';
+// ── ADMIN PANEL (in-page) ──
+function buildAdminPanel() {
+  const logs = getLoginLogs();
+  const todayLogs = logs.filter(l => new Date(l.time).toDateString() === new Date().toDateString());
+  const activeCount = USERS.filter(u => getUserActive(u.id)).length;
+  const userRows = USERS.map(u => {
+    const active = getUserActive(u.id);
+    return `<div class="user-row"><div class="user-avatar ${u.role}">${u.first[0]}</div><div class="user-info"><div class="user-name">${u.name}</div><div class="user-meta"><span class="role-badge ${u.role}">${u.role}</span>&nbsp;PIN: ${u.pin}</div></div><div class="user-controls"><button class="toggle-switch ${active?'on':''}" id="tog-${u.id}" onclick="toggleUserActive('${u.id}')" ${u.id==='rl'?'disabled style="opacity:0.4;cursor:not-allowed"':''}></button></div></div>`;
+  }).join('');
+  const logItems = logs.length === 0 ? '<p style="color:var(--muted);font-size:13px;padding:12px 0;">No login activity yet.</p>'
+    : logs.slice(0,15).map(l => {
+        const d = new Date(l.time);
+        const ts = d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+        return `<div class="log-item"><div class="log-dot" style="background:${l.role==='admin'?'var(--blue)':l.role==='manager'?'var(--gold)':'var(--green)'}"></div><div class="log-info"><div class="log-name">${l.name}</div><div class="log-time">${ts}</div></div><span class="role-badge ${l.role}">${l.role}</span></div>`;
+      }).join('');
+  document.getElementById('admin-content').innerHTML = `
+    <div class="stat-grid" style="margin-top:20px;">
+      <div class="stat-card"><div class="stat-val">${USERS.length}</div><div class="stat-lbl">Users</div></div>
+      <div class="stat-card"><div class="stat-val">${activeCount}</div><div class="stat-lbl">Active</div></div>
+      <div class="stat-card"><div class="stat-val">${todayLogs.length}</div><div class="stat-lbl">Logins Today</div></div>
+    </div>
+    <div class="admin-section"><div class="admin-section-title">User Access</div>${userRows}</div>
+    <div class="admin-section"><div class="admin-section-title">Recent Login Activity</div><div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;padding:4px 16px;">${logItems}</div></div>
+    <div class="admin-section"><div class="admin-section-title">Quick Actions</div>
+      <div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;margin-bottom:10px;" onclick="clearLoginLog()">
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:18px;">🗑</span><div><div style="font-size:13px;font-weight:700;">Clear Login Log</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">Remove all login history</div></div></div>
+      </div>
+      <div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;" onclick="goTo('https://servicebridge.vyaxis.com/admin-panel.html')">
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:18px;">⚙️</span><div style="flex:1;"><div style="font-size:13px;font-weight:700;">Full Admin Console</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">Email, data & dealer settings</div></div><span style="color:var(--muted);">→</span></div>
+      </div>
+    </div>`;
 }
 
-function clearLoginLog() { if(!confirm('Clear all login history?')) return; localStorage.removeItem('sb_login_log'); buildAdminPanel(); showToast('Login log cleared'); }
+function toggleUserActive(id) {
+  if (id === 'rl') return;
+  const current = getUserActive(id); setUserActive(id, !current);
+  const tog = document.getElementById('tog-' + id); if (tog) tog.classList.toggle('on', !current);
+  const user = USERS.find(u => u.id === id); showToast(`${user.first} ${!current?'activated':'deactivated'}`);
+}
+function clearLoginLog() { if (!confirm('Clear all login history?')) return; localStorage.removeItem('sb_login_log'); buildAdminPanel(); showToast('Login log cleared'); }
 function logout() { currentUser = null; clearSession(); unsubscribeFromPush(); document.getElementById('nav-bar').classList.remove('visible'); window.location.replace('/login.html'); }
-function showToast(msg) { var t = document.getElementById('app-toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 2500); }
+function showToast(msg) { const t = document.getElementById('app-toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
 
-var VAPID_PUBLIC_KEY = 'BKTD8xwqJo60NqxmuiBdKZnwkH_SouZqDiEVBm8IqEyxcdaJpdZRuQV2s4jsDjqoB3tSfG841-yygb3jsaE3A3o';
-var H_SB = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' };
-function urlBase64ToUint8Array(b){var p='='.repeat((4-b.length%4)%4);var d=(b+p).replace(/-/g,'+').replace(/_/g,'/');return Uint8Array.from([].slice.call(atob(d)).map(function(c){return c.charCodeAt(0)}));}
-
-// ── Push subscription (server-side storage) ──
-async function subscribeToPush(user){
-  if(!('Notification' in window)||!('serviceWorker' in navigator)) return;
-  if(Notification.permission==='denied') return;
-  try{
-    var reg=await navigator.serviceWorker.ready;
-    var sub=await reg.pushManager.getSubscription();
-    if(!sub){
-      var perm=await Notification.requestPermission();
-      if(perm!=='granted') return;
-      sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
-    }
-    var keys=sub.toJSON();
-    // Save to Supabase via RPC (upserts on endpoint)
-    await fetch(SUPABASE_URL+'/rest/v1/rpc/upsert_push_subscription',{
-      method:'POST',headers:H_SB,
-      body:JSON.stringify({
-        p_user_id:user.id||null,
-        p_user_name:user.name,
-        p_user_role:user.role,
-        p_endpoint:keys.endpoint,
-        p_auth:keys.keys.auth,
-        p_p256dh:keys.keys.p256dh
-      })
-    });
-    updateNotifMaster(true);
-  }catch(e){console.warn('Push subscribe failed:',e);}
+// ── PUSH NOTIFICATIONS ──
+const VAPID_PUBLIC_KEY = 'BFYqM0IN3sQtNJiq1iTFIh1Ex3LCEboUq7hB966WA5UT_Z5_q58_VPbuIUY__m36IyinsOTKlTHhg-PG5JN-JU4';
+function urlBase64ToUint8Array(b) { const p='='.repeat((4-b.length%4)%4); const d=(b+p).replace(/-/g,'+').replace(/_/g,'/'); return Uint8Array.from([...atob(d)].map(c=>c.charCodeAt(0))); }
+async function subscribeToPush(user) {
+  if (!('Notification' in window)||!('serviceWorker' in navigator)) return;
+  if (Notification.permission==='denied') return;
+  try {
+    const reg = await navigator.serviceWorker.ready; let sub = await reg.pushManager.getSubscription();
+    if (!sub) { const perm = await Notification.requestPermission(); if (perm!=='granted') return; sub = await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)}); }
+    await fetch('/api/save-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),user_id:user.id,user_name:user.name,user_role:user.role})});
+  } catch(e){console.warn('Push failed:',e);}
 }
-
-async function unsubscribeFromPush(){
-  try{
-    var reg=await navigator.serviceWorker.ready;
-    var sub=await reg.pushManager.getSubscription();
-    if(sub){
-      // Remove from Supabase
-      await fetch(SUPABASE_URL+'/rest/v1/rpc/delete_push_subscription',{
-        method:'POST',headers:H_SB,
-        body:JSON.stringify({p_endpoint:sub.endpoint})
-      });
-      await sub.unsubscribe();
-    }
-    updateNotifMaster(false);
-  }catch(e){console.warn('Push unsubscribe failed:',e);}
+async function unsubscribeFromPush() {
+  try { const reg=await navigator.serviceWorker.ready; const sub=await reg.pushManager.getSubscription(); if(sub){await fetch('/api/save-subscription',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe();} } catch{}
 }
-
-async function toggleNotifications(){
-  try{
-    var reg=await navigator.serviceWorker.ready;
-    var sub=await reg.pushManager.getSubscription();
-    if(sub){
-      await unsubscribeFromPush();
-      showToast('Notifications disabled');
-    }else{
-      await subscribeToPush(currentUser);
-      showToast('Notifications enabled ✓');
-    }
-  }catch(e){showToast('Notifications not available on this device');}
+async function toggleNotifications() {
+  try { const reg=await navigator.serviceWorker.ready; const sub=await reg.pushManager.getSubscription(); if(sub){await unsubscribeFromPush();updateNotifButton(false);}else{await subscribeToPush(currentUser);updateNotifButton(true);} } catch{showToast('Notifications not available');}
 }
-
-async function checkNotifStatus(){
-  if(!('PushManager' in window)) return false;
-  try{var reg=await navigator.serviceWorker.ready;return !!(await reg.pushManager.getSubscription());}catch(e){return false;}
-}
-
-function updateNotifMaster(enabled){
-  var lbl=document.getElementById('notif-master-label');
-  var sub=document.getElementById('notif-master-sub');
-  var ico=document.getElementById('notif-master-icon');
-  var row=document.getElementById('notif-master-row');
-  var prefs=document.getElementById('notif-prefs-wrap');
-  if(!lbl) return;
-  if(enabled){
-    lbl.textContent='🔔 Push Notifications On';
-    sub.textContent='Tap to disable';
-    ico.textContent='✓';
-    row.style.borderColor='rgba(45,212,160,0.3)';
-    row.style.background='var(--green-soft)';
-    lbl.style.color='var(--green)';
-    if(prefs) prefs.style.display='block';
-  }else{
-    lbl.textContent='🔕 Enable Push Notifications';
-    sub.textContent='Get alerts for hot leads and follow-ups';
-    ico.textContent='→';
-    row.style.borderColor='var(--border)';
-    row.style.background='var(--surface)';
-    lbl.style.color='var(--text)';
-    if(prefs) prefs.style.display='none';
+async function checkNotifStatus() { if(!('PushManager' in window)) return false; try{const reg=await navigator.serviceWorker.ready;return !!(await reg.pushManager.getSubscription());}catch{return false;} }
+function updateNotifButton(enabled) {
+  const card = document.getElementById('notif-toggle-card');
+  const text = document.getElementById('notif-text');
+  const check = document.getElementById('notif-check');
+  if (!card) return;
+  if (enabled) {
+    card.classList.add('on');
+    text.textContent = 'Push Notifications On';
+    check.textContent = '✓';
+  } else {
+    card.classList.remove('on');
+    text.textContent = 'Enable Notifications';
+    check.textContent = '';
   }
 }
+async function initNotifButton() { updateNotifButton(await checkNotifStatus()); }
+if ('serviceWorker' in navigator) { window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})}); }
 
-// ── Notification Preferences ──
-var NOTIF_PREFS = { hot_leads:true, all_entries:false, daily_digest:true, overdue_alerts:true };
-
-async function loadNotifPrefs(){
-  var enabled=await checkNotifStatus();
-  updateNotifMaster(enabled);
-  if(!currentUser) return;
-  try{
-    var res=await fetch(SUPABASE_URL+'/rest/v1/sb_notification_prefs?user_name=eq.'+encodeURIComponent(currentUser.name)+'&limit=1',{headers:H_SB});
-    if(res.ok){
-      var rows=await res.json();
-      if(rows.length>0) NOTIF_PREFS=rows[0];
-    }
-  }catch(e){}
-  renderPrefToggles();
-}
-
-function renderPrefToggles(){
-  ['hot_leads','all_entries','overdue_alerts','daily_digest'].forEach(function(k){
-    var el=document.getElementById('np-'+k);
-    if(el) el.classList.toggle('on',!!NOTIF_PREFS[k]);
-  });
-}
-
-async function npToggle(key){
-  NOTIF_PREFS[key]=!NOTIF_PREFS[key];
-  renderPrefToggles();
-  if(!currentUser) return;
-  try{
-    await fetch(SUPABASE_URL+'/rest/v1/rpc/upsert_notification_prefs',{
-      method:'POST',headers:H_SB,
-      body:JSON.stringify({
-        p_user_name:currentUser.name,
-        p_hot_leads:!!NOTIF_PREFS.hot_leads,
-        p_all_entries:!!NOTIF_PREFS.all_entries,
-        p_daily_digest:!!NOTIF_PREFS.daily_digest,
-        p_overdue_alerts:!!NOTIF_PREFS.overdue_alerts
-      })
-    });
-  }catch(e){console.warn('Pref save failed:',e);}
-}
-
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})});}
-
+// ── INIT ──
 function init() {
-  currentUser = getSession();
-  if (!currentUser) { window.location.replace('/login.html'); return; }
-  addLoginLog(currentUser);
-  buildHome(); buildNav(); initAppNav(); showScreen('screen-home');
-  subscribeToPush(currentUser);
+  const sbRep = JSON.parse(sessionStorage.getItem('sb_rep')||'null');
+  if (sbRep) {
+    const matched = USERS.find(u => u.name === sbRep.name);
+    if (matched) {
+      currentUser = matched;
+      ensureSbRep(currentUser);
+      addLoginLog(currentUser);
+      saveSession(currentUser);
+      buildHome(); buildNav(); initAppNav(); showScreen('screen-home');
+      subscribeToPush(currentUser);
+      return;
+    }
+  }
+  const saved = loadSession();
+  if (saved) {
+    currentUser = saved;
+    ensureSbRep(currentUser);
+    buildHome(); buildNav(); initAppNav(); showScreen('screen-home');
+    return;
+  }
+  window.location.replace('/login.html');
 }
 init();
 </script>
