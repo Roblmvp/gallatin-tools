@@ -21,6 +21,10 @@ export default async function handler(req, res) {
     const uniqueId = `SB-${Date.now()}`;
     const vehicleStr = [veh_year, veh_make, veh_model].filter(Boolean).join(' ') || 'Unknown Vehicle';
 
+    // ── ADF/XML — DriveCentric standard format ──────────────────────────
+    // Sent to: campaignleads@drivegallatincdjr.com
+    // DriveCentric auto-parses ADF/XML from the text body of the email
+    // FIXED: All <name> tags now properly close with </name> (was </n> before)
     const adfXml = `<?xml version="1.0" encoding="UTF-8"?>
 <?adf version="1.0"?>
 <adf>
@@ -78,7 +82,10 @@ Rep Notes: ${notes || 'None'}
 
     const scoreInt = parseInt(eng_score) || 0;
     const scoreColor = scoreInt >= 8 ? '#ef4444' : scoreInt >= 5 ? '#f59e0b' : '#6366f1';
+    const scoreBg = scoreInt >= 8 ? '#fef2f2' : scoreInt >= 5 ? '#fffbeb' : '#eef2ff';
+    const scoreLabel = scoreInt >= 8 ? '🔥 HOT' : scoreInt >= 5 ? '⚡ WARM' : '❄️ COOL';
 
+    // ── Send via Resend to DriveCentric campaign email ──────────────────
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -97,6 +104,9 @@ Rep Notes: ${notes || 'None'}
     <p style="color:#94a3b8;margin:6px 0 0;font-size:13px;">ServiceBridge &rarr; DriveCentric &middot; Source: Service to Sales</p>
   </div>
   <div style="background:#f8fafc;padding:20px;border:1px solid #e2e8f0;">
+    <div style="display:inline-block;background:${scoreBg};border:1px solid ${scoreColor};border-radius:6px;padding:6px 14px;margin-bottom:16px;">
+      <span style="font-size:12px;font-weight:700;color:${scoreColor};">${scoreLabel} &mdash; Temp Score: ${eng_score || '?'}/10</span>
+    </div>
     <table style="width:100%;border-collapse:collapse;font-size:14px;">
       <tr><td style="padding:7px 0;color:#64748b;width:40%;">Customer</td><td style="padding:7px 0;font-weight:700;">${prospectName}</td></tr>
       <tr><td style="padding:7px 0;color:#64748b;">Phone</td><td style="padding:7px 0;">${phone || '&mdash;'}</td></tr>
