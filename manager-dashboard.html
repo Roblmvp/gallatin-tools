@@ -178,6 +178,50 @@ textarea.fi{resize:vertical;min-height:60px;}
 .sv:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(108,112,240,0.3);}
 .sv-ok{font-size:11px;color:var(--green);font-weight:600;margin-left:10px;opacity:0;transition:opacity 0.3s;}
 
+/* Funnel tab */
+.fnl-period{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.fnl-pb{padding:7px 16px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text3);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.18s;}
+.fnl-pb:hover{color:var(--text);border-color:var(--blue);}
+.fnl-pb.ac{background:var(--blue-soft);border-color:rgba(108,112,240,0.3);color:#818CF8;}
+.fnl-rev{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:20px;margin-bottom:20px;position:relative;overflow:hidden;}
+.fnl-rev::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--gold));}
+.fnl-rev-v{font-family:'Instrument Serif',Georgia,serif;font-size:42px;color:var(--green);line-height:1;}
+.fnl-rev-l{font-size:13px;color:var(--text2);margin-top:6px;line-height:1.4;}
+.fnl-rev-n{font-size:11px;color:var(--text3);margin-top:8px;font-style:italic;}
+.fnl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:20px;margin-bottom:20px;}
+.fnl-card-t{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;}
+.fnl-stage{display:flex;align-items:center;gap:14px;margin-bottom:14px;position:relative;}
+.fnl-stage:last-child{margin-bottom:0;}
+.fnl-num{min-width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
+.fnl-info{flex:1;min-width:0;}
+.fnl-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.fnl-meta{display:flex;align-items:center;gap:8px;font-size:12px;}
+.fnl-count{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--text);}
+.fnl-pct{font-family:'JetBrains Mono',monospace;font-weight:600;padding:1px 7px;border-radius:6px;font-size:11px;}
+.fnl-drop{font-size:11px;color:var(--text3);}
+.fnl-bar-wrap{flex:0 0 200px;height:10px;background:rgba(255,255,255,0.04);border-radius:5px;overflow:hidden;}
+.fnl-bar{height:100%;border-radius:5px;transition:width 0.8s var(--spring);}
+.fnl-arrow{position:absolute;left:13px;top:28px;bottom:-14px;width:2px;background:rgba(255,255,255,0.06);}
+.fnl-stage:last-child .fnl-arrow{display:none;}
+@media(max-width:600px){
+  .fnl-bar-wrap{flex:0 0 100px;}
+  .fnl-stage{gap:10px;}
+  .fnl-rep-grid{grid-template-columns:1fr!important;}
+}
+.fnl-toggle{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.fnl-tog-btn{padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text3);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.18s;}
+.fnl-tog-btn.ac{background:var(--blue-soft);border-color:rgba(108,112,240,0.3);color:#818CF8;}
+.fnl-rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fnl-rep-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;position:relative;}
+.fnl-rep-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;}
+.fnl-rep-best{position:absolute;top:10px;right:12px;font-size:10px;font-weight:700;color:var(--gold);background:var(--gold-soft);padding:2px 8px;border-radius:6px;}
+.fnl-mini-stage{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.fnl-mini-label{font-size:11px;color:var(--text3);min-width:70px;}
+.fnl-mini-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;}
+.fnl-mini-bar{height:100%;border-radius:3px;transition:width 0.6s var(--spring);}
+.fnl-mini-count{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--text3);min-width:24px;text-align:right;}
+.fnl-mini-pct{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;min-width:36px;text-align:right;padding:1px 4px;border-radius:4px;}
+
 /* Reports tab */
 .rpt-f{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:20px;margin-bottom:16px;}
 .rpt-ft{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;}
@@ -459,6 +503,7 @@ textarea.min{resize:vertical;min-height:70px;}
     <button class="tb" onclick="showTab('unclaimed',this)">📭 Unclaimed</button>
     <button class="tb" onclick="showTab('followups',this)">📅 Follow-Ups</button>
     <button class="tb" onclick="showTab('queue',this)">⚡ Queue <span class="tb-badge" id="badge-queue" style="background:var(--red-soft);color:#F87171;border-color:rgba(224,27,54,0.2);">0</span></button>
+    <button class="tb" onclick="showTab('funnel',this)">🔻 Funnel</button>
     <button class="tb" onclick="showTab('reports',this)">📊 Reports</button>
   </div>
 
@@ -499,6 +544,22 @@ textarea.min{resize:vertical;min-height:70px;}
     </div>
     <div id="q-hot-sec"></div>
     <div id="q-overdue-sec"></div>
+  </div>
+
+  <!-- FUNNEL -->
+  <div id="tab-funnel" style="display:none;">
+    <div class="fnl-period">
+      <button class="fnl-pb ac" onclick="setFunnelPeriod('week',this)">This Week</button>
+      <button class="fnl-pb" onclick="setFunnelPeriod('month',this)">This Month</button>
+      <button class="fnl-pb" onclick="setFunnelPeriod('all',this)">All Time</button>
+    </div>
+    <div id="fnl-revenue"></div>
+    <div class="fnl-toggle">
+      <button class="fnl-tog-btn ac" id="fnl-team-btn" onclick="setFunnelView('team')">Team Funnel</button>
+      <button class="fnl-tog-btn" id="fnl-rep-btn" onclick="setFunnelView('reps')">Per-Rep Comparison</button>
+    </div>
+    <div id="fnl-team-view"></div>
+    <div id="fnl-rep-view" style="display:none;"></div>
   </div>
 
   <!-- REPORTS -->
@@ -755,9 +816,11 @@ function showTab(tab,btn){
   document.getElementById('tab-reports').style.display='none';
   document.getElementById('tab-followups').style.display='none';
   document.getElementById('tab-queue').style.display='none';
+  document.getElementById('tab-funnel').style.display='none';
   if(tab==='reports'){document.getElementById('tab-reports').style.display='block';runReport();}
   else if(tab==='followups'){document.getElementById('tab-followups').style.display='block';renderFollowUps();}
   else if(tab==='queue'){document.getElementById('tab-queue').style.display='block';renderQueue();}
+  else if(tab==='funnel'){document.getElementById('tab-funnel').style.display='block';renderFunnel();}
   else{document.getElementById('tab-entries').style.display='block';renderEntries();}
 }
 
@@ -883,6 +946,175 @@ async function softDeleteEntry(){
     ALL=ALL.filter(x=>x.id!==id);
     closeModal();renderEntries();renderKPIs();showToast('✓ Entry archived by '+deletedBy);
   }catch(e){showToast('Error: '+e.message);}
+}
+
+// ═══ Funnel Analytics ═══
+let funnelPeriod='week';
+let funnelView='team';
+
+function setFunnelPeriod(period,btn){
+  funnelPeriod=period;
+  document.querySelectorAll('.fnl-pb').forEach(b=>b.classList.remove('ac'));
+  if(btn)btn.classList.add('ac');
+  renderFunnel();
+}
+
+function setFunnelView(view){
+  funnelView=view;
+  document.getElementById('fnl-team-btn').classList.toggle('ac',view==='team');
+  document.getElementById('fnl-rep-btn').classList.toggle('ac',view==='reps');
+  document.getElementById('fnl-team-view').style.display=view==='team'?'block':'none';
+  document.getElementById('fnl-rep-view').style.display=view==='reps'?'block':'none';
+  renderFunnel();
+}
+
+function getFunnelData(entries){
+  const contacts=entries.length;
+  const warm=entries.filter(e=>(parseInt(e.eng_score)||0)>=5).length;
+  const hot=entries.filter(e=>(parseInt(e.eng_score)||0)>=8).length;
+  const appt=entries.filter(e=>e.outcome==='Appointment Set').length;
+  const sold=entries.filter(e=>e.outcome&&(e.outcome.includes('New Vehicle Sold')||e.outcome.includes('Used Vehicle Sold'))).length;
+  return{contacts,warm,hot,appt,sold};
+}
+
+function funnelColor(pct,goodThresh,poorThresh){
+  if(pct>=goodThresh)return{bg:'var(--green)',soft:'var(--green-soft)',text:'#2DD4A0',label:'Good'};
+  if(pct>=poorThresh)return{bg:'var(--gold)',soft:'var(--gold-soft)',text:'#D4A73A',label:'Average'};
+  return{bg:'var(--red)',soft:'var(--red-soft)',text:'#F87171',label:'Poor'};
+}
+
+function funnelPeriodLabel(){
+  if(funnelPeriod==='week')return'this week';
+  if(funnelPeriod==='month')return'this month';
+  return'all time';
+}
+
+function filterByPeriod(data){
+  const now=new Date();
+  if(funnelPeriod==='week'){
+    const d=now.getDay();const diff=d===0?6:d-1;
+    const start=new Date(now);start.setDate(start.getDate()-diff);start.setHours(0,0,0,0);
+    return data.filter(e=>e.created_at&&new Date(e.created_at)>=start);
+  }
+  if(funnelPeriod==='month'){
+    const start=new Date(now.getFullYear(),now.getMonth(),1);
+    return data.filter(e=>e.created_at&&new Date(e.created_at)>=start);
+  }
+  return data;
+}
+
+function renderFunnel(){
+  const filtered=filterByPeriod(ALL);
+  const d=getFunnelData(filtered);
+  const stages=[
+    {name:'Contacts Logged',count:d.contacts,prev:d.contacts,good:100,poor:0,icon:'📋',color:'var(--blue)'},
+    {name:'Warm+ Leads',count:d.warm,prev:d.contacts,good:40,poor:20,icon:'🌡️',color:'var(--gold)'},
+    {name:'Hot Leads',count:d.hot,prev:d.warm,good:35,poor:15,icon:'🔥',color:'var(--red)'},
+    {name:'Appointments Set',count:d.appt,prev:d.hot,good:25,poor:10,icon:'📅',color:'var(--green)'},
+    {name:'Vehicles Sold',count:d.sold,prev:d.appt,good:60,poor:30,icon:'🚗',color:'var(--purple)'},
+  ];
+
+  // Revenue
+  const revenue=d.sold*2800;
+  const revenueStr=revenue.toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0});
+  document.getElementById('fnl-revenue').innerHTML=`
+    <div class="fnl-rev">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Estimated S2S Revenue</div>
+          <div class="fnl-rev-v">${revenueStr}</div>
+          <div class="fnl-rev-l">ServiceBridge generated an estimated <strong style="color:var(--green);">${revenueStr}</strong> in front-end gross ${funnelPeriodLabel()}</div>
+          <div class="fnl-rev-n">(Based on $2,800 avg gross — verify against actuals in DMS)</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Instrument Serif',Georgia,serif;font-size:48px;color:${d.sold>0?'var(--green)':'var(--text3)'};">${d.sold}</div>
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;">Units Sold</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Team funnel
+  const maxCount=Math.max(d.contacts,1);
+  let teamHtml='<div class="fnl-card"><div class="fnl-card-t">Conversion Funnel — '+funnelPeriodLabel().replace(/^\w/,c=>c.toUpperCase())+'</div>';
+  stages.forEach((s,i)=>{
+    const pct=i===0?100:(s.prev>0?Math.round((s.count/s.prev)*100):0);
+    const c=i===0?{bg:'var(--blue)',soft:'var(--blue-soft)',text:'#818CF8',label:'—'}:funnelColor(pct,s.good,s.poor);
+    const barW=Math.max((s.count/maxCount)*100,2);
+    const dropoff=i>0&&s.prev>0?s.prev-s.count:0;
+    teamHtml+=`
+      <div class="fnl-stage">
+        <div class="fnl-arrow"></div>
+        <div class="fnl-num" style="background:${c.bg};">${i+1}</div>
+        <div class="fnl-info">
+          <div class="fnl-name">${s.icon} ${s.name}</div>
+          <div class="fnl-meta">
+            <span class="fnl-count">${s.count}</span>
+            ${i>0?`<span class="fnl-pct" style="background:${c.soft};color:${c.text};">${pct}%</span>`:''}
+            ${dropoff>0?`<span class="fnl-drop">↓ ${dropoff} dropped</span>`:''}
+          </div>
+        </div>
+        <div class="fnl-bar-wrap"><div class="fnl-bar" style="width:${barW}%;background:${c.bg};"></div></div>
+      </div>`;
+  });
+  teamHtml+='</div>';
+  document.getElementById('fnl-team-view').innerHTML=teamHtml;
+
+  // Per-rep comparison
+  const reps={};
+  filtered.forEach(e=>{const r=e.submitter||'Unknown';if(!reps[r])reps[r]=[];reps[r].push(e);});
+  const repNames=Object.keys(reps).sort((a,b)=>reps[b].length-reps[a].length);
+
+  // Find best performer at each stage
+  const bestAt={contacts:'',warm:'',hot:'',appt:'',sold:''};
+  let bestVals={contacts:0,warm:0,hot:0,appt:0,sold:0};
+  repNames.forEach(name=>{
+    const rd=getFunnelData(reps[name]);
+    if(rd.contacts>bestVals.contacts){bestVals.contacts=rd.contacts;bestAt.contacts=name;}
+    if(rd.warm>bestVals.warm){bestVals.warm=rd.warm;bestAt.warm=name;}
+    if(rd.hot>bestVals.hot){bestVals.hot=rd.hot;bestAt.hot=name;}
+    if(rd.appt>bestVals.appt){bestVals.appt=rd.appt;bestAt.appt=name;}
+    if(rd.sold>bestVals.sold){bestVals.sold=rd.sold;bestAt.sold=name;}
+  });
+
+  const miniStages=[
+    {key:'contacts',label:'Contacts',color:'var(--blue)'},
+    {key:'warm',label:'Warm+',color:'var(--gold)'},
+    {key:'hot',label:'Hot',color:'var(--red)'},
+    {key:'appt',label:'Appt Set',color:'var(--green)'},
+    {key:'sold',label:'Sold',color:'var(--purple)'},
+  ];
+
+  let repHtml='<div class="fnl-rep-grid">';
+  repNames.forEach(name=>{
+    const rd=getFunnelData(reps[name]);
+    const vals={contacts:rd.contacts,warm:rd.warm,hot:rd.hot,appt:rd.appt,sold:rd.sold};
+    const maxV=Math.max(rd.contacts,1);
+    const badges=[];
+    Object.keys(bestAt).forEach(k=>{if(bestAt[k]===name&&bestVals[k]>0)badges.push(k);});
+    const badgeHtml=badges.length>0?`<span class="fnl-rep-best">★ Best ${badges[0]}</span>`:'';
+
+    repHtml+=`<div class="fnl-rep-card">${badgeHtml}<div class="fnl-rep-name">${name}</div>`;
+    miniStages.forEach((s,i)=>{
+      const count=vals[s.key];
+      const prev=i===0?count:(i===1?vals.contacts:i===2?vals.warm:i===3?vals.hot:vals.appt);
+      const pct=i===0?'':prev>0?Math.round((count/prev)*100)+'%':'0%';
+      const barW=Math.max((count/maxV)*100,2);
+      const c=i===0?{soft:'var(--blue-soft)',text:'#818CF8'}:
+              (prev>0&&(count/prev)*100>=[0,40,35,25,60][i])?{soft:'var(--green-soft)',text:'#2DD4A0'}:
+              (prev>0&&(count/prev)*100>=[0,20,15,10,30][i])?{soft:'var(--gold-soft)',text:'#D4A73A'}:
+              {soft:'var(--red-soft)',text:'#F87171'};
+      repHtml+=`
+        <div class="fnl-mini-stage">
+          <div class="fnl-mini-label">${s.label}</div>
+          <div class="fnl-mini-bar-wrap"><div class="fnl-mini-bar" style="width:${barW}%;background:${s.color};"></div></div>
+          <div class="fnl-mini-count">${count}</div>
+          ${i>0?`<div class="fnl-mini-pct" style="background:${c.soft};color:${c.text};">${pct}</div>`:''}
+        </div>`;
+    });
+    repHtml+='</div>';
+  });
+  repHtml+='</div>';
+  document.getElementById('fnl-rep-view').innerHTML=repNames.length>0?repHtml:'<div style="color:var(--text3);text-align:center;padding:32px;">No data for this period</div>';
 }
 
 // Reports
