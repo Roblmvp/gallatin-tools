@@ -1,471 +1,550 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>
+  <script>
 (function(){
-  var rep = null;
-  try { rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null'); } catch(e) {}
-  if (!rep || !rep.name || !rep.role) { window.location.replace('/login.html'); }
-  if (rep.role.toLowerCase() !== 'admin') { window.location.replace('/app.html'); }
+  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
+  if (!rep || rep.role !== 'Admin') {
+    window.location.replace('/login.html');
+  }
 })();
 </script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#06080E">
-<title>Admin Console — ServiceBridge</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServiceBridge Admin — Vyaxis</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #06080E; --bg2: #0C0F18;
-  --surface: #111520; --surface2: #171C2A; --surface3: #1D2333;
-  --red: #E01B36; --red-soft: rgba(224,27,54,0.10); --red-glow: rgba(224,27,54,0.25);
-  --gold: #D4A73A; --gold-soft: rgba(212,167,58,0.10);
-  --green: #2DD4A0; --green-soft: rgba(45,212,160,0.10);
-  --blue: #6C70F0; --blue-soft: rgba(108,112,240,0.10);
-  --orange: #F59E0B; --orange-soft: rgba(245,158,11,0.10);
-  --purple: #A855F7; --purple-soft: rgba(168,85,247,0.10);
-  --text: #EDEEF2; --text2: rgba(237,238,242,0.62); --text3: rgba(237,238,242,0.34);
-  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.10); --border3: rgba(255,255,255,0.16);
-  --r: 14px; --rsm: 10px; --rlg: 18px;
-  --spring: cubic-bezier(0.16, 1, 0.3, 1);
+:root{
+  --ink:#0C0C14;--ink2:#15151F;--surface:#F5F4F1;--card:#FFFFFF;
+  --border:#E4E2DC;--muted:#8C897F;--text:#18171A;--subtext:#6A6760;
+  --red:#C8102E;--red-dark:#9B0D22;--red-light:#FEF2F3;
+  --gold:#C49A2A;--gold-light:#FDF9EF;
+  --green:#14532D;--green-mid:#166534;--green-light:#F0FDF4;
+  --blue:#1E3A8A;--blue-light:#EFF6FF;
+  --purple:#7C3AED;--purple-light:#F5F3FF;
+  --r:10px;--rsm:6px;
+  --sh:0 1px 3px rgba(0,0,0,0.06),0 4px 20px rgba(0,0,0,0.05);
+  --sh-lg:0 12px 48px rgba(0,0,0,0.14);
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg); color: var(--text);
-  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-  min-height: 100vh; overflow-x: hidden;
-  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-  font-size: 15px; line-height: 1.5; letter-spacing: -0.01em;
-}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
-/* ── Background ── */
-.bg-noise { position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
-.bg-grad { position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 20% 0%,rgba(108,112,240,0.06) 0%,transparent 70%),radial-gradient(ellipse 50% 60% at 80% 100%,rgba(224,27,54,0.04) 0%,transparent 70%); }
-
-/* ── Header ── */
-.app-header {
+/* ══ NAV ══ */
+.admin-nav{
+  background:var(--ink);
+  height:62px;
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 24px 12px; padding-top:max(14px, env(safe-area-inset-top));
-  border-bottom:1px solid var(--border);
-  background:rgba(6,8,14,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  padding:0 28px;
   position:sticky;top:0;z-index:200;
+  border-bottom:1px solid rgba(255,255,255,0.08);
 }
-.app-header::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),var(--purple),transparent);opacity:0.5; }
-.header-left { display:flex;align-items:center;gap:12px; }
-.header-logo { width:30px;height:30px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center; }
-.header-logo svg { width:14px;height:14px; }
-.header-title { font-family:'Instrument Serif',Georgia,serif;font-size:17px;letter-spacing:-0.01em;color:var(--text); }
-.header-sep { width:1px;height:16px;background:var(--border3); }
-.header-product { font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3); }
-.header-right { display:flex;align-items:center;gap:10px;position:relative; }
-.header-user-pill { display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:30px;padding:4px 12px 4px 4px; }
-.header-avatar { width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--orange));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bg);flex-shrink:0;font-family:'JetBrains Mono',monospace; }
-.header-user-name { font-size:12px;font-weight:600;color:var(--text);white-space:nowrap; }
-.header-role-badge { font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:10px;background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2); }
+.admin-nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--blue));}
+.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.06em;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav-sep{width:1px;height:18px;background:rgba(255,255,255,0.15);}
+.nav-product{font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.4);}
+.nav-left{display:flex;align-items:center;gap:14px;}
+.nav-right{display:flex;align-items:center;gap:10px;}
+
+/* User pill */
+.nav-user-pill{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:100px;padding:4px 14px 4px 4px;cursor:pointer;
+}
+.nav-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;letter-spacing:0.04em;
+}
+.nav-user-name{font-size:13px;font-weight:600;color:#fff;}
+.nav-role-pill{
+  font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  background:rgba(124,58,237,0.2);color:#A78BFA;
+  padding:3px 8px;border-radius:4px;
+}
 
 /* Hamburger */
-.hamburger { background:none;border:1px solid var(--border2);border-radius:8px;width:34px;height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all 0.18s;padding:0;flex-shrink:0; }
-.hamburger:hover { border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.03); }
-.hamburger span { display:block;width:14px;height:1.5px;background:rgba(255,255,255,0.55);border-radius:2px;transition:all 0.2s; }
-.hamburger.open span:nth-child(1) { transform:translateY(5.5px) rotate(45deg); }
-.hamburger.open span:nth-child(2) { opacity:0; }
-.hamburger.open span:nth-child(3) { transform:translateY(-5.5px) rotate(-45deg); }
+.hamburger{width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;background:none;border:none;padding:0;}
+.hamburger span{width:20px;height:2px;background:#fff;border-radius:2px;transition:all 0.25s;}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
 
 /* Dropdown */
-.nav-overlay { position:fixed;inset:0;z-index:190;display:none; }
-.nav-overlay.open { display:block; }
-.nav-dropdown { position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);min-width:230px;padding:6px;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:201;opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;transition:all 0.18s var(--spring); }
-.nav-dropdown.open { opacity:1;transform:translateY(0) scale(1);pointer-events:all; }
-.dd-item { display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--rsm);font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s; }
-.dd-item:hover { background:rgba(255,255,255,0.04);color:var(--text); }
-.dd-item.active-page { background:var(--blue-soft);color:var(--blue); }
-.dd-item.danger { color:#FC8181; }
-.dd-item.danger:hover { background:rgba(239,68,68,0.08); }
-.dd-icon { font-size:14px;width:20px;text-align:center; }
-.dd-divider { height:1px;background:var(--border);margin:4px 0; }
-.dd-header { padding:10px 14px 6px; }
-.dd-header-name { font-size:13px;font-weight:700;color:var(--text); }
-.dd-header-role { font-size:11px;color:var(--text3);margin-top:1px; }
-
-/* ── Tab Navigation ── */
-.tab-bar {
-  display:flex;gap:0;padding:0 24px;
-  background:var(--bg2);border-bottom:1px solid var(--border);
-  overflow-x:auto;scrollbar-width:none;position:relative;z-index:1;
+.nav-dropdown{
+  position:fixed;top:62px;right:16px;width:260px;
+  background:var(--ink2);border:1px solid rgba(255,255,255,0.1);
+  border-radius:var(--r);box-shadow:var(--sh-lg);
+  transform:translateY(-8px);opacity:0;pointer-events:none;
+  transition:all 0.2s;z-index:300;padding:8px;
 }
-.tab-bar::-webkit-scrollbar { display:none; }
-.tab-btn {
-  padding:12px 18px;font-size:11px;font-weight:700;
-  letter-spacing:0.08em;text-transform:uppercase;
-  color:var(--text3);border-bottom:2px solid transparent;
-  cursor:pointer;transition:all 0.18s;white-space:nowrap;
-  background:none;border-top:none;border-left:none;border-right:none;
-  font-family:'Plus Jakarta Sans',sans-serif;
+.nav-dropdown.open{transform:translateY(4px);opacity:1;pointer-events:auto;}
+.dd-header{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:4px;}
+.dd-header-name{font-weight:700;color:#fff;font-size:14px;}
+.dd-header-role{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;}
+.dd-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rsm);font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);text-decoration:none;cursor:pointer;transition:background 0.15s;border:none;background:none;width:100%;font-family:inherit;}
+.dd-item:hover{background:rgba(255,255,255,0.06);color:#fff;}
+.dd-item.danger{color:#F87171;}
+.dd-item.danger:hover{background:rgba(248,113,113,0.1);}
+.dd-icon{font-size:16px;width:22px;text-align:center;}
+.dd-divider{height:1px;background:rgba(255,255,255,0.08);margin:4px 0;}
+
+/* Nav Tabs */
+.nav-wrap{
+  display:flex;gap:0;background:var(--card);border-bottom:1px solid var(--border);
+  padding:0 28px;overflow-x:auto;-webkit-overflow-scrolling:touch;
 }
-.tab-btn:hover { color:var(--text2); }
-.tab-btn.active { color:var(--blue);border-bottom-color:var(--blue); }
-
-/* ── Page ── */
-.page { max-width:1200px;margin:0 auto;padding:28px 24px 80px;position:relative;z-index:1; }
-.tab-panel { display:none; }
-.tab-panel.active { display:block; }
-
-/* ── Section Headers ── */
-.sh { display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 18px; }
-.sh-title { font-family:'Instrument Serif',Georgia,serif;font-size:26px;letter-spacing:-0.02em;color:var(--text); }
-.sh-desc { font-size:13px;color:var(--text3);margin-top:3px; }
-.sh-actions { display:flex;gap:8px;flex-shrink:0; }
-
-/* ── KPI Tiles ── */
-.kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px; }
-.kpi-tile {
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
-  padding:18px 18px;position:relative;overflow:hidden;
-  transition:transform 0.2s var(--spring);
+.nav-tab{
+  padding:14px 20px;font-size:12px;font-weight:600;letter-spacing:0.04em;
+  color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;
+  white-space:nowrap;transition:all 0.18s;
 }
-.kpi-tile:hover { transform:translateY(-2px); }
-.kpi-tile::before { content:'';position:absolute;top:0;left:0;right:0;height:2px; }
-.k-blue::before { background:var(--blue); } .k-green::before { background:var(--green); }
-.k-red::before { background:var(--red); } .k-gold::before { background:var(--gold); }
-.kpi-label { font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px; }
-.kpi-val { font-family:'Instrument Serif',Georgia,serif;font-size:36px;line-height:1; }
-.k-blue .kpi-val { color:var(--blue); } .k-green .kpi-val { color:var(--green); }
-.k-red .kpi-val { color:#F87171; } .k-gold .kpi-val { color:var(--gold); }
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--purple);border-bottom-color:var(--purple);}
 
-/* ── Cards ── */
-.card {
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);
-  padding:22px 22px;margin-bottom:14px;
+/* Page */
+.page{max-width:1200px;margin:0 auto;padding:20px 28px 80px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* Section header */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap;}
+.sh-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);}
+.sh-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;box-shadow:var(--sh);}
+.card-title{font-weight:700;font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+/* KPI Grid */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.kpi-tile{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh);}
+.kpi-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.kpi-val{font-family:'DM Mono',monospace;font-size:28px;font-weight:700;}
+.k-purple .kpi-val{color:var(--purple);}
+.k-green .kpi-val{color:var(--green);}
+.k-blue .kpi-val{color:var(--blue);}
+.k-red .kpi-val{color:var(--red);}
+
+/* Forms */
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.form-input{
+  width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--rsm);
+  font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);
+  background:#FAFAF8;transition:border-color 0.18s;
 }
-.card-title { font-family:'Instrument Serif',Georgia,serif;font-size:18px;margin-bottom:16px;color:var(--text); }
-.grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.form-input:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.1);}
+.form-input::placeholder{color:#C2BFB9;}
+select.form-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238C897F' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;appearance:none;}
 
-/* ── Dealer Cards ── */
-.dealer-card {
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);
-  padding:22px;position:relative;overflow:hidden;
+/* BTNS */
+.btn-primary{background:var(--purple);color:#fff;border:none;border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.06em;padding:10px 22px;cursor:pointer;transition:background 0.18s;}
+.btn-primary:hover{background:#6D28D9;}
+.btn-dark{background:var(--ink);color:#fff;border:none;border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.06em;padding:10px 22px;cursor:pointer;transition:background 0.18s;}
+.btn-dark:hover{background:#000;}
+.btn-outline{background:transparent;color:var(--purple);border:1.5px solid var(--purple);border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.06em;padding:9px 20px;cursor:pointer;transition:all 0.18s;}
+.btn-outline:hover{background:var(--purple-light);}
+.btn-red{background:var(--red);color:#fff;border:none;border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.06em;padding:9px 20px;cursor:pointer;transition:background 0.18s;}
+.btn-red:hover{background:var(--red-dark);}
+.btn-sm{padding:6px 14px;font-size:11px;}
+.btn-green{background:var(--green);color:#fff;border:none;border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.06em;padding:9px 20px;cursor:pointer;transition:background 0.18s;}
+.btn-green:hover{background:var(--green-mid);}
+
+/* REP TABLE */
+.rep-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+.rep-row:last-child{border-bottom:none;}
+.rep-info{display:flex;flex-direction:column;gap:3px;}
+.rep-name-lg{font-weight:600;font-size:14px;}
+.rep-meta{font-size:11px;color:var(--muted);}
+.rep-actions{display:flex;align-items:center;gap:8px;}
+
+/* EMAIL LOG */
+.email-log-row{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+.email-log-row:last-child{border-bottom:none;}
+.email-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.dot-hot{background:var(--red);}
+.dot-daily{background:var(--blue);}
+.dot-system{background:var(--muted);}
+.email-log-info{flex:1;}
+.email-log-subject{font-weight:600;font-size:13px;}
+.email-log-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;padding:10px 12px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+
+/* Status badges */
+.status-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.04em;}
+.s-active{background:var(--green-light);color:var(--green);}
+.s-inactive{background:var(--red-light);color:var(--red);}
+
+/* Loading */
+.loading{text-align:center;padding:40px;color:var(--muted);}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Alert */
+.alert{padding:12px 16px;border-radius:var(--rsm);font-size:13px;font-weight:500;display:none;margin-bottom:16px;}
+.alert.show{display:block;}
+.alert.success{background:var(--green-light);color:var(--green);border:1px solid rgba(20,83,45,0.15);}
+.alert.error{background:var(--red-light);color:var(--red);border:1px solid rgba(200,16,46,0.15);}
+.alert.info{background:var(--blue-light);color:var(--blue);border:1px solid rgba(30,58,138,0.15);}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;backdrop-filter:blur(4px);}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal{background:var(--card);border-radius:12px;padding:32px;max-width:560px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg);transform:translateY(8px);transition:transform 0.2s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:4px;}
+.modal-desc{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);}
+
+/* Dealer cards */
+.dealer-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;box-shadow:var(--sh);}
+.dealer-name{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:4px;}
+.dealer-id{font-size:11px;color:var(--muted);margin-bottom:16px;}
+.dealer-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.dealer-stat-val{font-family:'DM Mono',monospace;font-weight:700;font-size:18px;}
+.dealer-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
+
+/* Export bar */
+.export-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.export-btn{padding:10px 20px;border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:var(--text);transition:all 0.18s;}
+.export-btn:hover{border-color:var(--purple);color:var(--purple);}
+
+/* ══ USER PROFILE CARDS ══ */
+.user-profile-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:0;box-shadow:var(--sh);margin-bottom:16px;overflow:hidden;
+  transition:box-shadow 0.2s,border-color 0.2s;
 }
-.dealer-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple)); }
-.dealer-name { font-family:'Instrument Serif',Georgia,serif;font-size:20px;color:var(--text);margin-bottom:3px; }
-.dealer-id { font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px; }
-.dealer-stats { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
-.dealer-stat { background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 12px; }
-.dealer-stat-val { font-family:'Instrument Serif',Georgia,serif;font-size:22px;color:var(--blue); }
-.dealer-stat-lbl { font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:2px; }
-.dealer-footer { margin-top:14px;display:flex;align-items:center;justify-content:space-between; }
-.status-badge { display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.06em; }
-.s-active { background:var(--green-soft);color:var(--green);border:1px solid rgba(45,212,160,0.2); }
-.dealer-add {
-  border:2px dashed var(--border2);background:transparent;border-radius:var(--rlg);
-  padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:220px;cursor:pointer;transition:all 0.2s;
+.user-profile-card:hover{box-shadow:0 4px 24px rgba(0,0,0,0.08);border-color:rgba(124,58,237,0.2);}
+.user-profile-card.editing{border-color:var(--purple);box-shadow:0 4px 24px rgba(124,58,237,0.12);}
+
+.upc-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 24px;cursor:pointer;
 }
-.dealer-add:hover { border-color:var(--border3);background:rgba(255,255,255,0.02); }
-.dealer-add-icon { font-size:32px;margin-bottom:10px;opacity:0.4; }
-.dealer-add-title { font-family:'Instrument Serif',Georgia,serif;font-size:16px;color:var(--text2); }
-.dealer-add-sub { font-size:12px;color:var(--text3);margin-top:4px; }
-
-/* ── Form Elements ── */
-.form-group { margin-bottom:14px; }
-.form-label { font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px; }
-.form-input {
-  width:100%;background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--rsm);
-  color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;
-  padding:10px 14px;outline:none;transition:border-color 0.18s;-webkit-appearance:none;
+.upc-left{display:flex;align-items:center;gap:16px;flex:1;min-width:0;}
+.upc-avatar{
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:700;color:#fff;letter-spacing:0.04em;
+  flex-shrink:0;
 }
-.form-input:focus { border-color:var(--blue);box-shadow:0 0 0 3px rgba(108,112,240,0.1); }
-.form-input::placeholder { color:var(--text3);opacity:0.5; }
-select.form-input {
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='rgba(237,238,242,0.34)' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;
+.upc-avatar.role-admin{background:linear-gradient(135deg,var(--purple),var(--blue));}
+.upc-avatar.role-manager{background:linear-gradient(135deg,var(--gold),#E5B83A);}
+.upc-avatar.role-sales{background:linear-gradient(135deg,#059669,#10B981);}
+.upc-avatar.role-finance{background:linear-gradient(135deg,var(--blue),#3B82F6);}
+
+.upc-info{flex:1;min-width:0;}
+.upc-name{font-weight:700;font-size:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.upc-role-badge{
+  font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  padding:3px 10px;border-radius:4px;
 }
-select.form-input option { background:var(--surface); }
+.upc-role-badge.admin{background:rgba(124,58,237,0.12);color:var(--purple);}
+.upc-role-badge.manager{background:rgba(196,154,42,0.12);color:var(--gold);}
+.upc-role-badge.sales{background:rgba(5,150,105,0.12);color:#059669;}
+.upc-role-badge.finance{background:rgba(30,58,138,0.12);color:var(--blue);}
+.upc-role-badge.s2s-manager{background:rgba(196,154,42,0.12);color:var(--gold);}
 
-/* ── Buttons ── */
-.btn-primary { background:var(--blue);color:#fff;border:none;border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.04em;padding:10px 22px;cursor:pointer;transition:all 0.18s var(--spring); }
-.btn-primary:hover { transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,112,240,0.3); }
-.btn-dark { background:var(--surface2);color:var(--text);border:1.5px solid var(--border2);border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.04em;padding:10px 22px;cursor:pointer;transition:all 0.18s; }
-.btn-dark:hover { border-color:var(--border3);background:var(--surface3); }
-.btn-outline { background:transparent;color:var(--blue);border:1.5px solid rgba(108,112,240,0.3);border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.04em;padding:9px 18px;cursor:pointer;transition:all 0.18s; }
-.btn-outline:hover { background:var(--blue-soft); }
-.btn-red { background:var(--red-soft);color:#FC8181;border:1px solid rgba(224,27,54,0.25);border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;padding:9px 18px;cursor:pointer;transition:all 0.18s; }
-.btn-red:hover { background:rgba(224,27,54,0.18); }
-.btn-sm { padding:6px 14px;font-size:11px; }
+.upc-subtitle{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.upc-subtitle span{display:flex;align-items:center;gap:4px;}
 
-/* ── Table ── */
-.tbl-wrap { overflow-x:auto;border-radius:var(--rsm);border:1px solid var(--border); }
-table { width:100%;border-collapse:collapse;font-size:12px; }
-thead tr { background:var(--surface2); }
-thead th { padding:10px 14px;text-align:left;font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);white-space:nowrap; }
-tbody tr { border-bottom:1px solid var(--border);transition:background 0.12s; }
-tbody tr:hover { background:rgba(108,112,240,0.03); }
-td { padding:10px 14px;color:var(--text2);font-size:12px; }
-td:first-child { font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:11px; }
-
-/* ── Rep Rows ── */
-.rep-row { display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border); }
-.rep-row:last-child { border-bottom:none; }
-.rep-info { display:flex;align-items:center;gap:12px; }
-.rep-avatar { width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;font-family:'JetBrains Mono',monospace;flex-shrink:0; }
-.rep-name-lg { font-weight:700;font-size:14px;color:var(--text); }
-.rep-meta { font-size:11px;color:var(--text3);margin-top:1px; }
-.rep-actions { display:flex;align-items:center;gap:10px; }
-.rep-count { font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3); }
-
-/* ── Email Log ── */
-.email-log-row { display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border); }
-.email-log-row:last-child { border-bottom:none; }
-.email-dot { width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0; }
-.dot-hot { background:var(--red); } .dot-daily { background:var(--blue); } .dot-system { background:var(--text3); }
-.email-log-subject { font-size:13px;font-weight:600;color:var(--text); }
-.email-log-meta { font-size:11px;color:var(--text3);margin-top:2px; }
-
-/* ── Export Bar ── */
-.export-bar { display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap; }
-.export-btn { display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--rsm);font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.18s; }
-.export-csv { background:var(--green-soft);border:1px solid rgba(45,212,160,0.2);color:var(--green); }
-.export-csv:hover { background:rgba(45,212,160,0.18);transform:translateY(-1px); }
-.export-pdf { background:var(--red-soft);border:1px solid rgba(224,27,54,0.2);color:#FC8181; }
-.export-pdf:hover { background:rgba(224,27,54,0.18);transform:translateY(-1px); }
-
-/* ── Alert ── */
-.alert { padding:12px 16px;border-radius:var(--rsm);font-size:12px;font-weight:600;margin-bottom:14px;display:none; }
-.alert.show { display:block; }
-.alert-success { background:var(--green-soft);color:var(--green);border:1px solid rgba(45,212,160,0.2); }
-.alert-error { background:var(--red-soft);color:#FC8181;border:1px solid rgba(224,27,54,0.2); }
-
-/* ── Loading ── */
-.loading { text-align:center;padding:40px;color:var(--text3);font-size:13px; }
-.spinner { display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;vertical-align:middle; }
-@keyframes spin { to{transform:rotate(360deg);} }
-
-/* ── Modal ── */
-.modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px; }
-.modal-overlay.open { display:flex; }
-.modal {
-  background:var(--surface);border:1px solid var(--border2);border-radius:var(--rlg);
-  padding:28px;width:100%;max-width:480px;position:relative;
+.upc-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.upc-expand-btn{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(0,0,0,0.03);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.18s;font-size:14px;color:var(--muted);
 }
-.modal::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:var(--rlg) var(--rlg) 0 0; }
-.modal-title { font-family:'Instrument Serif',Georgia,serif;font-size:24px;margin-bottom:4px; }
-.modal-desc { font-size:13px;color:var(--text3);margin-bottom:22px; }
-.modal-actions { display:flex;gap:10px;justify-content:flex-end;margin-top:22px; }
+.upc-expand-btn:hover{background:var(--purple-light);color:var(--purple);border-color:var(--purple);}
+.upc-expand-btn.open{transform:rotate(180deg);}
 
-/* ── Sync Label ── */
-.sync-label { font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3); }
+/* Expandable body */
+.upc-body{
+  max-height:0;overflow:hidden;transition:max-height 0.35s ease;
+  border-top:0px solid transparent;
+}
+.upc-body.open{max-height:800px;border-top:1px solid var(--border);}
 
-/* ── Responsive ── */
+.upc-body-inner{padding:24px;}
+.upc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.upc-field{display:flex;flex-direction:column;gap:4px;}
+.upc-field-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.upc-field-value{font-size:13px;font-weight:500;color:var(--text);word-break:break-word;}
+.upc-field-value.empty{color:var(--muted);font-style:italic;}
+
+.upc-edit-input{
+  width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--rsm);
+  font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);
+  background:#FAFAF8;transition:border-color 0.18s;
+}
+.upc-edit-input:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.1);}
+.upc-edit-select{
+  width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--rsm);
+  font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);
+  background:#FAFAF8;appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238C897F' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;
+}
+.upc-edit-select:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.1);}
+
+.upc-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;background:rgba(0,0,0,0.02);border-top:1px solid var(--border);
+  gap:12px;flex-wrap:wrap;
+}
+.upc-footer-left{display:flex;align-items:center;gap:8px;}
+.upc-footer-right{display:flex;align-items:center;gap:8px;}
+
+/* Access toggles */
+.access-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.access-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:var(--rsm);
+  background:rgba(0,0,0,0.02);border:1px solid var(--border);
+}
+.access-label{font-size:12px;font-weight:600;color:var(--text);}
+.access-desc{font-size:10px;color:var(--muted);margin-top:1px;}
+
+/* Toggle Switch */
+.toggle{
+  position:relative;width:40px;height:22px;cursor:pointer;flex-shrink:0;
+}
+.toggle input{display:none;}
+.toggle-slider{
+  position:absolute;inset:0;border-radius:11px;
+  background:#D1D5DB;transition:background 0.2s;
+}
+.toggle-slider::after{
+  content:'';position:absolute;left:2px;top:2px;
+  width:18px;height:18px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  transition:transform 0.2s;
+}
+.toggle input:checked + .toggle-slider{background:var(--purple);}
+.toggle input:checked + .toggle-slider::after{transform:translateX(18px);}
+.toggle input:disabled + .toggle-slider{opacity:0.5;cursor:not-allowed;}
+
+/* Responsive */
 @media(max-width:900px){
-  .kpi-grid { grid-template-columns:repeat(2,1fr); }
-  .grid-2 { grid-template-columns:1fr; }
-  .header-user-name { display:none; }
+  .grid-4{grid-template-columns:1fr 1fr;}
+  .grid-2{grid-template-columns:1fr;}
+  .upc-grid{grid-template-columns:1fr;}
+  .access-grid{grid-template-columns:1fr;}
+  .upc-header{padding:16px;}
+  .upc-body-inner{padding:16px;}
+  .upc-footer{padding:12px 16px;}
 }
 @media(max-width:600px){
-  .page { padding:20px 16px 80px; }
-  .card { padding:18px 16px; }
-  .app-header { padding:12px 16px; }
+  .admin-nav{padding:0 16px;}
+  .nav-wrap{padding:0 16px;}
+  .page{padding:16px 16px 80px;}
+  .grid-4{grid-template-columns:1fr 1fr;}
+  .upc-subtitle{flex-direction:column;gap:4px;align-items:flex-start;}
 }
 
-@keyframes fadeUp { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
-.fade-in { animation:fadeUp 0.4s ease both; }
+/* Toast */
+.admin-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:#fff;font-size:13px;font-weight:600;
+  padding:12px 24px;border-radius:100px;box-shadow:var(--sh-lg);
+  z-index:999;transition:transform 0.3s ease;white-space:nowrap;
+}
+.admin-toast.show{transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 
-<div class="bg-noise"></div>
-<div class="bg-grad"></div>
-
-<!-- ── HEADER ── -->
-<header class="app-header">
-  <div class="header-left">
-    <div class="header-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-    </div>
-    <div class="header-title">ServiceBridge</div>
-    <div class="header-sep"></div>
-    <div class="header-product">Admin Console</div>
+<header class="admin-nav">
+  <div class="nav-left">
+    <div class="nav-brand">ServiceBridge</div>
+    <div class="nav-sep"></div>
+    <div class="nav-product">Admin Console</div>
   </div>
-  <div class="header-right">
-    <div class="header-user-pill">
-      <div class="header-avatar" id="nav-avatar">RL</div>
-      <span class="header-user-name" id="nav-name"></span>
-      <span class="header-role-badge">Admin</span>
+  <div class="nav-right">
+    <div class="nav-user-pill">
+      <div class="nav-avatar" id="nav-avatar">RL</div>
+      <span class="nav-user-name" id="nav-name"></span>
+      <span class="nav-role-pill">Admin</span>
     </div>
-    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <div class="hamburger" id="hamburger" onclick="toggleMenu(event)">
       <span></span><span></span><span></span>
-    </button>
-    <div class="nav-dropdown" id="nav-dropdown">
-      <div class="dd-header">
-        <div class="dd-header-name" id="dd-name"></div>
-        <div class="dd-header-role">Admin · ServiceBridge</div>
-      </div>
-      <div class="dd-divider"></div>
-      <a href="app.html" class="dd-item"><span class="dd-icon">🏠</span> Home</a>
-      <a href="service-to-sales-log.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
-      <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Dashboard</a>
-      <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
-      <div class="dd-divider"></div>
-      <a href="admin-panel.html" class="dd-item active-page"><span class="dd-icon">⚙️</span> Admin Panel</a>
-      <div class="dd-divider"></div>
-      <button class="dd-item danger" onclick="signOut()"><span class="dd-icon">🚪</span> Sign Out</button>
     </div>
   </div>
 </header>
-<div class="nav-overlay" id="nav-overlay" onclick="closeMenu()"></div>
 
-<!-- ── TAB BAR ── -->
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('overview',this)">📊 Overview</button>
-  <button class="tab-btn" onclick="showTab('dealers',this)">🏢 Dealers</button>
-  <button class="tab-btn" onclick="showTab('reps',this)">👤 Team Management</button>
-  <button class="tab-btn" onclick="showTab('emails',this)">📧 Email Settings</button>
-  <button class="tab-btn" onclick="showTab('data',this)">🗄 Data</button>
+<!-- ══ DROPDOWN ══ -->
+<div class="nav-dropdown" id="nav-dropdown">
+  <div class="dd-header">
+    <div class="dd-header-name" id="dd-name"></div>
+    <div class="dd-header-role">Admin · ServiceBridge</div>
+  </div>
+  <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Manager Dashboard</a>
+  <a href="app.html" class="dd-item"><span class="dd-icon">📋</span> S2S Entry</a>
+  <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
+  <div class="dd-divider"></div>
+  <button class="dd-item danger" onclick="signOut()"><span class="dd-icon">🚪</span> Sign Out</button>
+</div>
+
+<!-- PAGE NAV TABS -->
+<div class="nav-wrap">
+  <div class="nav-tab active" onclick="showTab('overview',this)">📊 Overview</div>
+  <div class="nav-tab" onclick="showTab('dealers',this)">🏢 Dealers</div>
+  <div class="nav-tab" onclick="showTab('reps',this)">👤 Rep Management</div>
+  <div class="nav-tab" onclick="showTab('emails',this)">📧 Email Settings</div>
+  <div class="nav-tab" onclick="showTab('data',this)">🗄 Data</div>
 </div>
 
 <div class="page">
 
-  <div class="export-bar fade-in" style="margin-top:4px;">
-    <button class="export-btn export-csv" onclick="adminExportCSV()">⬇ S2S Entries — CSV</button>
-    <button class="export-btn export-pdf" onclick="adminExportPDF()">🖨 S2S Entries — Print</button>
+  <div class="export-bar" style="margin-top:20px;">
+    <button class="export-btn export-csv" onclick="adminExportS2SCSV()">⬇ S2S Entries — CSV</button>
+    <button class="export-btn export-pdf" onclick="adminExportS2SPDF()">🖨 S2S Entries — Print / PDF</button>
   </div>
 
-  <!-- ═══ OVERVIEW ═══ -->
-  <div class="tab-panel active fade-in" id="tab-overview">
+  <!-- OVERVIEW -->
+  <div class="tab-panel active" id="tab-overview">
     <div class="sh">
       <div><div class="sh-title">Platform Overview</div><div class="sh-desc">ServiceBridge across all dealers</div></div>
-      <div class="sync-label" id="overview-sync">—</div>
+      <div style="font-size:11px;color:var(--muted);" id="overview-sync">—</div>
     </div>
-    <div class="kpi-grid">
-      <div class="kpi-tile k-blue"><div class="kpi-label">Total Dealers</div><div class="kpi-val">1</div></div>
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="kpi-tile k-purple"><div class="kpi-label">Total Dealers</div><div class="kpi-val" id="kpi-dealers">1</div></div>
       <div class="kpi-tile k-green"><div class="kpi-label">Total Entries</div><div class="kpi-val" id="kpi-entries">—</div></div>
-      <div class="kpi-tile k-gold"><div class="kpi-label">Vehicles Sold</div><div class="kpi-val" id="kpi-sold">—</div></div>
+      <div class="kpi-tile k-blue"><div class="kpi-label">Vehicles Sold</div><div class="kpi-val" id="kpi-sold">—</div></div>
       <div class="kpi-tile k-red"><div class="kpi-label">Hot Leads</div><div class="kpi-val" id="kpi-hot">—</div></div>
     </div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Recent Entries</div>
-        <div id="recent-list"><div class="loading"><span class="spinner"></span> Loading...</div></div>
+        <div id="recent-entries-list"><div class="loading"><span class="spinner"></span>Loading...</div></div>
       </div>
       <div class="card">
         <div class="card-title">Email Notification Log</div>
-        <div id="email-log">
-          <div class="email-log-row"><div class="email-dot dot-system"></div><div><div class="email-log-subject">System initializing...</div><div class="email-log-meta">Waiting for first activity</div></div></div>
+        <div id="email-log-list">
+          <div class="email-log-row">
+            <div class="email-dot dot-system"></div>
+            <div class="email-log-info">
+              <div class="email-log-subject">Email system initializing...</div>
+              <div class="email-log-meta">Waiting for DNS verification on vyaxis.com</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ═══ DEALERS ═══ -->
+  <!-- DEALERS -->
   <div class="tab-panel" id="tab-dealers">
     <div class="sh">
       <div><div class="sh-title">Dealer Management</div><div class="sh-desc">All ServiceBridge dealer accounts</div></div>
-      <button class="btn-primary" onclick="openModal('dealer-modal')">+ Add Dealer</button>
+      <button class="btn-primary" onclick="openAddDealer()">+ Add Dealer</button>
     </div>
-    <div class="grid-2">
+    <div id="dealers-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
       <div class="dealer-card">
         <div class="dealer-name">Gallatin CDJR</div>
         <div class="dealer-id">Dealer ID: gallatin-cdjr · WeAuto Group</div>
-        <div class="dealer-stats">
+        <div class="dealer-stats" id="gallatin-stats">
           <div class="dealer-stat"><div class="dealer-stat-val" id="gs-entries">—</div><div class="dealer-stat-lbl">Total Entries</div></div>
           <div class="dealer-stat"><div class="dealer-stat-val" id="gs-sold">—</div><div class="dealer-stat-lbl">Sold</div></div>
           <div class="dealer-stat"><div class="dealer-stat-val" id="gs-conv">—</div><div class="dealer-stat-lbl">Conv. Rate</div></div>
           <div class="dealer-stat"><div class="dealer-stat-val" id="gs-hot">—</div><div class="dealer-stat-lbl">Hot Leads</div></div>
         </div>
-        <div class="dealer-footer">
+        <div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;">
           <span class="status-badge s-active">● Active</span>
           <div style="display:flex;gap:8px;">
-            <a href="manager-dashboard.html" class="btn-outline btn-sm">Dashboard</a>
-            <a href="service-to-sales-log.html" class="btn-dark btn-sm">Form</a>
+            <a href="manager-dashboard.html" target="_blank" class="btn-outline btn-sm">View Dashboard</a>
+            <a href="service-to-sales-log.html" target="_blank" class="btn-dark btn-sm">View Form</a>
           </div>
         </div>
       </div>
-      <div class="dealer-add" onclick="openModal('dealer-modal')">
-        <div class="dealer-add-icon">+</div>
-        <div class="dealer-add-title">Add New Dealer</div>
-        <div class="dealer-add-sub">Onboard next ServiceBridge client</div>
+      <div class="dealer-card" style="border:2px dashed var(--border);background:transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;cursor:pointer;" onclick="openAddDealer()">
+        <div style="font-size:32px;margin-bottom:12px;">+</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:16px;color:var(--subtext);">Add New Dealer</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;">Onboard next ServiceBridge client</div>
       </div>
     </div>
   </div>
 
-  <!-- ═══ TEAM MANAGEMENT ═══ -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- REP MANAGEMENT — UPGRADED WITH FULL PROFILE EDITING   -->
+  <!-- ══════════════════════════════════════════════════════ -->
   <div class="tab-panel" id="tab-reps">
     <div class="sh">
-      <div><div class="sh-title">Team Management</div><div class="sh-desc">Gallatin CDJR — Synced from Supabase sb_users</div></div>
-      <button class="btn-primary" onclick="openModal('rep-modal')">+ Add Rep</button>
+      <div><div class="sh-title">Rep Management</div><div class="sh-desc">Gallatin CDJR S2S Team — edit profiles, roles & access</div></div>
+      <button class="btn-primary" onclick="openAddRep()">+ Add Rep</button>
     </div>
-    <div class="card">
-      <div id="alert-rep" class="alert"></div>
-      <div id="reps-list"><div class="loading"><span class="spinner"></span> Loading team from Supabase...</div></div>
+    <div id="alert-rep" class="alert"></div>
+    <div id="reps-list">
+      <div class="loading"><span class="spinner"></span>Loading team...</div>
     </div>
   </div>
 
-  <!-- ═══ EMAIL SETTINGS ═══ -->
+  <!-- EMAIL SETTINGS -->
   <div class="tab-panel" id="tab-emails">
     <div class="sh"><div><div class="sh-title">Email Notifications</div><div class="sh-desc">Alert and reporting configuration</div></div></div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">🔥 Hot Lead Alerts</div>
-        <p style="font-size:13px;color:var(--text3);margin-bottom:16px;">Instant email when buying temp of 8+ is submitted.</p>
-        <div class="form-group"><label class="form-label">Status</label>
-          <select class="form-input" id="hot-status"><option value="enabled">✅ Enabled</option><option value="disabled">❌ Disabled</option></select>
+        <p style="font-size:13px;color:var(--subtext);margin-bottom:18px;">Instant email when a buying temperature of 8, 9, or 10 is submitted.</p>
+        <div class="form-group"><label class="form-label">Recipients</label><div id="recipients-list"></div></div>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" id="new-recipient" placeholder="email@example.com" style="flex:1;">
+          <button class="btn-outline" onclick="addRecipient()">Add</button>
         </div>
-        <div class="form-group"><label class="form-label">Trigger Threshold</label>
-          <select class="form-input" id="hot-threshold"><option value="8">8+ (Hot leads only)</option><option value="7">7+ (Warm & hot)</option><option value="9">9+ (Very hot only)</option></select>
-        </div>
-        <button class="btn-primary" onclick="alert('Hot lead alert settings saved.')">Save Settings</button>
+        <div style="margin-top:16px;"><button class="btn-primary" onclick="saveHotAlertSettings()">Save Settings</button></div>
       </div>
       <div class="card">
-        <div class="card-title">📅 Daily Summary Report</div>
-        <p style="font-size:13px;color:var(--text3);margin-bottom:16px;">Morning email with previous day's S2S activity.</p>
-        <div class="form-group"><label class="form-label">Status</label>
-          <select class="form-input" id="daily-status"><option value="enabled">✅ Enabled</option><option value="disabled">❌ Disabled</option></select>
+        <div class="card-title">📊 Daily Summary</div>
+        <p style="font-size:13px;color:var(--subtext);margin-bottom:18px;">End-of-day recap emailed automatically at 6:00 PM CT.</p>
+        <div class="form-group"><label class="form-label">Send Time</label>
+          <select class="form-input" id="summary-time"><option>5:00 PM</option><option selected>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option></select>
         </div>
-        <div class="form-group"><label class="form-label">Send Time (CT)</label>
-          <select class="form-input" id="daily-time"><option value="9:00">9:00 AM CT</option><option value="7:00">7:00 AM CT</option><option value="8:00">8:00 AM CT</option><option value="10:00">10:00 AM CT</option></select>
+        <div class="form-group"><label class="form-label">Include</label>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" checked> Entry count by rep</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" checked> Hot lead highlights</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" checked> Vehicles sold</label>
+          </div>
         </div>
-        <button class="btn-primary" onclick="alert('Daily summary settings saved.')">Save Settings</button>
+        <div style="margin-top:16px;"><button class="btn-primary" onclick="saveDailySettings()">Save Settings</button></div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">📬 Notification Recipients</div>
-      <p style="font-size:13px;color:var(--text3);margin-bottom:14px;">All emails below receive hot lead alerts and daily reports.</p>
-      <div id="recipients-list"></div>
-      <div style="display:flex;gap:10px;margin-top:14px;">
-        <input class="form-input" type="email" id="new-recipient" placeholder="Add email address..." style="flex:1;">
-        <button class="btn-primary" onclick="addRecipient()">Add</button>
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">🧪 Test Email</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="form-input" id="test-email-to" style="flex:1;min-width:200px;" value="Rob.l@gallatincdjr.com">
+        <button class="btn-outline" onclick="sendTestEmail()">Send Test Email</button>
+        <button class="btn-dark" onclick="sendTestDailySummary()">Send Test Summary</button>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-title">🧪 Test Email System</div>
-      <p style="font-size:13px;color:var(--text3);margin-bottom:14px;">Send a test to verify the system is working.</p>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <input class="form-input" type="email" id="test-email" placeholder="Send test to..." style="width:260px;" value="Rob.l@gallatincdjr.com">
-        <button class="btn-outline" onclick="sendTestEmail()">Send Test Alert</button>
-        <button class="btn-dark" onclick="sendTestSummary()">Send Test Summary</button>
-      </div>
-      <div id="test-result" class="alert" style="margin-top:12px;"></div>
+      <div id="test-result" class="alert" style="margin-top:14px;"></div>
     </div>
   </div>
 
-  <!-- ═══ DATA ═══ -->
+  <!-- DATA -->
   <div class="tab-panel" id="tab-data">
     <div class="sh">
       <div><div class="sh-title">Data Management</div><div class="sh-desc">View and manage all S2S entries</div></div>
-      <div class="sh-actions">
+      <div style="display:flex;gap:10px;">
         <button class="btn-dark" onclick="exportAllCSV()">⬇ Export All CSV</button>
         <button class="btn-red" onclick="confirmDeleteAll()">✕ Delete All</button>
       </div>
     </div>
-    <div class="card" style="padding:0;overflow:hidden;">
+    <div class="card">
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>ID</th><th>Date</th><th>Submitter</th><th>Customer</th><th>Outcome</th><th>Temp</th><th>Vehicle</th><th>Actions</th></tr></thead>
-          <tbody id="data-tbody"><tr><td colspan="8"><div class="loading"><span class="spinner"></span> Loading...</div></td></tr></tbody>
+          <thead><tr>
+            <th>ID</th><th>Date</th><th>Submitter</th><th>Customer</th><th>Outcome</th><th>Temp</th><th>Vehicle</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="data-tbody"><tr><td colspan="8"><div class="loading"><span class="spinner"></span>Loading...</div></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -473,371 +552,672 @@ td:first-child { font-family:'JetBrains Mono',monospace;color:var(--text3);font-
 
 </div>
 
-<!-- ═══ ADD DEALER MODAL ═══ -->
+<!-- ADD DEALER MODAL -->
 <div class="modal-overlay" id="dealer-modal">
   <div class="modal">
     <div class="modal-title">Add New Dealer</div>
-    <div class="modal-desc">Onboard a new ServiceBridge client with their own isolated data.</div>
+    <div class="modal-desc">Onboard a new ServiceBridge client. They'll get their own isolated data and branded dashboard.</div>
     <div class="form-group"><label class="form-label">Dealership Name</label><input class="form-input" id="new-dealer-name" placeholder="e.g. Nashville CDJR"></div>
     <div class="form-group"><label class="form-label">Dealer Group</label><input class="form-input" id="new-dealer-group" placeholder="e.g. WeAuto Group"></div>
     <div class="form-group"><label class="form-label">Primary Contact Email</label><input class="form-input" type="email" id="new-dealer-email" placeholder="manager@dealership.com"></div>
     <div class="form-group"><label class="form-label">City, State</label><input class="form-input" id="new-dealer-location" placeholder="Nashville, TN"></div>
     <div class="modal-actions">
-      <button class="btn-outline" onclick="closeModalById('dealer-modal')">Cancel</button>
-      <button class="btn-primary" onclick="addDealer()">Create Dealer</button>
+      <button class="btn-outline" onclick="closeModal('dealer-modal')">Cancel</button>
+      <button class="btn-primary" onclick="addDealer()">Create Dealer Account</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ ADD REP MODAL ═══ -->
+<!-- ADD REP MODAL -->
 <div class="modal-overlay" id="rep-modal">
   <div class="modal">
-    <div class="modal-title">Add New Rep</div>
-    <div class="modal-desc">Creates a new user in Supabase sb_users. They'll appear on login and scorecards immediately.</div>
+    <div class="modal-title">Add New Team Member</div>
+    <div class="modal-desc">Add a new person to the Gallatin CDJR ServiceBridge team.</div>
     <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="new-rep-name" placeholder="e.g. John Smith"></div>
-    <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="new-rep-first" placeholder="e.g. John"></div>
-    <div class="form-group"><label class="form-label">Role</label>
-      <select class="form-input" id="new-rep-role"><option value="sales">Sales</option><option value="manager">Manager</option><option value="admin">Admin</option></select>
+    <div class="form-group"><label class="form-label">Role / Title</label>
+      <select class="form-input" id="new-rep-role">
+        <option value="Sales">Sales Rep</option>
+        <option value="S2S Manager">S2S Manager</option>
+        <option value="Finance Manager">Finance Manager</option>
+        <option value="Admin">Admin</option>
+      </select>
     </div>
-    <div class="form-group"><label class="form-label">Initial PIN (4 digits)</label><input class="form-input" id="new-rep-pin" type="text" maxlength="4" placeholder="e.g. 1234" inputmode="numeric" pattern="\d{4}"></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="new-rep-email" placeholder="name@gallatincdjr.com"></div>
+    <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" id="new-rep-phone" placeholder="(615) 555-0000"></div>
     <div class="modal-actions">
-      <button class="btn-outline" onclick="closeModalById('rep-modal')">Cancel</button>
-      <button class="btn-primary" onclick="addRep()">Create User</button>
+      <button class="btn-outline" onclick="closeModal('rep-modal')">Cancel</button>
+      <button class="btn-primary" onclick="addRep()">Add Team Member</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ RESET PIN MODAL ═══ -->
-<div class="modal-overlay" id="pin-modal">
-  <div class="modal">
-    <div class="modal-title">Reset PIN</div>
-    <div class="modal-desc">Set a new 4-digit PIN for <strong id="pin-modal-name">—</strong>. The PIN is hashed server-side via pgcrypto.</div>
-    <input type="hidden" id="pin-modal-id">
-    <div class="form-group"><label class="form-label">New PIN (4 digits)</label><input class="form-input" id="pin-modal-value" type="text" maxlength="4" placeholder="Enter new 4-digit PIN" inputmode="numeric" pattern="\d{4}"></div>
-    <div class="modal-actions">
-      <button class="btn-outline" onclick="closeModalById('pin-modal')">Cancel</button>
-      <button class="btn-primary" onclick="resetPin()">Reset PIN</button>
-    </div>
-  </div>
-</div>
+<!-- TOAST -->
+<div class="admin-toast" id="admin-toast"></div>
 
 <script>
-const SB_URL='https://jbkgwtohwsbaorhvuuqb.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
-const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+const SB_URL  = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
+const HEADERS = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 
-let RECIPIENTS=['Rob.l@gallatincdjr.com','Tyler.d@gallatincdjr.com','Joe.s@gallatincdjr.com','Jbarba@weauto.us','dominick.f@gallatincdjr.com','Mich.s@gallatincdjr.com'];
-let SB_USERS=[];
-let ALL_ENTRIES=[];
-let emailLog=[];
+let RECIPIENTS = ['Rob.l@gallatincdjr.com','Tyler.d@gallatincdjr.com','Joe.s@gallatincdjr.com','Jbarba@weauto.us','dominick.f@gallatincdjr.com','Mich.s@gallatincdjr.com'];
 
-const ROLE_COLORS={'admin':'linear-gradient(135deg,#D4A73A,#F59E0B)','manager':'linear-gradient(135deg,#6C70F0,#A855F7)','sales':'linear-gradient(135deg,#2DD4A0,#14B8A6)'};
+// ── REPS data with full profiles ──
+let REPS = [
+  {name:'Robert Lisowski', role:'Admin',        email:'Rob.l@gallatincdjr.com',      phone:'',    title:'General Sales Manager', active:true, access:{dashboard:true,s2s:true,scorecards:true,admin:true,upboard:true}},
+  {name:'Tyler Doyle',     role:'S2S Manager',  email:'Tyler.d@gallatincdjr.com',    phone:'',    title:'S2S Manager',           active:true, access:{dashboard:true,s2s:true,scorecards:true,admin:false,upboard:true}},
+  {name:'Andrew Kirk',     role:'Sales',        email:'',                            phone:'',    title:'Sales Consultant',      active:true, access:{dashboard:false,s2s:true,scorecards:true,admin:false,upboard:true}},
+  {name:'DJ Rogers',       role:'Sales',        email:'',                            phone:'',    title:'Sales Consultant',      active:true, access:{dashboard:false,s2s:true,scorecards:true,admin:false,upboard:true}},
+  {name:'Kody McCann',     role:'Sales',        email:'',                            phone:'',    title:'Sales Consultant',      active:true, access:{dashboard:false,s2s:true,scorecards:true,admin:false,upboard:true}},
+  {name:'Joe Smith',       role:'Sales',        email:'Joe.s@gallatincdjr.com',      phone:'',    title:'Sales Consultant',      active:true, access:{dashboard:false,s2s:true,scorecards:true,admin:false,upboard:true}},
+  {name:'Dominick Ferrara',role:'Sales',        email:'dominick.f@gallatincdjr.com', phone:'',    title:'Sales Consultant',      active:true, access:{dashboard:false,s2s:true,scorecards:true,admin:false,upboard:true}},
+  {name:'Mich Shelton',    role:'Sales',        email:'Mich.s@gallatincdjr.com',     phone:'',    title:'Sales Consultant',      active:true, access:{dashboard:false,s2s:true,scorecards:true,admin:false,upboard:true}},
+];
 
-
-// ── Session & Nav ──
-const currentRep=JSON.parse(sessionStorage.getItem('sb_rep')||'null');
-(function initNav(){
-  if(!currentRep) return;
-  document.getElementById('nav-avatar').textContent=currentRep.initials||currentRep.name.slice(0,2).toUpperCase();
-  document.getElementById('nav-name').textContent=currentRep.name.split(' ')[0];
-  document.getElementById('dd-name').textContent=currentRep.name;
+// Load persisted reps from localStorage if available
+(function loadPersistedReps(){
+  try {
+    const saved = localStorage.getItem('sb_admin_reps');
+    if (saved) REPS = JSON.parse(saved);
+  } catch(e){}
 })();
 
-function toggleMenu(){
-  const hb=document.getElementById('hamburger'),dd=document.getElementById('nav-dropdown'),ov=document.getElementById('nav-overlay');
-  const isOpen=dd.classList.contains('open');
-  hb.classList.toggle('open',!isOpen);dd.classList.toggle('open',!isOpen);ov.classList.toggle('open',!isOpen);
+function persistReps(){ localStorage.setItem('sb_admin_reps', JSON.stringify(REPS)); }
+
+let ALL_ENTRIES = [];
+let emailLog = [];
+let expandedCards = {};
+let editingCards = {};
+
+// ── Session & Nav ──────────────────────────────────────
+const currentRep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
+(function initNav(){
+  if (!currentRep) return;
+  document.getElementById('nav-avatar').textContent = currentRep.initials || currentRep.name.slice(0,2).toUpperCase();
+  document.getElementById('nav-name').textContent = currentRep.name.split(' ')[0];
+  document.getElementById('dd-name').textContent = currentRep.name;
+})();
+
+// ── Hamburger ──────────────────────────────────────────
+function toggleMenu(e){
+  e.stopPropagation();
+  document.getElementById('hamburger').classList.toggle('open');
+  document.getElementById('nav-dropdown').classList.toggle('open');
 }
-function closeMenu(){
+document.addEventListener('click', () => {
   document.getElementById('hamburger').classList.remove('open');
   document.getElementById('nav-dropdown').classList.remove('open');
-  document.getElementById('nav-overlay').classList.remove('open');
-}
-function signOut(){sessionStorage.removeItem('sb_rep');window.location.replace('/login.html');}
+});
+document.getElementById('nav-dropdown').addEventListener('click', e => e.stopPropagation());
 
-// ── Tabs ──
-function showTab(id,el){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+function signOut(){
+  sessionStorage.removeItem('sb_rep');
+  window.location.replace('/login.html');
+}
+
+// ── Init ───────────────────────────────────────────────
+(async function init(){
+  await loadEntries();
+  renderOverview();
+  renderGallatinStats();
+  renderReps();
+  renderRecipients();
+  renderDataTable();
+  document.getElementById('overview-sync').textContent = 'Last sync: ' + new Date().toLocaleTimeString();
+})();
+
+// ── Tab Switching ──────────────────────────────────────
+function showTab(id, el){
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
 }
 
-// ── Init ──
-async function init(){
-  await Promise.all([loadEntries(), loadUsers()]);
-  renderOverview();renderReps();renderRecipients();renderDataTable();updateDealerStats();
-  document.getElementById('overview-sync').textContent='Last sync: '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+// ── Toast ──────────────────────────────────────────────
+function showToast(msg){
+  const t = document.getElementById('admin-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 3000);
 }
 
+function showAlert(id, msg, success){
+  const el = document.getElementById('alert-'+id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'alert show ' + (success ? 'success' : 'error');
+  setTimeout(()=> el.classList.remove('show'), 4000);
+}
+
+// ── Supabase Data ──────────────────────────────────────
 async function loadEntries(){
-  try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=1000`,{headers:H});if(res.ok)ALL_ENTRIES=await res.json();}catch(e){console.error(e);}
+  try {
+    const res = await fetch(SB_URL+'/rest/v1/s2s_entries?select=*&order=id.desc', {headers:HEADERS});
+    ALL_ENTRIES = await res.json();
+  } catch(e){ console.warn('Load entries failed:', e); ALL_ENTRIES = []; }
 }
 
-async function loadUsers(){
-  try{
-    const res=await fetch(`${SB_URL}/rest/v1/sb_users_public?select=id,name,first_name,role,active,created_at,last_login&order=created_at.asc`,{headers:H});
-    if(res.ok) SB_USERS=await res.json();
-  }catch(e){console.error('Failed to load users:',e);}
-}
-
-// ── Overview ──
+// ── Overview ───────────────────────────────────────────
 function renderOverview(){
-  const n=ALL_ENTRIES.length;
-  const sold=ALL_ENTRIES.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used'))).length;
-  const hot=ALL_ENTRIES.filter(e=>parseInt(e.eng_score)>=8).length;
-  document.getElementById('kpi-entries').textContent=n;
-  document.getElementById('kpi-sold').textContent=sold;
-  document.getElementById('kpi-hot').textContent=hot;
-  const recent=ALL_ENTRIES.slice(0,6);
-  document.getElementById('recent-list').innerHTML=recent.length?recent.map(e=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
-      <div><div style="font-weight:700;font-size:13px;color:var(--text);">${e.first_name||''} ${e.last_name||''}</div>
-      <div style="font-size:11px;color:var(--text3);">${e.submitter||'—'} · ${e.timestamp||'—'}</div></div>
-      <div style="text-align:right;">
-        <div style="font-size:11px;font-weight:700;color:${e.outcome&&e.outcome.includes('Sold')?'var(--green)':e.outcome==='Follow-Up Required'?'var(--gold)':'var(--text3)'};">${e.outcome||'—'}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">Temp: ${e.eng_score||'—'}</div>
-      </div>
-    </div>`).join(''):'<div style="text-align:center;padding:30px;color:var(--text3);">No entries yet</div>';
+  const n = ALL_ENTRIES.length;
+  const sold = ALL_ENTRIES.filter(e => e.outcome && (e.outcome.includes('Sold') || e.outcome.includes('New') || e.outcome.includes('Used'))).length;
+  const hot = ALL_ENTRIES.filter(e => parseInt(e.eng_score) >= 8).length;
+  document.getElementById('kpi-entries').textContent = n;
+  document.getElementById('kpi-sold').textContent = sold;
+  document.getElementById('kpi-hot').textContent = hot;
+
+  const recent = ALL_ENTRIES.slice(0,8);
+  document.getElementById('recent-entries-list').innerHTML = recent.length === 0
+    ? '<p style="color:var(--muted);font-size:13px;">No entries yet.</p>'
+    : recent.map(e => {
+        const d = new Date(e.created_at);
+        const ts = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+          <div><div style="font-weight:600;font-size:13px;">${e.customer_first||''} ${e.customer_last||''}</div><div style="font-size:11px;color:var(--muted);">${e.submitter||'—'} · ${ts}</div></div>
+          <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:${parseInt(e.eng_score)>=8?'var(--red)':parseInt(e.eng_score)>=5?'var(--gold)':'var(--muted)'};">${e.eng_score||'—'}/10</div>
+        </div>`;
+      }).join('');
 }
 
-function updateDealerStats(){
-  const n=ALL_ENTRIES.length;
-  const sold=ALL_ENTRIES.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used'))).length;
-  const hot=ALL_ENTRIES.filter(e=>parseInt(e.eng_score)>=8).length;
-  document.getElementById('gs-entries').textContent=n;
-  document.getElementById('gs-sold').textContent=sold;
-  document.getElementById('gs-conv').textContent=n?Math.round((sold/n)*100)+'%':'0%';
-  document.getElementById('gs-hot').textContent=hot;
+function renderGallatinStats(){
+  const n = ALL_ENTRIES.length;
+  const sold = ALL_ENTRIES.filter(e => e.outcome && (e.outcome.includes('Sold') || e.outcome.includes('New') || e.outcome.includes('Used'))).length;
+  const hot = ALL_ENTRIES.filter(e => parseInt(e.eng_score) >= 8).length;
+  document.getElementById('gs-entries').textContent = n;
+  document.getElementById('gs-sold').textContent = sold;
+  document.getElementById('gs-conv').textContent = n > 0 ? Math.round((sold/n)*100)+'%' : '0%';
+  document.getElementById('gs-hot').textContent = hot;
 }
 
-// ── Team Management (Supabase-backed) ──
+// ══════════════════════════════════════════════════════════
+//  REP MANAGEMENT — FULL PROFILE CARDS
+// ══════════════════════════════════════════════════════════
+function getInitials(name){
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  return name.slice(0,2).toUpperCase();
+}
+
+function getRoleClass(role){
+  const r = (role||'').toLowerCase();
+  if (r === 'admin') return 'admin';
+  if (r.includes('manager') || r === 's2s manager') return 'manager';
+  if (r.includes('finance')) return 'finance';
+  return 'sales';
+}
+
+function getEntryCount(name){
+  return ALL_ENTRIES.filter(e => e.submitter === name).length;
+}
+
+function getLastLogin(name){
+  try {
+    const logs = JSON.parse(localStorage.getItem('sb_login_log') || '[]');
+    const match = logs.find(l => l.name === name);
+    if (match) {
+      const d = new Date(match.time);
+      return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ', ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    }
+  } catch(e){}
+  return 'Never';
+}
+
 function renderReps(){
-  const el=document.getElementById('reps-list');
-  if(!SB_USERS.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);">No users found in sb_users.</div>';return;}
-  el.innerHTML=SB_USERS.map(u=>{
-    const initials=u.name.split(' ').map(w=>w[0]).join('').toUpperCase();
-    const color=ROLE_COLORS[u.role]||'linear-gradient(135deg,var(--surface3),var(--surface2))';
-    const entries=ALL_ENTRIES.filter(e=>e.submitter===u.name).length;
-    const isActive=u.active!==false;
-    const roleBadge=u.role==='admin'?'background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2);':u.role==='manager'?'background:var(--blue-soft);color:var(--blue);border:1px solid rgba(108,112,240,0.2);':'background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08);';
-    const lastLogin=u.last_login?new Date(u.last_login).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'Never';
-    return`<div class="rep-row" style="${!isActive?'opacity:0.45;':''}">
-      <div class="rep-info">
-        <div class="rep-avatar" style="background:${color};">${initials}</div>
-        <div>
-          <div class="rep-name-lg">${u.name} ${!isActive?'<span style="font-size:11px;color:#FC8181;font-weight:600;">(Inactive)</span>':''}</div>
-          <div class="rep-meta">
-            <span style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:12px;${roleBadge}">${u.role}</span>
-            <span style="margin-left:6px;">· ${entries} entries · Last login: ${lastLogin}</span>
+  const container = document.getElementById('reps-list');
+  container.innerHTML = REPS.map((rep, idx) => {
+    const initials = getInitials(rep.name);
+    const roleClass = getRoleClass(rep.role);
+    const entries = getEntryCount(rep.name);
+    const lastLogin = getLastLogin(rep.name);
+    const isExpanded = expandedCards[idx];
+    const isEditing = editingCards[idx];
+
+    return `
+    <div class="user-profile-card ${isEditing ? 'editing' : ''}" id="upc-${idx}">
+      <div class="upc-header" onclick="toggleExpand(${idx})">
+        <div class="upc-left">
+          <div class="upc-avatar role-${roleClass}">${initials}</div>
+          <div class="upc-info">
+            <div class="upc-name">
+              ${rep.name}
+              <span class="upc-role-badge ${roleClass}">${rep.role}</span>
+              ${!rep.active ? '<span class="status-badge s-inactive">Inactive</span>' : ''}
+            </div>
+            <div class="upc-subtitle">
+              <span>📊 ${entries} entries</span>
+              <span>🕐 Last login: ${lastLogin}</span>
+              ${rep.email ? `<span>✉ ${rep.email}</span>` : ''}
+            </div>
           </div>
         </div>
+        <div class="upc-actions">
+          <div class="upc-expand-btn ${isExpanded ? 'open' : ''}" title="Expand">▾</div>
+        </div>
       </div>
-      <div class="rep-actions">
-        <button class="btn-dark btn-sm" onclick="openPinReset('${u.id}','${u.name.replace(/'/g,"\\'")}')">🔑 Reset PIN</button>
-        <button class="${isActive?'btn-red':'btn-primary'} btn-sm" onclick="toggleActive('${u.id}',${!isActive})">${isActive?'Deactivate':'Reactivate'}</button>
+
+      <div class="upc-body ${isExpanded ? 'open' : ''}" id="upc-body-${idx}">
+        <div class="upc-body-inner">
+          ${isEditing ? renderEditMode(rep, idx) : renderViewMode(rep, idx)}
+        </div>
+        <div class="upc-footer">
+          <div class="upc-footer-left">
+            ${isEditing
+              ? `<button class="btn-primary btn-sm" onclick="saveProfile(${idx})">✓ Save Changes</button>
+                 <button class="btn-outline btn-sm" onclick="cancelEdit(${idx})">Cancel</button>`
+              : `<button class="btn-outline btn-sm" onclick="startEdit(${idx})">✏️ Edit Profile</button>`
+            }
+          </div>
+          <div class="upc-footer-right">
+            ${rep.name !== 'Robert Lisowski'
+              ? `<button class="btn-red btn-sm" onclick="removeRep(${idx})">Remove</button>`
+              : `<span style="font-size:11px;color:var(--muted);">Primary admin — cannot remove</span>`
+            }
+          </div>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
-async function addRep(){
-  const name=document.getElementById('new-rep-name').value.trim();
-  const first=document.getElementById('new-rep-first').value.trim();
-  const role=document.getElementById('new-rep-role').value;
-  const pin=document.getElementById('new-rep-pin').value.trim();
-  if(!name||!first){showAlert('rep','Full name and first name are required.',false);return;}
-  if(!/^\d{4}$/.test(pin)){showAlert('rep','PIN must be exactly 4 digits.',false);return;}
-  try{
-    const res=await fetch(`${SB_URL}/rest/v1/rpc/admin_add_user`,{method:'POST',headers:H,body:JSON.stringify({p_name:name,p_first_name:first,p_role:role,p_pin:pin})});
-    if(!res.ok){const err=await res.json();showAlert('rep','Failed: '+(err.message||err.error||'Unknown error'),false);return;}
-    closeModalById('rep-modal');
-    document.getElementById('new-rep-name').value='';document.getElementById('new-rep-first').value='';document.getElementById('new-rep-pin').value='';
-    await loadUsers();renderReps();
-    showAlert('rep',`✓ ${name} added to sb_users. They can now log in and appear on scorecards.`,true);
-  }catch(e){showAlert('rep','Error: '+e.message,false);}
+function renderViewMode(rep, idx){
+  const ac = rep.access || {};
+  return `
+    <div class="upc-grid">
+      <div class="upc-field">
+        <div class="upc-field-label">Full Name</div>
+        <div class="upc-field-value">${rep.name}</div>
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Job Title</div>
+        <div class="upc-field-value ${rep.title ? '' : 'empty'}">${rep.title || 'Not set'}</div>
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Role / Access Level</div>
+        <div class="upc-field-value">${rep.role}</div>
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Status</div>
+        <div class="upc-field-value">${rep.active !== false ? '<span class="status-badge s-active">● Active</span>' : '<span class="status-badge s-inactive">● Inactive</span>'}</div>
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Email</div>
+        <div class="upc-field-value ${rep.email ? '' : 'empty'}">${rep.email || 'Not set'}</div>
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Phone</div>
+        <div class="upc-field-value ${rep.phone ? '' : 'empty'}">${rep.phone || 'Not set'}</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <div class="upc-field-label" style="margin-bottom:10px;">Page Access</div>
+      <div class="access-grid">
+        <div class="access-item">
+          <div><div class="access-label">S2S Entry Form</div></div>
+          <span style="font-size:12px;font-weight:600;color:${ac.s2s !== false ? 'var(--green)' : 'var(--red)'};">${ac.s2s !== false ? '✓ Granted' : '✕ Denied'}</span>
+        </div>
+        <div class="access-item">
+          <div><div class="access-label">Manager Dashboard</div></div>
+          <span style="font-size:12px;font-weight:600;color:${ac.dashboard ? 'var(--green)' : 'var(--red)'};">${ac.dashboard ? '✓ Granted' : '✕ Denied'}</span>
+        </div>
+        <div class="access-item">
+          <div><div class="access-label">Scorecards</div></div>
+          <span style="font-size:12px;font-weight:600;color:${ac.scorecards !== false ? 'var(--green)' : 'var(--red)'};">${ac.scorecards !== false ? '✓ Granted' : '✕ Denied'}</span>
+        </div>
+        <div class="access-item">
+          <div><div class="access-label">Admin Console</div></div>
+          <span style="font-size:12px;font-weight:600;color:${ac.admin ? 'var(--green)' : 'var(--red)'};">${ac.admin ? '✓ Granted' : '✕ Denied'}</span>
+        </div>
+        <div class="access-item">
+          <div><div class="access-label">UP Board</div></div>
+          <span style="font-size:12px;font-weight:600;color:${ac.upboard !== false ? 'var(--green)' : 'var(--red)'};">${ac.upboard !== false ? '✓ Granted' : '✕ Denied'}</span>
+        </div>
+      </div>
+    </div>`;
 }
 
-async function toggleActive(userId,newState){
-  const user=SB_USERS.find(u=>u.id===userId);
-  const action=newState?'reactivate':'deactivate';
-  if(!confirm(`${action.charAt(0).toUpperCase()+action.slice(1)} ${user?user.name:'this user'}?`))return;
-  try{
-    await fetch(`${SB_URL}/rest/v1/sb_users?id=eq.${userId}`,{method:'PATCH',headers:H,body:JSON.stringify({active:newState})});
-    await loadUsers();renderReps();
-    showAlert('rep',`✓ ${user?user.name:'User'} ${action}d.`,true);
-  }catch(e){showAlert('rep','Error: '+e.message,false);}
+function renderEditMode(rep, idx){
+  const ac = rep.access || {};
+  const isProtected = rep.name === 'Robert Lisowski';
+  return `
+    <div class="upc-grid">
+      <div class="upc-field">
+        <div class="upc-field-label">Full Name</div>
+        <input class="upc-edit-input" id="edit-name-${idx}" value="${escHtml(rep.name)}" placeholder="Full name">
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Job Title</div>
+        <input class="upc-edit-input" id="edit-title-${idx}" value="${escHtml(rep.title||'')}" placeholder="e.g. Sales Consultant">
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Role / Access Level</div>
+        <select class="upc-edit-select" id="edit-role-${idx}" ${isProtected ? 'disabled' : ''}>
+          <option value="Sales" ${rep.role==='Sales'?'selected':''}>Sales Rep</option>
+          <option value="S2S Manager" ${rep.role==='S2S Manager'?'selected':''}>S2S Manager</option>
+          <option value="Finance Manager" ${rep.role==='Finance Manager'?'selected':''}>Finance Manager</option>
+          <option value="Admin" ${rep.role==='Admin'?'selected':''}>Admin</option>
+        </select>
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Status</div>
+        <select class="upc-edit-select" id="edit-active-${idx}" ${isProtected ? 'disabled' : ''}>
+          <option value="true" ${rep.active !== false ? 'selected' : ''}>Active</option>
+          <option value="false" ${rep.active === false ? 'selected' : ''}>Inactive</option>
+        </select>
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Email</div>
+        <input class="upc-edit-input" id="edit-email-${idx}" type="email" value="${escHtml(rep.email||'')}" placeholder="name@gallatincdjr.com">
+      </div>
+      <div class="upc-field">
+        <div class="upc-field-label">Phone</div>
+        <input class="upc-edit-input" id="edit-phone-${idx}" type="tel" value="${escHtml(rep.phone||'')}" placeholder="(615) 555-0000">
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <div class="upc-field-label" style="margin-bottom:10px;">Page Access Privileges</div>
+      <div class="access-grid">
+        <div class="access-item">
+          <div><div class="access-label">S2S Entry Form</div><div class="access-desc">Log service-to-sales contacts</div></div>
+          <label class="toggle"><input type="checkbox" id="edit-ac-s2s-${idx}" ${ac.s2s !== false ? 'checked' : ''}><span class="toggle-slider"></span></label>
+        </div>
+        <div class="access-item">
+          <div><div class="access-label">Manager Dashboard</div><div class="access-desc">View all entries & analytics</div></div>
+          <label class="toggle"><input type="checkbox" id="edit-ac-dashboard-${idx}" ${ac.dashboard ? 'checked' : ''}><span class="toggle-slider"></span></label>
+        </div>
+        <div class="access-item">
+          <div><div class="access-label">Scorecards</div><div class="access-desc">Performance leaderboard</div></div>
+          <label class="toggle"><input type="checkbox" id="edit-ac-scorecards-${idx}" ${ac.scorecards !== false ? 'checked' : ''}><span class="toggle-slider"></span></label>
+        </div>
+        <div class="access-item">
+          <div><div class="access-label">Admin Console</div><div class="access-desc">Full system administration</div></div>
+          <label class="toggle"><input type="checkbox" id="edit-ac-admin-${idx}" ${ac.admin ? 'checked' : ''} ${isProtected ? 'disabled' : ''}><span class="toggle-slider"></span></label>
+        </div>
+        <div class="access-item">
+          <div><div class="access-label">UP Board</div><div class="access-desc">Floor rotation tracker</div></div>
+          <label class="toggle"><input type="checkbox" id="edit-ac-upboard-${idx}" ${ac.upboard !== false ? 'checked' : ''}><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>`;
 }
 
-function openPinReset(userId,userName){
-  document.getElementById('pin-modal-id').value=userId;
-  document.getElementById('pin-modal-name').textContent=userName;
-  document.getElementById('pin-modal-value').value='';
-  openModal('pin-modal');
+function escHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
 }
 
-async function resetPin(){
-  const userId=document.getElementById('pin-modal-id').value;
-  const newPin=document.getElementById('pin-modal-value').value.trim();
-  if(!/^\d{4}$/.test(newPin)){alert('PIN must be exactly 4 digits.');return;}
-  try{
-    const res=await fetch(`${SB_URL}/rest/v1/rpc/admin_reset_pin`,{method:'POST',headers:H,body:JSON.stringify({p_user_id:userId,p_new_pin:newPin})});
-    if(!res.ok){const err=await res.json();alert('Failed: '+(err.message||'Unknown error'));return;}
-    closeModalById('pin-modal');
-    const user=SB_USERS.find(u=>u.id===userId);
-    showAlert('rep',`✓ PIN reset for ${user?user.name:'user'}. New PIN is active immediately.`,true);
-  }catch(e){alert('Error: '+e.message);}
+function toggleExpand(idx){
+  expandedCards[idx] = !expandedCards[idx];
+  if (!expandedCards[idx]) editingCards[idx] = false;
+  renderReps();
 }
 
-// ── Email Recipients ──
+function startEdit(idx){
+  editingCards[idx] = true;
+  expandedCards[idx] = true;
+  renderReps();
+  // Focus the name field
+  setTimeout(() => {
+    const nameInput = document.getElementById('edit-name-'+idx);
+    if (nameInput) nameInput.focus();
+  }, 50);
+}
+
+function cancelEdit(idx){
+  editingCards[idx] = false;
+  renderReps();
+}
+
+function saveProfile(idx){
+  const rep = REPS[idx];
+  const newName = (document.getElementById('edit-name-'+idx).value || '').trim();
+  if (!newName) { showToast('Name is required'); return; }
+
+  const oldName = rep.name;
+  rep.name   = newName;
+  rep.title  = (document.getElementById('edit-title-'+idx).value || '').trim();
+  rep.role   = document.getElementById('edit-role-'+idx).value;
+  rep.active = document.getElementById('edit-active-'+idx).value === 'true';
+  rep.email  = (document.getElementById('edit-email-'+idx).value || '').trim();
+  rep.phone  = formatPhone(document.getElementById('edit-phone-'+idx).value || '');
+
+  rep.access = {
+    s2s:        document.getElementById('edit-ac-s2s-'+idx).checked,
+    dashboard:  document.getElementById('edit-ac-dashboard-'+idx).checked,
+    scorecards: document.getElementById('edit-ac-scorecards-'+idx).checked,
+    admin:      document.getElementById('edit-ac-admin-'+idx).checked,
+    upboard:    document.getElementById('edit-ac-upboard-'+idx).checked,
+  };
+
+  editingCards[idx] = false;
+  persistReps();
+  renderReps();
+
+  // If name changed, update entries in Supabase
+  if (oldName !== newName && oldName) {
+    updateSubmitterName(oldName, newName);
+  }
+
+  showToast(`${newName} profile updated`);
+}
+
+function formatPhone(raw){
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length === 10) return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+  if (digits.length === 11 && digits[0] === '1') return `(${digits.slice(1,4)}) ${digits.slice(4,7)}-${digits.slice(7)}`;
+  return raw.trim();
+}
+
+async function updateSubmitterName(oldName, newName){
+  try {
+    await fetch(SB_URL+'/rest/v1/s2s_entries?submitter=eq.'+encodeURIComponent(oldName), {
+      method: 'PATCH',
+      headers: {...HEADERS, 'Prefer': 'return=minimal'},
+      body: JSON.stringify({submitter: newName})
+    });
+  } catch(e){ console.warn('Name update in entries failed:', e); }
+}
+
+function removeRep(idx){
+  const rep = REPS[idx];
+  if (rep.name === 'Robert Lisowski') { showToast('Cannot remove primary admin'); return; }
+  if (!confirm(`Remove ${rep.name} from the team?\n\nThis will not delete their existing S2S entries.`)) return;
+  REPS.splice(idx, 1);
+  delete expandedCards[idx];
+  delete editingCards[idx];
+  // Reindex
+  const newExpanded = {}, newEditing = {};
+  Object.keys(expandedCards).forEach(k => { const ki = parseInt(k); if (ki > idx) newExpanded[ki-1] = expandedCards[k]; else newExpanded[ki] = expandedCards[k]; });
+  Object.keys(editingCards).forEach(k => { const ki = parseInt(k); if (ki > idx) newEditing[ki-1] = editingCards[k]; else newEditing[ki] = editingCards[k]; });
+  expandedCards = newExpanded;
+  editingCards = newEditing;
+  persistReps();
+  renderReps();
+  showToast(`${rep.name} removed`);
+}
+
+// ── Add Rep ────────────────────────────────────────────
+function openAddRep(){ document.getElementById('rep-modal').classList.add('open'); }
+
+function addRep(){
+  const name  = document.getElementById('new-rep-name').value.trim();
+  const role  = document.getElementById('new-rep-role').value;
+  const email = document.getElementById('new-rep-email').value.trim();
+  const phone = formatPhone(document.getElementById('new-rep-phone').value || '');
+
+  if (!name) { alert('Please enter a name.'); return; }
+
+  const isAdmin   = role === 'Admin';
+  const isManager = role.includes('Manager');
+
+  REPS.push({
+    name,
+    role,
+    email,
+    phone,
+    title: role === 'Sales' ? 'Sales Consultant' : role,
+    active: true,
+    access: {
+      s2s: true,
+      dashboard: isAdmin || isManager,
+      scorecards: true,
+      admin: isAdmin,
+      upboard: true,
+    }
+  });
+
+  persistReps();
+  renderReps();
+  closeModal('rep-modal');
+
+  // Clear form
+  document.getElementById('new-rep-name').value = '';
+  document.getElementById('new-rep-email').value = '';
+  document.getElementById('new-rep-phone').value = '';
+  document.getElementById('new-rep-role').selectedIndex = 0;
+
+  showToast(`${name} added to team`);
+  showAlert('rep', `${name} added successfully. They will appear in the S2S form submitter dropdown after the form page is updated.`, true);
+}
+
+// ── Email / Recipients ─────────────────────────────────
 function renderRecipients(){
-  document.getElementById('recipients-list').innerHTML=RECIPIENTS.map((r,i)=>`
+  document.getElementById('recipients-list').innerHTML = RECIPIENTS.map((r,i)=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
-      <span style="font-size:13px;color:var(--text);">${r}</span>
+      <span style="font-size:13px;">${r}</span>
       <button class="btn-red btn-sm" onclick="removeRecipient(${i})">Remove</button>
     </div>`).join('');
 }
 function addRecipient(){
-  const v=document.getElementById('new-recipient').value.trim();
-  if(!v||!v.includes('@')){alert('Enter a valid email.');return;}
-  RECIPIENTS.push(v);renderRecipients();document.getElementById('new-recipient').value='';
+  const v = document.getElementById('new-recipient').value.trim();
+  if (!v||!v.includes('@')){ alert('Enter a valid email.'); return; }
+  RECIPIENTS.push(v); renderRecipients();
+  document.getElementById('new-recipient').value = '';
 }
-function removeRecipient(i){RECIPIENTS.splice(i,1);renderRecipients();}
+function removeRecipient(i){ RECIPIENTS.splice(i,1); renderRecipients(); }
+function saveHotAlertSettings(){ showToast('Hot lead alert settings saved'); }
+function saveDailySettings(){ showToast('Daily summary settings saved'); }
 
-// ── Email Sending ──
-async function sendEmail(to,subject,html){
+// ── Email Sending ──────────────────────────────────────
+async function sendEmail(to, subject, html){
   try{
-    const res=await fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:Array.isArray(to)?to:[to],subject,html})});
-    const data=await res.json();
-    addEmailLog(subject,data.success?'sent':'failed');
-    return data.success?{success:true}:{success:false,error:data.error};
-  }catch(err){addEmailLog(subject,'failed');return{success:false,error:err.message};}
+    const res = await fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:Array.isArray(to)?to:[to],subject,html})});
+    const data = await res.json();
+    addEmailLog(subject, data.success?'sent':'failed');
+    return data.success;
+  }catch(e){ addEmailLog(subject,'failed'); return false; }
+}
+function addEmailLog(subject, status){
+  emailLog.unshift({subject,status,time:new Date().toISOString()});
+  renderEmailLog();
+}
+function renderEmailLog(){
+  if (!emailLog.length) return;
+  document.getElementById('email-log-list').innerHTML = emailLog.slice(0,10).map(l=>{
+    const d = new Date(l.time);
+    const ts = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const dot = l.subject.includes('Hot') ? 'dot-hot' : l.subject.includes('Summary') ? 'dot-daily' : 'dot-system';
+    return `<div class="email-log-row"><div class="email-dot ${dot}"></div><div class="email-log-info"><div class="email-log-subject">${l.subject}</div><div class="email-log-meta">${l.status} · ${ts}</div></div></div>`;
+  }).join('');
 }
 
-function addEmailLog(subject,status){
-  emailLog.unshift({subject,status,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})});
-  const el=document.getElementById('email-log');
-  if(el)el.innerHTML=emailLog.slice(0,8).map(e=>`
-    <div class="email-log-row"><div class="email-dot ${e.status==='sent'?'dot-daily':'dot-hot'}"></div><div><div class="email-log-subject">${e.subject}</div><div class="email-log-meta">${e.status==='sent'?'✓ Sent':'✗ Failed'} · ${e.time}</div></div></div>`).join('');
+function sendTestEmail(){
+  const to = document.getElementById('test-email-to').value.trim();
+  if (!to) return;
+  const el = document.getElementById('test-result');
+  el.className = 'alert show info'; el.textContent = 'Sending test email...';
+  sendEmail(to, '🧪 ServiceBridge Test Email', '<h2>Test Email</h2><p>If you received this, email notifications are working.</p>')
+    .then(ok => { el.className = 'alert show '+(ok?'success':'error'); el.textContent = ok?'Test email sent!':'Failed — check server logs.'; });
+}
+function sendTestDailySummary(){
+  const to = document.getElementById('test-email-to').value.trim();
+  if (!to) return;
+  const el = document.getElementById('test-result');
+  el.className = 'alert show info'; el.textContent = 'Sending test summary...';
+  const n = ALL_ENTRIES.length;
+  const sold = ALL_ENTRIES.filter(e=>e.outcome&&e.outcome.includes('Sold')).length;
+  const html = `<h2>📊 Daily S2S Summary</h2><p>Total entries: ${n}</p><p>Vehicles sold: ${sold}</p><p>This is a test summary.</p>`;
+  sendEmail(to, '📊 ServiceBridge Daily Summary (Test)', html)
+    .then(ok => { el.className = 'alert show '+(ok?'success':'error'); el.textContent = ok?'Summary sent!':'Failed — check server logs.'; });
 }
 
-async function sendTestEmail(){
-  const to=document.getElementById('test-email').value;
-  const result=document.getElementById('test-result');
-  result.className='alert show';result.style.display='block';result.textContent='Sending...';result.style.color='var(--text2)';result.style.background='var(--surface2)';result.style.borderColor='var(--border2)';
-  const html=buildHotLeadEmail({first_name:'Test',last_name:'Customer',phone:'(615) 555-0100',veh_year:'2019',veh_make:'Ram',veh_model:'1500',eng_score:9,outcome:'Follow-Up Required',submitter:'Tyler Doyle',visit_reason:'Major Mechanical Repair',repair_cost:'$3,200',trade_equity:'Positive Equity',timeline:'Within 30 Days',notes:'Test alert from Admin Console',timestamp:new Date().toLocaleString()});
-  const res=await sendEmail(to,'🔥 [TEST] Hot Lead Alert — ServiceBridge',html);
-  result.className=`alert alert-${res.success?'success':'error'} show`;
-  result.textContent=res.success?'✓ Test email sent! Check your inbox.':'✗ Failed: '+(res.error||'Check API setup');
-}
-
-async function sendTestSummary(){
-  const to=document.getElementById('test-email').value;
-  const result=document.getElementById('test-result');
-  result.className='alert show';result.style.display='block';result.textContent='Sending summary...';result.style.color='var(--text2)';result.style.background='var(--surface2)';result.style.borderColor='var(--border2)';
-  const html=buildDailySummaryEmail(ALL_ENTRIES.slice(0,5));
-  const res=await sendEmail(to,'📊 [TEST] Daily S2S Summary — Gallatin CDJR',html);
-  result.className=`alert alert-${res.success?'success':'error'} show`;
-  result.textContent=res.success?'✓ Summary sent! Check your inbox.':'✗ Failed: '+(res.error||'Check API setup');
-}
-
-// ── Email Templates ──
-function buildHotLeadEmail(e){
-  const tc=parseInt(e.eng_score)>=9?'#C8102E':'#C49A2A';
-  return`<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F5F4F1;font-family:Arial,sans-serif;"><div style="max-width:600px;margin:0 auto;padding:24px 16px;"><div style="background:#0C0C14;border-radius:12px 12px 0 0;padding:24px 28px;"><div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Vyaxis · ServiceBridge</div><div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">🔥 Hot Lead Alert</div><div style="font-size:13px;color:rgba(255,255,255,0.5);">Gallatin CDJR · Service Drive</div></div><div style="background:#fff;padding:28px;border-left:1px solid #E4E2DC;border-right:1px solid #E4E2DC;"><div style="display:inline-block;background:${tc};color:#fff;border-radius:6px;padding:6px 16px;font-size:13px;font-weight:700;margin-bottom:20px;">🌡 Buying Temp: ${e.eng_score}/10</div><table style="width:100%;border-collapse:collapse;">${[['Customer',`${e.first_name} ${e.last_name}`],['Phone',e.phone||'—'],['Vehicle',`${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''}`],['Visit Reason',e.visit_reason||'—'],['Repair Cost',e.repair_cost||'—'],['Equity',e.trade_equity||'—'],['Timeline',e.timeline||'—'],['Logged By',e.submitter||'—'],['Outcome',e.outcome||'—']].map(([k,v])=>`<tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;width:35%;">${k}</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${v}</td></tr>`).join('')}</table>${e.notes?`<div style="background:#F5F4F1;border-radius:6px;padding:14px 16px;margin-top:16px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;margin-bottom:6px;">Notes</div><div style="font-size:13px;">${e.notes}</div></div>`:''}<div style="margin-top:20px;"><a href="https://servicebridge.vyaxis.com/manager-dashboard.html" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;border-radius:6px;padding:12px 24px;font-size:13px;font-weight:600;">View in Dashboard →</a></div></div><div style="background:#EDECEA;border:1px solid #E4E2DC;border-top:none;border-radius:0 0 12px 12px;padding:16px 28px;text-align:center;"><div style="font-size:11px;color:#8C897F;">ServiceBridge by Vyaxis · Gallatin CDJR · ${e.timestamp||new Date().toLocaleString()}</div></div></div></body></html>`;
-}
-
-function buildDailySummaryEmail(entries){
-  const n=entries.length,sold=entries.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used'))).length;
-  const appts=entries.filter(e=>e.outcome==='Appointment Set').length,hot=entries.filter(e=>parseInt(e.eng_score)>=8).length;
-  const temps=entries.map(e=>parseInt(e.eng_score)).filter(t=>!isNaN(t));
-  const avg=temps.length?(temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1):'—';
-  return`<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F5F4F1;font-family:Arial,sans-serif;"><div style="max-width:600px;margin:0 auto;padding:24px 16px;"><div style="background:#0C0C14;border-radius:12px 12px 0 0;padding:24px 28px;"><div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Vyaxis · ServiceBridge</div><div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">📊 Daily S2S Summary</div></div><div style="background:#fff;padding:28px;border-left:1px solid #E4E2DC;border-right:1px solid #E4E2DC;"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px;">${[['Total',n,'#0C0C14'],['Sold',sold,'#166534'],['Appts',appts,'#1E3A8A'],['Follow-Ups',entries.filter(e=>e.outcome==='Follow-Up Required').length,'#C49A2A'],['Hot (8+)',hot,'#C8102E'],['Avg Temp',avg,'#7C3AED']].map(([l,v,c])=>`<div style="background:#F5F4F1;border-radius:8px;padding:14px;text-align:center;"><div style="font-size:24px;font-weight:700;color:${c};">${v}</div><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;margin-top:4px;">${l}</div></div>`).join('')}</div>${n>0?`<table style="width:100%;border-collapse:collapse;"><tr style="background:#0C0C14;"><th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Customer</th><th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Rep</th><th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Temp</th><th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Outcome</th></tr>${entries.slice(0,8).map((e,i)=>`<tr style="background:${i%2?'#FAFAF8':'#fff'};"><td style="padding:8px 12px;font-size:12px;">${e.first_name||''} ${e.last_name||''}</td><td style="padding:8px 12px;font-size:12px;">${e.submitter||'—'}</td><td style="padding:8px 12px;font-size:12px;font-weight:700;">${e.eng_score||'—'}</td><td style="padding:8px 12px;font-size:12px;">${e.outcome||'—'}</td></tr>`).join('')}</table>`:'<div style="text-align:center;padding:30px;color:#8C897F;">No entries.</div>'}<div style="margin-top:20px;"><a href="https://servicebridge.vyaxis.com/manager-dashboard.html" style="display:inline-block;background:#0C0C14;color:#fff;text-decoration:none;border-radius:6px;padding:12px 24px;font-size:13px;font-weight:600;">Open Dashboard →</a></div></div><div style="background:#EDECEA;border:1px solid #E4E2DC;border-top:none;border-radius:0 0 12px 12px;padding:16px 28px;text-align:center;"><div style="font-size:11px;color:#8C897F;">ServiceBridge · Daily report · 9:00 AM CT</div></div></div></body></html>`;
-}
-
-// ── Data Table ──
+// ── Data Table ─────────────────────────────────────────
 function renderDataTable(){
-  const tbody=document.getElementById('data-tbody');
-  if(!ALL_ENTRIES.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text3);">No entries yet</td></tr>';return;}
-  tbody.innerHTML=ALL_ENTRIES.map(e=>`<tr>
-    <td>${e.id}</td>
-    <td style="font-size:11px;color:var(--text2);">${e.timestamp||'—'}</td>
-    <td style="font-weight:700;color:var(--text);">${e.submitter||'—'}</td>
-    <td style="color:var(--text);">${e.first_name||''} ${e.last_name||''}</td>
-    <td><span style="font-size:11px;font-weight:700;color:${e.outcome&&e.outcome.includes('Sold')?'var(--green)':e.outcome==='Follow-Up Required'?'var(--gold)':'var(--text2)'};">${e.outcome||'—'}</span></td>
-    <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${parseInt(e.eng_score)>=8?'#F87171':parseInt(e.eng_score)>=5?'var(--gold)':'var(--text3)'};">${e.eng_score||'—'}</td>
-    <td style="font-size:11px;">${[e.veh_year,e.veh_make,e.veh_model].filter(Boolean).join(' ')||'—'}</td>
-    <td><button class="btn-red btn-sm" onclick="deleteEntry(${e.id})">Delete</button></td>
-  </tr>`).join('');
+  const tbody = document.getElementById('data-tbody');
+  if (!ALL_ENTRIES.length){ tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">No entries found.</td></tr>'; return; }
+  tbody.innerHTML = ALL_ENTRIES.map(e => {
+    const d = new Date(e.created_at);
+    const ts = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">${e.id}</td>
+      <td>${ts}</td>
+      <td>${e.submitter||'—'}</td>
+      <td>${(e.customer_first||'')+' '+(e.customer_last||'')}</td>
+      <td>${e.outcome||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${parseInt(e.eng_score)>=8?'var(--red)':parseInt(e.eng_score)>=5?'var(--gold)':'var(--muted)'};">${e.eng_score||'—'}</td>
+      <td>${(e.vehicle_year||'')+' '+(e.vehicle_make||'')+' '+(e.vehicle_model||'')}</td>
+      <td><button class="btn-red btn-sm" onclick="deleteEntry(${e.id})">Delete</button></td>
+    </tr>`;
+  }).join('');
 }
 
 async function deleteEntry(id){
-  if(!confirm(`Delete entry #${id}?`))return;
-  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${id}`,{method:'DELETE',headers:H});
-  ALL_ENTRIES=ALL_ENTRIES.filter(e=>e.id!==id);
-  renderDataTable();renderOverview();updateDealerStats();
-}
-
-// ── Exports ──
-function toCSV(rows,headers){
-  const esc=v=>{if(v==null)return'';const s=String(v).replace(/"/g,'""');return s.includes(',')||s.includes('"')||s.includes('\n')?`"${s}"`:s;};
-  return[headers.join(','),...rows.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\n');
-}
-
-function exportAllCSV(){
-  if(!ALL_ENTRIES.length)return alert('No entries.');
-  const keys=Object.keys(ALL_ENTRIES[0]);
-  const blob=new Blob([[keys.join(','),...ALL_ENTRIES.map(e=>keys.map(k=>`"${(e[k]??'').toString().replace(/"/g,'""')}"`).join(','))].join('\n')],{type:'text/csv'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`ServiceBridge_AllData_${new Date().toISOString().slice(0,10)}.csv`;a.click();
-}
-
-async function adminExportCSV(){
-  const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=2000`,{headers:H});
-  const data=await res.json();
-  if(!data.length)return alert('No entries found.');
-  const hdrs=['id','submitter','first_name','last_name','phone','email','veh_year','veh_make','veh_model','repair_cost','eng_score','outcome','followup_status','manager_outcome','manager_claimed_by','manager_notes','notes','created_at'];
-  const blob=new Blob([toCSV(data,hdrs)],{type:'text/csv'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`s2s-entries-${new Date().toISOString().slice(0,10)}.csv`;a.click();
-}
-
-async function adminExportPDF(){
-  const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=2000`,{headers:H});
-  const data=await res.json();
-  if(!data.length)return alert('No entries found.');
-  const date=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const rows=data.map(e=>`<tr><td>${e.submitter||'—'}</td><td>${e.first_name||''} ${e.last_name||''}</td><td>${e.phone||'—'}</td><td>${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''}</td><td>${e.repair_cost?'$'+e.repair_cost:'—'}</td><td style="text-align:center;font-weight:700;">${e.eng_score||'—'}</td><td>${e.outcome||'—'}</td><td>${e.followup_status||'Pending'}</td><td>${e.created_at?new Date(e.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—'}</td></tr>`).join('');
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><title>S2S Export</title><style>body{font-family:Arial,sans-serif;font-size:11px;padding:24px;}h1{font-size:18px;margin-bottom:4px;}.sub{color:#666;font-size:12px;margin-bottom:16px;}table{width:100%;border-collapse:collapse;}th{background:#0C0C14;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;}td{padding:7px 10px;border-bottom:1px solid #eee;}tr:nth-child(even) td{background:#f9f9f9;}</style></head><body><h1>ServiceBridge — S2S Entries</h1><div class="sub">Gallatin CDJR · Exported ${date} · ${data.length} entries</div><table><thead><tr><th>Rep</th><th>Customer</th><th>Phone</th><th>Vehicle</th><th>Repair $</th><th>Temp</th><th>Outcome</th><th>Follow-Up</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
-  w.document.close();setTimeout(()=>w.print(),500);
+  if (!confirm('Delete this entry permanently?')) return;
+  try{
+    await fetch(SB_URL+'/rest/v1/s2s_entries?id=eq.'+id, {method:'DELETE',headers:HEADERS});
+    ALL_ENTRIES = ALL_ENTRIES.filter(e=>e.id!==id);
+    renderDataTable(); renderOverview(); renderGallatinStats();
+    showToast('Entry deleted');
+  }catch(e){ showToast('Delete failed'); }
 }
 
 async function confirmDeleteAll(){
-  if(!confirm('DELETE ALL entries? This cannot be undone.'))return;
-  const code=prompt('Type CONFIRM:');
-  if(code!=='CONFIRM'){alert('Cancelled.');return;}
-  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=gte.0`,{method:'DELETE',headers:H});
-  ALL_ENTRIES=[];renderDataTable();renderOverview();updateDealerStats();
+  if (!confirm('⚠️ DELETE ALL ENTRIES?\n\nThis cannot be undone. Type "DELETE" to confirm.')) return;
+  const answer = prompt('Type DELETE to confirm:');
+  if (answer !== 'DELETE') return;
+  try{
+    await fetch(SB_URL+'/rest/v1/s2s_entries?id=gt.0', {method:'DELETE',headers:HEADERS});
+    ALL_ENTRIES = [];
+    renderDataTable(); renderOverview(); renderGallatinStats();
+    showToast('All entries deleted');
+  }catch(e){ showToast('Delete failed'); }
 }
 
-// ── Dealers ──
-function addDealer(){
-  const name=document.getElementById('new-dealer-name').value.trim();
-  if(!name){alert('Enter dealer name.');return;}
-  alert(`Dealer "${name}" created. Next: clone form/dashboard HTML, update dealer_id, deploy to subdomain.`);
-  closeModalById('dealer-modal');
+// ── Export ──────────────────────────────────────────────
+function adminExportS2SCSV(){ exportCSV(ALL_ENTRIES, 'servicebridge-s2s-all.csv'); }
+function adminExportS2SPDF(){
+  const w = window.open('','_blank');
+  w.document.write('<html><head><title>S2S Entries</title><style>body{font-family:sans-serif;font-size:11px;}table{width:100%;border-collapse:collapse;}th,td{padding:6px 8px;border:1px solid #ddd;text-align:left;}th{background:#f5f5f5;font-size:10px;}</style></head><body>');
+  w.document.write('<h2>ServiceBridge S2S Entries</h2><p>Exported: '+new Date().toLocaleString()+'</p>');
+  w.document.write('<table><thead><tr><th>ID</th><th>Date</th><th>Submitter</th><th>Customer</th><th>Vehicle</th><th>Score</th><th>Outcome</th></tr></thead><tbody>');
+  ALL_ENTRIES.forEach(e=>{
+    w.document.write(`<tr><td>${e.id}</td><td>${new Date(e.created_at).toLocaleDateString()}</td><td>${e.submitter||''}</td><td>${(e.customer_first||'')+' '+(e.customer_last||'')}</td><td>${(e.vehicle_year||'')+' '+(e.vehicle_make||'')+' '+(e.vehicle_model||'')}</td><td>${e.eng_score||''}</td><td>${e.outcome||''}</td></tr>`);
+  });
+  w.document.write('</tbody></table></body></html>');
+  w.document.close();
+  w.print();
+}
+function exportAllCSV(){ exportCSV(ALL_ENTRIES, 'servicebridge-all-data.csv'); }
+function exportCSV(data, filename){
+  if (!data.length) return;
+  const keys = Object.keys(data[0]);
+  const csv = [keys.join(','), ...data.map(r => keys.map(k => `"${(r[k]||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
 }
 
-// ── Utils ──
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModalById(id){document.getElementById(id).classList.remove('open');}
-function showAlert(id,msg,success){
-  const el=document.getElementById('alert-'+id);
-  el.className=`alert ${success?'alert-success':'alert-error'} show`;
-  el.textContent=msg;setTimeout(()=>el.classList.remove('show'),4000);
-}
-document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+// ── Modal helpers ──────────────────────────────────────
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function openAddDealer(){ document.getElementById('dealer-modal').classList.add('open'); }
+function addDealer(){ showToast('Multi-dealer support coming soon'); closeModal('dealer-modal'); }
 
-init();
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
 </script>
 </body>
 </html>
