@@ -309,6 +309,28 @@ textarea.min{resize:vertical;min-height:70px;}
 .fu-tl-note{font-size:11px;color:var(--text3);margin-top:1px;}
 .fu-tl-by{font-size:10px;color:var(--text3);font-style:italic;}
 .fu-empty{text-align:center;padding:24px;color:var(--text3);font-size:13px;}
+
+/* ═══ Audit History ═══ */
+.modal-tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px;}
+.modal-tab{flex:1;padding:8px 0;text-align:center;font-size:12px;font-weight:700;color:var(--text3);cursor:pointer;border-radius:6px;border:none;background:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;}
+.modal-tab.active{background:var(--surface3);color:var(--text);}
+.modal-panel{display:none;}.modal-panel.active{display:block;}
+.audit-list{max-height:400px;overflow-y:auto;}
+.audit-item{padding:12px 0;border-bottom:1px solid var(--border);}
+.audit-item:last-child{border-bottom:none;}
+.audit-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.audit-action{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 8px;border-radius:6px;}
+.audit-action.a-edit{background:var(--blue-soft);color:var(--blue);}
+.audit-action.a-delete{background:var(--red-soft);color:#F87171;}
+.audit-when{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);}
+.audit-who{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.audit-changes{display:flex;flex-direction:column;gap:3px;}
+.audit-change{font-size:11px;color:var(--text3);display:flex;gap:4px;align-items:baseline;flex-wrap:wrap;}
+.audit-field{font-weight:700;color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:10px;}
+.audit-old{color:#F87171;text-decoration:line-through;}
+.audit-new{color:var(--green);font-weight:600;}
+.audit-arrow{color:var(--text3);opacity:0.5;}
+.audit-empty{text-align:center;padding:30px;color:var(--text3);font-size:12px;font-style:italic;}
 </style>
 </head>
 <body>
@@ -420,35 +442,44 @@ textarea.min{resize:vertical;min-height:70px;}
 <!-- EDIT MODAL -->
 <div class="mo" id="edit-modal">
   <div class="mb">
-    <div class="mh"><div class="mt">Edit Entry</div><button class="mc" onclick="closeModal()">✕</button></div>
+    <div class="mh"><div class="mt">Edit Entry <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-left:6px;" id="ed-id-display"></span></div><button class="mc" onclick="closeModal()">✕</button></div>
     <div class="mbd">
       <input type="hidden" id="ed-id">
-      <div class="msec">Customer Info</div>
-      <div class="mg">
-        <div class="mfl"><label class="mlbl">First Name</label><input class="min" id="ed-first"></div>
-        <div class="mfl"><label class="mlbl">Last Name</label><input class="min" id="ed-last"></div>
-        <div class="mfl"><label class="mlbl">Phone</label><input class="min" id="ed-phone"></div>
-        <div class="mfl"><label class="mlbl">Email</label><input class="min" id="ed-email"></div>
+      <div class="modal-tabs" id="modal-tabs">
+        <button class="modal-tab active" onclick="switchModalTab('edit')">✏️ Edit</button>
+        <button class="modal-tab" onclick="switchModalTab('history')" id="history-tab" style="display:none;">📋 History</button>
       </div>
-      <div class="msec">Vehicle</div>
-      <div class="mg mg3">
-        <div class="mfl"><label class="mlbl">Year</label><input class="min" id="ed-year"></div>
-        <div class="mfl"><label class="mlbl">Make</label><input class="min" id="ed-make"></div>
-        <div class="mfl"><label class="mlbl">Model</label><input class="min" id="ed-model"></div>
+      <div class="modal-panel active" id="panel-edit">
+        <div class="msec">Customer Info</div>
+        <div class="mg">
+          <div class="mfl"><label class="mlbl">First Name</label><input class="min" id="ed-first"></div>
+          <div class="mfl"><label class="mlbl">Last Name</label><input class="min" id="ed-last"></div>
+          <div class="mfl"><label class="mlbl">Phone</label><input class="min" id="ed-phone"></div>
+          <div class="mfl"><label class="mlbl">Email</label><input class="min" id="ed-email"></div>
+        </div>
+        <div class="msec">Vehicle</div>
+        <div class="mg mg3">
+          <div class="mfl"><label class="mlbl">Year</label><input class="min" id="ed-year"></div>
+          <div class="mfl"><label class="mlbl">Make</label><input class="min" id="ed-make"></div>
+          <div class="mfl"><label class="mlbl">Model</label><input class="min" id="ed-model"></div>
+        </div>
+        <div class="msec">Status</div>
+        <div class="mg">
+          <div class="mfl"><label class="mlbl">Repair Cost</label><input class="min" id="ed-repair"></div>
+          <div class="mfl"><label class="mlbl">Engagement Score</label><input class="min" id="ed-score" type="number" min="1" max="10"></div>
+          <div class="mfl"><label class="mlbl">Outcome</label><select class="min" id="ed-outcome"><option>New Vehicle Sold</option><option>Used Vehicle Sold</option><option>Appointment Set</option><option>Follow-Up Required</option><option>Not Interested</option></select></div>
+          <div class="mfl"><label class="mlbl">Submitter</label><select class="min" id="ed-submitter"><option>Tyler Doyle</option><option>Andrew Kirk</option><option>DJ Rogers</option><option>Kody McCann</option></select></div>
+        </div>
+        <div class="msec">Notes</div>
+        <div class="mfl"><textarea class="min" id="ed-notes" rows="3"></textarea></div>
+        <div class="mfoot">
+          <button class="mcan" onclick="closeModal()">Cancel</button>
+          <button class="mdel" onclick="softDeleteEntry()">🗑 Archive</button>
+          <button class="msave" onclick="saveEdit()">✓ Save Changes</button>
+        </div>
       </div>
-      <div class="msec">Status</div>
-      <div class="mg">
-        <div class="mfl"><label class="mlbl">Repair Cost</label><input class="min" id="ed-repair"></div>
-        <div class="mfl"><label class="mlbl">Engagement Score</label><input class="min" id="ed-score" type="number" min="1" max="10"></div>
-        <div class="mfl"><label class="mlbl">Outcome</label><select class="min" id="ed-outcome"><option>New Vehicle Sold</option><option>Used Vehicle Sold</option><option>Appointment Set</option><option>Follow-Up Required</option><option>Not Interested</option></select></div>
-        <div class="mfl"><label class="mlbl">Submitter</label><select class="min" id="ed-submitter"><option>Tyler Doyle</option><option>Andrew Kirk</option><option>DJ Rogers</option><option>Kody McCann</option></select></div>
-      </div>
-      <div class="msec">Notes</div>
-      <div class="mfl"><textarea class="min" id="ed-notes" rows="3"></textarea></div>
-      <div class="mfoot">
-        <button class="mcan" onclick="closeModal()">Cancel</button>
-        <button class="mdel" onclick="deleteEntry()">🗑 Delete</button>
-        <button class="msave" onclick="saveEdit()">✓ Save Changes</button>
+      <div class="modal-panel" id="panel-history">
+        <div class="audit-list" id="audit-list"><div class="audit-empty">Loading audit history...</div></div>
       </div>
     </div>
   </div>
@@ -623,10 +654,18 @@ async function saveMgr(id){
   const ok=document.getElementById('svok-'+id);ok.style.opacity='1';setTimeout(()=>ok.style.opacity='0',2000);
 }
 
-// Edit modal
+// Edit modal with audit trail
+function switchModalTab(tab){
+  document.querySelectorAll('#modal-tabs .modal-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.modal-panel').forEach(p=>p.classList.remove('active'));
+  if(tab==='edit'){document.querySelector('#modal-tabs .modal-tab:first-child').classList.add('active');document.getElementById('panel-edit').classList.add('active');}
+  else{document.getElementById('history-tab').classList.add('active');document.getElementById('panel-history').classList.add('active');}
+}
+
 async function openEdit(id){
   const e=ALL.find(x=>x.id===id);if(!e)return;
   document.getElementById('ed-id').value=e.id;
+  document.getElementById('ed-id-display').textContent='#'+e.id;
   document.getElementById('ed-first').value=e.first_name||'';
   document.getElementById('ed-last').value=e.last_name||'';
   document.getElementById('ed-phone').value=e.phone||'';
@@ -639,24 +678,79 @@ async function openEdit(id){
   document.getElementById('ed-outcome').value=e.outcome||'';
   document.getElementById('ed-submitter').value=e.submitter||'';
   document.getElementById('ed-notes').value=e.notes||'';
+  // Show history tab for admin/manager only
+  const isPriv=rep&&(rep.role==='admin'||rep.role==='manager');
+  document.getElementById('history-tab').style.display=isPriv?'':'none';
+  // Reset to edit tab
+  switchModalTab('edit');
   document.getElementById('edit-modal').classList.add('open');
+  // Load audit history in background
+  if(isPriv) loadAuditHistory(id);
 }
+
 function closeModal(){document.getElementById('edit-modal').classList.remove('open');}
 document.getElementById('edit-modal').addEventListener('click',function(ev){if(ev.target===this)closeModal();});
+
+async function loadAuditHistory(entryId){
+  const el=document.getElementById('audit-list');
+  el.innerHTML='<div class="audit-empty">Loading audit history...</div>';
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/s2s_audit_log?entry_id=eq.${entryId}&order=changed_at.desc&limit=50`,{headers:H});
+    if(!res.ok){el.innerHTML='<div class="audit-empty">Failed to load history</div>';return;}
+    const logs=await res.json();
+    if(!logs.length){el.innerHTML='<div class="audit-empty">No edit history — this entry has never been modified</div>';return;}
+    el.innerHTML=logs.map(log=>{
+      const when=new Date(log.changed_at);
+      const dateStr=when.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' at '+when.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+      const isDelete=log.action==='delete';
+      // Compute changed fields
+      let changesHtml='';
+      if(!isDelete&&log.old_values&&log.new_values){
+        const TRACKED=['first_name','last_name','phone','email','veh_year','veh_make','veh_model','repair_cost','eng_score','outcome','submitter','notes','follow_up_status','manager_outcome','manager_notes','followup_status','manager_claimed_by','crm_entry','next_followup_date'];
+        const diffs=[];
+        TRACKED.forEach(k=>{
+          const ov=(log.old_values[k]??'').toString();
+          const nv=(log.new_values[k]??'').toString();
+          if(ov!==nv) diffs.push({field:k,old:ov||'(empty)',new:nv||'(empty)'});
+        });
+        if(diffs.length){
+          changesHtml=`<div class="audit-changes">${diffs.map(d=>`<div class="audit-change"><span class="audit-field">${d.field.replace(/_/g,' ')}</span> <span class="audit-old">${truncate(d.old,40)}</span> <span class="audit-arrow">→</span> <span class="audit-new">${truncate(d.new,40)}</span></div>`).join('')}</div>`;
+        } else {
+          changesHtml='<div style="font-size:11px;color:var(--text3);font-style:italic;">Metadata update (no visible field changes)</div>';
+        }
+      } else if(isDelete){
+        changesHtml='<div style="font-size:11px;color:#F87171;font-weight:600;">Entry archived (soft delete)</div>';
+      }
+      return`<div class="audit-item">
+        <div class="audit-hdr"><span class="audit-action ${isDelete?'a-delete':'a-edit'}">${log.action}</span><span class="audit-when">${dateStr}</span></div>
+        <div class="audit-who">by ${log.changed_by}</div>
+        ${changesHtml}
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div class="audit-empty">Error loading history: '+e.message+'</div>';}
+}
+
+function truncate(s,n){return s.length>n?s.slice(0,n)+'…':s;}
 
 async function saveEdit(){
   const id=document.getElementById('ed-id').value;
   const p={first_name:document.getElementById('ed-first').value,last_name:document.getElementById('ed-last').value,phone:document.getElementById('ed-phone').value,email:document.getElementById('ed-email').value,veh_year:document.getElementById('ed-year').value,veh_make:document.getElementById('ed-make').value,veh_model:document.getElementById('ed-model').value,repair_cost:document.getElementById('ed-repair').value,eng_score:document.getElementById('ed-score').value,outcome:document.getElementById('ed-outcome').value,submitter:document.getElementById('ed-submitter').value,notes:document.getElementById('ed-notes').value};
+  // The BEFORE UPDATE trigger automatically creates the audit log entry
   await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${id}`,{method:'PATCH',headers:H,body:JSON.stringify(p)});
   const e=ALL.find(x=>x.id==id);if(e)Object.assign(e,p);
-  closeModal();renderEntries();renderKPIs();showToast('✓ Entry updated','grn');
+  closeModal();renderEntries();renderKPIs();showToast('✓ Entry updated (audit logged)','grn');
 }
 
-async function deleteEntry(){
-  if(!confirm('Delete this entry?'))return;
-  const id=document.getElementById('ed-id').value;
-  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${id}`,{method:'DELETE',headers:H});
-  ALL=ALL.filter(x=>x.id!=id);closeModal();renderEntries();renderKPIs();showToast('Entry deleted');
+async function softDeleteEntry(){
+  if(!confirm('Archive this entry? It will be hidden from all views but preserved in the audit log and can be recovered.'))return;
+  const id=parseInt(document.getElementById('ed-id').value);
+  const deletedBy=rep?rep.name:'Unknown';
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/rpc/soft_delete_entry`,{method:'POST',headers:H,body:JSON.stringify({p_entry_id:id,p_deleted_by:deletedBy})});
+    if(!res.ok){const err=await res.json();showToast('Error: '+(err.message||'Delete failed'));return;}
+    ALL=ALL.filter(x=>x.id!==id);
+    closeModal();renderEntries();renderKPIs();showToast('✓ Entry archived by '+deletedBy);
+  }catch(e){showToast('Error: '+e.message);}
 }
 
 // Reports
@@ -855,7 +949,7 @@ async function scheduleFU(entryId){
 // ── Init ──
 async function initDash(){
   await Promise.all([
-    (async()=>{try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=1000`,{headers:H});if(res.ok)ALL=await res.json();}catch(e){console.error(e);}})(),
+    (async()=>{try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&deleted_at=is.null&order=id.desc&limit=1000`,{headers:H});if(res.ok)ALL=await res.json();}catch(e){console.error(e);}})(),
     loadFollowUpLog()
   ]);
   renderKPIs();renderEntries();
