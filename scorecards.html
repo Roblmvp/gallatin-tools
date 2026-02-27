@@ -116,8 +116,16 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',-app
 
 /* ═══ FULL LEADERBOARD ═══ */
 .lb{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:28px;}
-.lb-head{display:grid;grid-template-columns:40px 1fr 80px 80px 80px 80px 100px;gap:8px;padding:12px 18px;background:var(--surface2);font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);align-items:center;}
-.lb-row{display:grid;grid-template-columns:40px 1fr 80px 80px 80px 80px 100px;gap:8px;padding:14px 18px;border-bottom:1px solid var(--border);align-items:center;transition:background 0.12s;}
+.lb-head{display:grid;grid-template-columns:40px 1fr 70px 70px 70px 70px 70px 110px;gap:8px;padding:12px 18px;background:var(--surface2);font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);align-items:center;}
+.lb-row{display:grid;grid-template-columns:40px 1fr 70px 70px 70px 70px 70px 110px;gap:8px;padding:14px 18px;border-bottom:1px solid var(--border);align-items:center;transition:background 0.12s;cursor:pointer;}
+.lb-breakdown{display:none;grid-column:1/-1;padding:8px 18px 12px;background:var(--bg2);border-radius:8px;margin:4px 0 6px;}
+.lb-breakdown.open{display:block;}
+.lb-bd-formula{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);line-height:1.7;}
+.lb-bd-part{color:var(--text3);}
+.lb-bd-op{color:var(--text3);opacity:0.5;}
+.lb-bd-val{font-weight:700;}
+.lb-bd-result{font-weight:700;margin-top:4px;padding-top:6px;border-top:1px solid var(--border);}
+.lb-qm{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;text-align:center;}
 .lb-row:hover{background:rgba(255,255,255,0.02);}
 .lb-row:last-child{border-bottom:none;}
 .lb-rank{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;text-align:center;}
@@ -162,8 +170,8 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',-app
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 .fi{animation:fadeUp 0.4s ease both;}
 
-@media(max-width:900px){.podium{grid-template-columns:1fr;}.pod-1,.pod-2,.pod-3{order:unset;}.lb-head,.lb-row{grid-template-columns:32px 1fr 60px 60px 60px 60px 80px;}.trends{grid-template-columns:1fr;}.insights{grid-template-columns:1fr;}}
-@media(max-width:600px){.page{padding:18px 14px 80px;}.lb-head,.lb-row{grid-template-columns:28px 1fr 50px 50px;font-size:11px;}.lb-head>:nth-child(n+5),.lb-row>:nth-child(n+5){display:none;}}
+@media(max-width:900px){.podium{grid-template-columns:1fr;}.pod-1,.pod-2,.pod-3{order:unset;}.lb-head,.lb-row{grid-template-columns:32px 1fr 55px 55px 55px 55px 55px 80px;}.trends{grid-template-columns:1fr;}.insights{grid-template-columns:1fr;}}
+@media(max-width:600px){.page{padding:18px 14px 80px;}.lb-head,.lb-row{grid-template-columns:28px 1fr 50px 50px 50px;font-size:11px;}.lb-head>:nth-child(n+6),.lb-row>:nth-child(n+6){display:none;}}
 </style>
 </head>
 <body>
@@ -228,9 +236,19 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 const rep=JSON.parse(sessionStorage.getItem('sb_rep')||'null');
 let ALL=[];let period='week';
-
-const REP_COLORS={'Tyler Doyle':{bg:'linear-gradient(135deg,#D4A73A,#F59E0B)',bar:'var(--gold)'},'Andrew Kirk':{bg:'linear-gradient(135deg,#6C70F0,#A855F7)',bar:'var(--blue)'},'DJ Rogers':{bg:'linear-gradient(135deg,#2DD4A0,#14B8A6)',bar:'var(--green)'},'Kody McCann':{bg:'linear-gradient(135deg,#E01B36,#F87171)',bar:'var(--red)'}};
-const REPS=['Tyler Doyle','Andrew Kirk','DJ Rogers','Kody McCann'];
+let REPS=[];
+let REPS_DATA={}; // {name: {role, first_name}} from Supabase
+const COLOR_POOL=[
+  {bg:'linear-gradient(135deg,#D4A73A,#F59E0B)',bar:'var(--gold)'},
+  {bg:'linear-gradient(135deg,#6C70F0,#A855F7)',bar:'var(--blue)'},
+  {bg:'linear-gradient(135deg,#2DD4A0,#14B8A6)',bar:'var(--green)'},
+  {bg:'linear-gradient(135deg,#E01B36,#F87171)',bar:'var(--red)'},
+  {bg:'linear-gradient(135deg,#A855F7,#EC4899)',bar:'var(--purple)'},
+  {bg:'linear-gradient(135deg,#F59E0B,#EF4444)',bar:'var(--orange)'},
+  {bg:'linear-gradient(135deg,#22D3EE,#6C70F0)',bar:'#22D3EE'},
+  {bg:'linear-gradient(135deg,#10B981,#059669)',bar:'#10B981'},
+];
+let REP_COLORS={};
 
 // Nav
 (function(){
@@ -246,9 +264,25 @@ const REPS=['Tyler Doyle','Andrew Kirk','DJ Rogers','Kody McCann'];
 function toggleMenu(){const h=document.getElementById('ham'),d=document.getElementById('nav-dd'),o=document.getElementById('nav-ov');const op=d.classList.contains('open');h.classList.toggle('open',!op);d.classList.toggle('open',!op);o.classList.toggle('open',!op);}
 function closeMenu(){document.getElementById('ham').classList.remove('open');document.getElementById('nav-dd').classList.remove('open');document.getElementById('nav-ov').classList.remove('open');}
 
-// Init
+// Init — fetch users from Supabase sb_users_public
 async function init(){
-  try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=2000`,{headers:H});if(res.ok)ALL=await res.json();}catch(e){console.error(e);}
+  try{
+    const [entriesRes, usersRes] = await Promise.all([
+      fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=2000`,{headers:H}),
+      fetch(`${SB_URL}/rest/v1/sb_users_public?select=name,first_name,role&active=eq.true&role=in.(sales,manager)&order=name.asc`,{headers:H})
+    ]);
+    if(entriesRes.ok) ALL=await entriesRes.json();
+    if(usersRes.ok){
+      const users=await usersRes.json();
+      REPS=users.map(u=>u.name);
+      REPS_DATA={};
+      users.forEach(u=>{REPS_DATA[u.name]={role:u.role,first_name:u.first_name};});
+      // Assign colors dynamically
+      REP_COLORS={};
+      REPS.forEach((name,i)=>{REP_COLORS[name]=COLOR_POOL[i%COLOR_POOL.length];});
+    }
+  }catch(e){console.error(e);}
+  if(!REPS.length) REPS=['No reps found'];
   document.getElementById('sync-label').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
   render();
 }
@@ -266,15 +300,23 @@ function calcStats(entries){
   return REPS.map(name=>{
     const mine=entries.filter(e=>e.submitter===name);
     const contacts=mine.length;
-    const sold=mine.filter(e=>e.outcome&&(e.outcome.includes('New')||e.outcome.includes('Used'))).length;
+    const sold=mine.filter(e=>e.outcome&&(e.outcome==='New Vehicle Sold'||e.outcome==='Used Vehicle Sold')&&(e.verified_sold===true||e.verified_sold===null||e.verified_sold===undefined)).length;
     const hot=mine.filter(e=>parseInt(e.eng_score)>=8).length;
     const appt=mine.filter(e=>e.outcome==='Appointment Set').length;
     const temps=mine.map(e=>parseInt(e.eng_score)).filter(t=>!isNaN(t));
     const avgTemp=temps.length?(temps.reduce((a,b)=>a+b,0)/temps.length):0;
-    // Composite score: weighted formula favoring quality
-    const score=Math.round((sold*40)+(appt*15)+(hot*10)+(contacts*5)+(avgTemp*3));
-    return{name,contacts,sold,hot,appt,avgTemp:avgTemp.toFixed(1),score,initials:name.split(' ').map(w=>w[0]).join('')};
-  }).sort((a,b)=>b.score-a.score);
+    // New formula: base × quality multiplier
+    const base=(contacts*1)+(hot*5)+(sold*10)+(appt*4);
+    const qualityMult=avgTemp>0?(avgTemp/5):0;
+    const score=Math.round(base*qualityMult);
+    return{name,contacts,sold,hot,appt,avgTemp:avgTemp.toFixed(1),base,qualityMult:qualityMult.toFixed(2),score,initials:name.split(' ').map(w=>w[0]).join('')};
+  }).sort((a,b)=>{
+    // Tiebreakers: score → sold → hot → contacts
+    if(b.score!==a.score) return b.score-a.score;
+    if(b.sold!==a.sold) return b.sold-a.sold;
+    if(b.hot!==a.hot) return b.hot-a.hot;
+    return b.contacts-a.contacts;
+  });
 }
 
 function render(){
@@ -299,7 +341,7 @@ function renderPodium(stats){
       <div class="pod-trophy">${medals[i]}</div>
       <div class="pod-avatar" style="background:${c.bg};">${s.initials}</div>
       <div class="pod-name">${s.name}</div>
-      <div class="pod-role">${s.name==='Tyler Doyle'?'S2S Manager':'Sales Consultant'}</div>
+      <div class="pod-role">${(REPS_DATA[s.name]&&REPS_DATA[s.name].role==='manager')?'Manager':'Sales Consultant'}</div>
       <div class="pod-stats">
         <div class="pod-stat"><div class="pod-stat-v">${s.contacts}</div><div class="pod-stat-l">Contacts</div></div>
         <div class="pod-stat"><div class="pod-stat-v">${s.sold}</div><div class="pod-stat-l">Sold</div></div>
@@ -307,9 +349,9 @@ function renderPodium(stats){
         <div class="pod-stat"><div class="pod-stat-v">${s.avgTemp}</div><div class="pod-stat-l">Avg Temp</div></div>
       </div>
       <div class="pod-score">
-        <div class="pod-score-lbl">Composite Score</div>
+        <div class="pod-score-lbl">Quality Score</div>
         <div class="pod-score-bar"><div class="pod-score-fill" style="width:${(s.score/maxScore)*100}%;background:${c.bar};"></div></div>
-        <div class="pod-score-val">${s.score} pts</div>
+        <div class="pod-score-val">${s.score} pts <span style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;">(${s.qualityMult}×)</span></div>
       </div>
     </div>`;
   }).join('');
@@ -317,19 +359,32 @@ function renderPodium(stats){
 
 function renderLeaderboard(stats){
   const el=document.getElementById('leaderboard');
-  const maxContacts=Math.max(...stats.map(s=>s.contacts),1);
-  el.innerHTML=`<div class="lb-head"><div>#</div><div>Rep</div><div style="text-align:center;">Contacts</div><div style="text-align:center;">Sold</div><div style="text-align:center;">Hot</div><div style="text-align:center;">Avg Temp</div><div>Score</div></div>`+
+  el.innerHTML=`<div class="lb-head"><div>#</div><div>Rep</div><div style="text-align:center;">Contacts</div><div style="text-align:center;">Sold</div><div style="text-align:center;">Hot</div><div style="text-align:center;">Avg Temp</div><div style="text-align:center;">Quality</div><div>Score</div></div>`+
   stats.map((s,i)=>{
     const c=REP_COLORS[s.name]||{bg:'var(--surface3)',bar:'var(--purple)'};
     const rankCls=i===0?'r1':i===1?'r2':i===2?'r3':'r4';
-    return`<div class="lb-row">
+    const qmColor=parseFloat(s.qualityMult)>=1.5?'var(--green)':parseFloat(s.qualityMult)>=1.0?'var(--blue)':parseFloat(s.qualityMult)>=0.6?'var(--gold)':'#F87171';
+    return`<div class="lb-row" onclick="document.getElementById('lbd-${i}').classList.toggle('open')">
       <div class="lb-rank ${rankCls}">${i+1}</div>
-      <div class="lb-rep"><div class="lb-av" style="background:${c.bg};">${s.initials}</div><div><div class="lb-name">${s.name}</div><div class="lb-sub">${s.name==='Tyler Doyle'?'S2S Manager':'Sales'}</div></div></div>
+      <div class="lb-rep"><div class="lb-av" style="background:${c.bg};">${s.initials}</div><div><div class="lb-name">${s.name}</div><div class="lb-sub">${(REPS_DATA[s.name]&&REPS_DATA[s.name].role==='manager')?'Manager':(REPS_DATA[s.name]&&REPS_DATA[s.name].role==='admin')?'Admin':'Sales'}</div></div></div>
       <div class="lb-val">${s.contacts}</div>
       <div class="lb-val" style="color:${s.sold>0?'var(--green)':'var(--text3)'};">${s.sold}</div>
       <div class="lb-val" style="color:${s.hot>0?'#F87171':'var(--text3)'};">${s.hot}</div>
       <div class="lb-val">${s.avgTemp}</div>
+      <div class="lb-qm" style="color:${qmColor};">${s.qualityMult}×</div>
       <div class="lb-bar-wrap"><div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${stats[0].score?(s.score/stats[0].score)*100:0}%;background:${c.bar};"></div></div><div class="lb-bar-pct" style="color:${c.bar};">${s.score}</div></div>
+    </div>
+    <div class="lb-breakdown" id="lbd-${i}">
+      <div class="lb-bd-formula">
+        <span class="lb-bd-part">Contacts: <span class="lb-bd-val">${s.contacts}</span> ×1</span> <span class="lb-bd-op">+</span>
+        <span class="lb-bd-part">Hot Leads: <span class="lb-bd-val">${s.hot}</span> ×5</span> <span class="lb-bd-op">+</span>
+        <span class="lb-bd-part">Sold: <span class="lb-bd-val">${s.sold}</span> ×10</span> <span class="lb-bd-op">+</span>
+        <span class="lb-bd-part">Appts: <span class="lb-bd-val">${s.appt}</span> ×4</span>
+        <span class="lb-bd-op">=</span> <span class="lb-bd-val">${s.base}</span> base
+      </div>
+      <div class="lb-bd-formula lb-bd-result" style="color:${c.bar||'var(--blue)'};">
+        ${s.base} base × ${s.qualityMult}× quality <span class="lb-bd-op">=</span> <span style="font-size:14px;">${s.score} pts</span>
+      </div>
     </div>`;
   }).join('');
 }
