@@ -215,8 +215,8 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
 .crm-push { display:flex;flex-direction:column;align-items:center;gap:6px;width:100%; }
 .crm-btn { width:100%;padding:12px 18px;border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s var(--spring);border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);display:flex;align-items:center;justify-content:center;gap:8px; }
 .crm-btn:hover { border-color:var(--blue);color:var(--text);background:var(--blue-soft);transform:translateY(-1px); }
+.crm-btn.crm-armed { border-color:rgba(108,112,240,0.4);background:var(--blue-soft);color:var(--blue); }
 .crm-btn.crm-pushed { border-color:rgba(45,212,160,0.4);background:var(--green-soft);color:var(--green);pointer-events:none; }
-.crm-btn.crm-sending { border-color:rgba(108,112,240,0.3);background:var(--blue-soft);color:var(--blue);pointer-events:none; }
 .crm-status { font-size:11px;color:var(--text3);font-style:italic; }
 
 .ro-display {
@@ -915,23 +915,38 @@ document.getElementById('vreason').addEventListener('change',()=>mark(4));
 const gv=id=>{const e=document.getElementById(id);return e?(e.value||'—'):'—';};
 
 // ── SUBMIT ──
-// ── Push to CRM ──
+// ── Push to CRM (arm/disarm toggle — fires after submit) ──
+let crmArmed=false;
 function pushToCRM(){
-  const fname=gv('fname'),lname=gv('lname'),phone=gv('phone');
-  if(!fname&&!lname){showToast('Enter customer name first',true);return;}
+  const btn=document.getElementById('crm-btn');
+  const status=document.getElementById('crm-status');
+  if(crmArmed){
+    crmArmed=false;
+    btn.innerHTML='📤 Push to CRM';
+    btn.classList.remove('crm-armed');
+    status.textContent='';
+    document.getElementById('crm').value='';
+  } else {
+    crmArmed=true;
+    btn.innerHTML='✓ CRM push queued — will send on submit';
+    btn.classList.add('crm-armed');
+    status.textContent='Click again to cancel';
+    document.getElementById('crm').value='Yes — pushed to CRM';
+  }
+}
+
+function executeCRMPush(entry){
+  // This fires after successful Supabase insert
   const btn=document.getElementById('crm-btn');
   const status=document.getElementById('crm-status');
   btn.innerHTML='<span class="btn-spinner"></span> Pushing to CRM...';
-  btn.classList.add('crm-sending');
-  status.textContent='';
-  // Simulate CRM push (replace with actual CRM API when integrated)
+  btn.classList.remove('crm-armed');
+  // Replace this timeout with actual CRM API integration
   setTimeout(()=>{
-    document.getElementById('crm').value='Yes — pushed to CRM';
     btn.innerHTML='✅ Pushed to CRM';
-    btn.classList.remove('crm-sending');
     btn.classList.add('crm-pushed');
     const now=new Date();
-    status.textContent=`Pushed ${now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true})} · ${fname} ${lname}${phone?' · '+phone:''}`;
+    status.textContent=`Pushed ${now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true})} · ${entry.first_name} ${entry.last_name}${entry.phone?' · '+entry.phone:''}`;
   },800);
 }
 
@@ -1056,6 +1071,9 @@ async function submitLog(){
     }catch(e){console.warn('Follow-up task creation failed:',e);}
   }
 
+  // Execute CRM push if armed
+  if(crmArmed) executeCRMPush(entry);
+
   // Reset button
   btn.textContent=origText;btn.classList.remove('btn-loading');
 
@@ -1148,7 +1166,8 @@ function resetForm(){
   document.getElementById('sub-name').value='';document.getElementById('sub-role').value='';
   document.getElementById('escore').value='';document.getElementById('outcome').value='';document.getElementById('intro').value='';
   document.getElementById('crm').value='';
-  const crmBtn=document.getElementById('crm-btn');crmBtn.innerHTML='📤 Push to CRM';crmBtn.classList.remove('crm-pushed','crm-sending');
+  crmArmed=false;
+  const crmBtn=document.getElementById('crm-btn');crmBtn.innerHTML='📤 Push to CRM';crmBtn.classList.remove('crm-pushed','crm-armed');
   document.getElementById('crm-status').textContent='';
   vmd.innerHTML='<option value="">Model</option>';
   const d=document.getElementById('sp-disp');d.textContent='Select your name above to auto-assign';d.classList.remove('filled');
