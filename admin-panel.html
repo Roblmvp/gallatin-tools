@@ -53,7 +53,7 @@ body {
   padding:14px 24px 12px; padding-top:max(14px, env(safe-area-inset-top));
   border-bottom:1px solid var(--border);
   background:rgba(6,8,14,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  position:sticky;top:0;z-index:100;
+  position:sticky;top:0;z-index:200;
 }
 .app-header::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),var(--purple),transparent);opacity:0.5; }
 .header-left { display:flex;align-items:center;gap:12px; }
@@ -322,7 +322,7 @@ td:first-child { font-family:'JetBrains Mono',monospace;color:var(--text3);font-
 <div class="tab-bar">
   <button class="tab-btn active" onclick="showTab('overview',this)">📊 Overview</button>
   <button class="tab-btn" onclick="showTab('dealers',this)">🏢 Dealers</button>
-  <button class="tab-btn" onclick="showTab('reps',this)">👤 Rep Management</button>
+  <button class="tab-btn" onclick="showTab('reps',this)">👤 Team Management</button>
   <button class="tab-btn" onclick="showTab('emails',this)">📧 Email Settings</button>
   <button class="tab-btn" onclick="showTab('data',this)">🗄 Data</button>
 </div>
@@ -392,15 +392,15 @@ td:first-child { font-family:'JetBrains Mono',monospace;color:var(--text3);font-
     </div>
   </div>
 
-  <!-- ═══ REP MANAGEMENT ═══ -->
+  <!-- ═══ TEAM MANAGEMENT ═══ -->
   <div class="tab-panel" id="tab-reps">
     <div class="sh">
-      <div><div class="sh-title">Rep Management</div><div class="sh-desc">Gallatin CDJR S2S Team</div></div>
+      <div><div class="sh-title">Team Management</div><div class="sh-desc">Gallatin CDJR — Synced from Supabase sb_users</div></div>
       <button class="btn-primary" onclick="openModal('rep-modal')">+ Add Rep</button>
     </div>
     <div class="card">
       <div id="alert-rep" class="alert"></div>
-      <div id="reps-list"></div>
+      <div id="reps-list"><div class="loading"><span class="spinner"></span> Loading team from Supabase...</div></div>
     </div>
   </div>
 
@@ -492,15 +492,31 @@ td:first-child { font-family:'JetBrains Mono',monospace;color:var(--text3);font-
 <!-- ═══ ADD REP MODAL ═══ -->
 <div class="modal-overlay" id="rep-modal">
   <div class="modal">
-    <div class="modal-title">Add Rep</div>
-    <div class="modal-desc">Add a new salesperson to the Gallatin CDJR S2S team.</div>
+    <div class="modal-title">Add New Rep</div>
+    <div class="modal-desc">Creates a new user in Supabase sb_users. They'll appear on login and scorecards immediately.</div>
     <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="new-rep-name" placeholder="e.g. John Smith"></div>
+    <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="new-rep-first" placeholder="e.g. John"></div>
     <div class="form-group"><label class="form-label">Role</label>
-      <select class="form-input" id="new-rep-role"><option>Sales</option><option>S2S Manager</option><option>Finance Manager</option></select>
+      <select class="form-input" id="new-rep-role"><option value="sales">Sales</option><option value="manager">Manager</option><option value="admin">Admin</option></select>
     </div>
+    <div class="form-group"><label class="form-label">Initial PIN (4 digits)</label><input class="form-input" id="new-rep-pin" type="text" maxlength="4" placeholder="e.g. 1234" inputmode="numeric" pattern="\d{4}"></div>
     <div class="modal-actions">
       <button class="btn-outline" onclick="closeModalById('rep-modal')">Cancel</button>
-      <button class="btn-primary" onclick="addRep()">Add Rep</button>
+      <button class="btn-primary" onclick="addRep()">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESET PIN MODAL ═══ -->
+<div class="modal-overlay" id="pin-modal">
+  <div class="modal">
+    <div class="modal-title">Reset PIN</div>
+    <div class="modal-desc">Set a new 4-digit PIN for <strong id="pin-modal-name">—</strong>. The PIN is hashed server-side via pgcrypto.</div>
+    <input type="hidden" id="pin-modal-id">
+    <div class="form-group"><label class="form-label">New PIN (4 digits)</label><input class="form-input" id="pin-modal-value" type="text" maxlength="4" placeholder="Enter new 4-digit PIN" inputmode="numeric" pattern="\d{4}"></div>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeModalById('pin-modal')">Cancel</button>
+      <button class="btn-primary" onclick="resetPin()">Reset PIN</button>
     </div>
   </div>
 </div>
@@ -511,9 +527,12 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 
 let RECIPIENTS=['Rob.l@gallatincdjr.com','Tyler.d@gallatincdjr.com','Joe.s@gallatincdjr.com','Jbarba@weauto.us','dominick.f@gallatincdjr.com','Mich.s@gallatincdjr.com'];
-let REPS=[{name:'Tyler Doyle',role:'S2S Manager',color:'linear-gradient(135deg,#D4A73A,#F59E0B)'},{name:'Andrew Kirk',role:'Sales',color:'linear-gradient(135deg,#6C70F0,#A855F7)'},{name:'DJ Rogers',role:'Sales',color:'linear-gradient(135deg,#2DD4A0,#14B8A6)'},{name:'Kody McCann',role:'Sales',color:'linear-gradient(135deg,#E01B36,#F87171)'}];
+let SB_USERS=[];
 let ALL_ENTRIES=[];
 let emailLog=[];
+
+const ROLE_COLORS={'admin':'linear-gradient(135deg,#D4A73A,#F59E0B)','manager':'linear-gradient(135deg,#6C70F0,#A855F7)','sales':'linear-gradient(135deg,#2DD4A0,#14B8A6)'};
+
 
 // ── Session & Nav ──
 const currentRep=JSON.parse(sessionStorage.getItem('sb_rep')||'null');
@@ -546,13 +565,20 @@ function showTab(id,el){
 
 // ── Init ──
 async function init(){
-  await loadEntries();
+  await Promise.all([loadEntries(), loadUsers()]);
   renderOverview();renderReps();renderRecipients();renderDataTable();updateDealerStats();
   document.getElementById('overview-sync').textContent='Last sync: '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
 }
 
 async function loadEntries(){
   try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=1000`,{headers:H});if(res.ok)ALL_ENTRIES=await res.json();}catch(e){console.error(e);}
+}
+
+async function loadUsers(){
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/sb_users_public?select=id,name,first_name,role,active,created_at,last_login&order=created_at.asc`,{headers:H});
+    if(res.ok) SB_USERS=await res.json();
+  }catch(e){console.error('Failed to load users:',e);}
 }
 
 // ── Overview ──
@@ -585,30 +611,83 @@ function updateDealerStats(){
   document.getElementById('gs-hot').textContent=hot;
 }
 
-// ── Rep Management ──
+// ── Team Management (Supabase-backed) ──
 function renderReps(){
-  document.getElementById('reps-list').innerHTML=REPS.map((r,i)=>`
-    <div class="rep-row">
+  const el=document.getElementById('reps-list');
+  if(!SB_USERS.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);">No users found in sb_users.</div>';return;}
+  el.innerHTML=SB_USERS.map(u=>{
+    const initials=u.name.split(' ').map(w=>w[0]).join('').toUpperCase();
+    const color=ROLE_COLORS[u.role]||'linear-gradient(135deg,var(--surface3),var(--surface2))';
+    const entries=ALL_ENTRIES.filter(e=>e.submitter===u.name).length;
+    const isActive=u.active!==false;
+    const roleBadge=u.role==='admin'?'background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2);':u.role==='manager'?'background:var(--blue-soft);color:var(--blue);border:1px solid rgba(108,112,240,0.2);':'background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08);';
+    const lastLogin=u.last_login?new Date(u.last_login).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'Never';
+    return`<div class="rep-row" style="${!isActive?'opacity:0.45;':''}">
       <div class="rep-info">
-        <div class="rep-avatar" style="background:${r.color||'var(--surface3)'};">${r.name.split(' ').map(w=>w[0]).join('')}</div>
-        <div><div class="rep-name-lg">${r.name}</div><div class="rep-meta">${r.role} · Gallatin CDJR</div></div>
+        <div class="rep-avatar" style="background:${color};">${initials}</div>
+        <div>
+          <div class="rep-name-lg">${u.name} ${!isActive?'<span style="font-size:11px;color:#FC8181;font-weight:600;">(Inactive)</span>':''}</div>
+          <div class="rep-meta">
+            <span style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:12px;${roleBadge}">${u.role}</span>
+            <span style="margin-left:6px;">· ${entries} entries · Last login: ${lastLogin}</span>
+          </div>
+        </div>
       </div>
       <div class="rep-actions">
-        <span class="rep-count">${ALL_ENTRIES.filter(e=>e.submitter===r.name).length} entries</span>
-        <button class="btn-red btn-sm" onclick="removeRep(${i})">Remove</button>
+        <button class="btn-dark btn-sm" onclick="openPinReset('${u.id}','${u.name.replace(/'/g,"\\'")}')">🔑 Reset PIN</button>
+        <button class="${isActive?'btn-red':'btn-primary'} btn-sm" onclick="toggleActive('${u.id}',${!isActive})">${isActive?'Deactivate':'Reactivate'}</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-function addRep(){
+async function addRep(){
   const name=document.getElementById('new-rep-name').value.trim();
+  const first=document.getElementById('new-rep-first').value.trim();
   const role=document.getElementById('new-rep-role').value;
-  if(!name){alert('Enter a name.');return;}
-  REPS.push({name,role,color:'linear-gradient(135deg,var(--blue),var(--purple))'});
-  renderReps();closeModalById('rep-modal');document.getElementById('new-rep-name').value='';
-  showAlert('rep','Rep added successfully. Update the S2S form HTML to include this rep.',true);
+  const pin=document.getElementById('new-rep-pin').value.trim();
+  if(!name||!first){showAlert('rep','Full name and first name are required.',false);return;}
+  if(!/^\d{4}$/.test(pin)){showAlert('rep','PIN must be exactly 4 digits.',false);return;}
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/rpc/admin_add_user`,{method:'POST',headers:H,body:JSON.stringify({p_name:name,p_first_name:first,p_role:role,p_pin:pin})});
+    if(!res.ok){const err=await res.json();showAlert('rep','Failed: '+(err.message||err.error||'Unknown error'),false);return;}
+    closeModalById('rep-modal');
+    document.getElementById('new-rep-name').value='';document.getElementById('new-rep-first').value='';document.getElementById('new-rep-pin').value='';
+    await loadUsers();renderReps();
+    showAlert('rep',`✓ ${name} added to sb_users. They can now log in and appear on scorecards.`,true);
+  }catch(e){showAlert('rep','Error: '+e.message,false);}
 }
-function removeRep(i){if(!confirm(`Remove ${REPS[i].name}?`))return;REPS.splice(i,1);renderReps();}
+
+async function toggleActive(userId,newState){
+  const user=SB_USERS.find(u=>u.id===userId);
+  const action=newState?'reactivate':'deactivate';
+  if(!confirm(`${action.charAt(0).toUpperCase()+action.slice(1)} ${user?user.name:'this user'}?`))return;
+  try{
+    await fetch(`${SB_URL}/rest/v1/sb_users?id=eq.${userId}`,{method:'PATCH',headers:H,body:JSON.stringify({active:newState})});
+    await loadUsers();renderReps();
+    showAlert('rep',`✓ ${user?user.name:'User'} ${action}d.`,true);
+  }catch(e){showAlert('rep','Error: '+e.message,false);}
+}
+
+function openPinReset(userId,userName){
+  document.getElementById('pin-modal-id').value=userId;
+  document.getElementById('pin-modal-name').textContent=userName;
+  document.getElementById('pin-modal-value').value='';
+  openModal('pin-modal');
+}
+
+async function resetPin(){
+  const userId=document.getElementById('pin-modal-id').value;
+  const newPin=document.getElementById('pin-modal-value').value.trim();
+  if(!/^\d{4}$/.test(newPin)){alert('PIN must be exactly 4 digits.');return;}
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/rpc/admin_reset_pin`,{method:'POST',headers:H,body:JSON.stringify({p_user_id:userId,p_new_pin:newPin})});
+    if(!res.ok){const err=await res.json();alert('Failed: '+(err.message||'Unknown error'));return;}
+    closeModalById('pin-modal');
+    const user=SB_USERS.find(u=>u.id===userId);
+    showAlert('rep',`✓ PIN reset for ${user?user.name:'user'}. New PIN is active immediately.`,true);
+  }catch(e){alert('Error: '+e.message);}
+}
 
 // ── Email Recipients ──
 function renderRecipients(){
