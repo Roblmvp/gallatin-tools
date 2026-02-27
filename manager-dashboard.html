@@ -355,6 +355,56 @@ textarea.min{resize:vertical;min-height:70px;}
 .mw-cancel{padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:none;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;}
 .mw-save{padding:8px 20px;border-radius:8px;border:none;background:var(--green);color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;}
 .mw-save:hover{box-shadow:0 4px 16px rgba(45,212,160,0.3);}
+
+/* ═══ Queue Panel ═══ */
+.q-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.q-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);padding:14px 16px;position:relative;overflow:hidden;}
+.q-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.qk-red::before{background:var(--red);} .qk-gold::before{background:var(--gold);} .qk-green::before{background:var(--green);}
+.q-kpi-v{font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;}
+.qk-red .q-kpi-v{color:#F87171;} .qk-gold .q-kpi-v{color:var(--gold);} .qk-green .q-kpi-v{color:var(--green);}
+.q-kpi-l{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-top:2px;}
+.q-refresh{font-size:10px;font-weight:700;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;}
+.q-refresh:hover{border-color:var(--border3);color:var(--text);}
+.q-sec{margin-bottom:24px;}
+.q-sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.q-sec-left{display:flex;align-items:center;gap:8px;}
+.q-sec-t{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);}
+.q-sec-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.q-sec-badge.qb-red{background:var(--red-soft);color:#F87171;border:1px solid rgba(224,27,54,0.2);}
+.q-sec-badge.qb-gold{background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2);}
+.qc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden;transition:all 0.2s;}
+.qc:hover{border-color:var(--border2);}
+.qc.qc-overdue{border-left:3px solid var(--red);animation:qcPulse 2.5s ease infinite;}
+.qc.qc-hot{border-left:3px solid var(--red);}
+.qc.qc-warm{border-left:3px solid var(--gold);}
+@keyframes qcPulse{0%,100%{box-shadow:0 0 0 0 rgba(224,27,54,0);}50%{box-shadow:0 0 0 3px rgba(224,27,54,0.12);}}
+.qc-top{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+.qc-temp{width:42px;height:42px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;font-family:'JetBrains Mono',monospace;}
+.qc-temp.qt-hot{background:rgba(224,27,54,0.12);color:#F87171;} .qc-temp.qt-warm{background:var(--gold-soft);color:var(--gold);} .qc-temp.qt-cool{background:rgba(255,255,255,0.04);color:var(--text3);}
+.qc-temp-n{font-size:16px;font-weight:800;line-height:1;}
+.qc-temp-l{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;opacity:0.7;}
+.qc-info{flex:1;min-width:0;}
+.qc-name{font-weight:700;font-size:14px;color:var(--text);}
+.qc-meta{font-size:12px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.qc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.qc-due{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;}
+.qc-due.qd-over{background:var(--red-soft);color:#F87171;} .qc-due.qd-hot{background:var(--red-soft);color:#F87171;} .qc-due.qd-warm{background:var(--gold-soft);color:var(--gold);} .qc-due.qd-cool{background:var(--blue-soft);color:var(--blue);}
+.qc-elapsed{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.qc-actions{display:flex;gap:5px;padding:0 16px 12px;flex-wrap:wrap;}
+.qc-btn{font-size:11px;font-weight:700;padding:5px 12px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;position:relative;}
+.qc-btn:hover{background:var(--surface3);border-color:var(--border3);color:var(--text);}
+.qc-btn.qb-work{border-color:rgba(45,212,160,0.3);color:var(--green);}
+.qc-btn.qb-work:hover{background:var(--green-soft);}
+.qc-btn.qb-view{border-color:rgba(108,112,240,0.3);color:var(--blue);}
+.qc-reassign-wrap{position:relative;display:inline-block;}
+.qc-reassign-dd{display:none;position:absolute;top:100%;left:0;margin-top:4px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;min-width:180px;padding:4px;box-shadow:0 12px 40px rgba(0,0,0,0.5);z-index:50;}
+.qc-reassign-dd.open{display:block;}
+.qc-reassign-opt{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.1s;}
+.qc-reassign-opt:hover{background:rgba(255,255,255,0.04);color:var(--text);}
+.qc-reassign-av{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;background:var(--surface3);color:var(--text3);}
+.q-empty{text-align:center;padding:30px;color:var(--text3);font-size:13px;}
+@media(max-width:600px){.q-kpis{grid-template-columns:1fr 1fr 1fr;}.qc-top{flex-wrap:wrap;}.qc-actions{gap:4px;}.qc-meta{white-space:normal;}}
 </style>
 </head>
 <body>
@@ -408,6 +458,7 @@ textarea.min{resize:vertical;min-height:70px;}
     <button class="tb" onclick="showTab('aging',this)">⏰ Aging</button>
     <button class="tb" onclick="showTab('unclaimed',this)">📭 Unclaimed</button>
     <button class="tb" onclick="showTab('followups',this)">📅 Follow-Ups</button>
+    <button class="tb" onclick="showTab('queue',this)">⚡ Queue <span class="tb-badge" id="badge-queue" style="background:var(--red-soft);color:#F87171;border-color:rgba(224,27,54,0.2);">0</span></button>
     <button class="tb" onclick="showTab('reports',this)">📊 Reports</button>
   </div>
 
@@ -433,6 +484,21 @@ textarea.min{resize:vertical;min-height:70px;}
     <div id="fu-overdue-sec"></div>
     <div id="fu-today-sec"></div>
     <div id="fu-upcoming-sec"></div>
+  </div>
+
+  <!-- QUEUE -->
+  <div id="tab-queue" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-family:'Instrument Serif',Georgia,serif;font-size:20px;">Unworked Lead Queue</div>
+      <button class="q-refresh" onclick="refreshQueue()">↻ Refresh</button>
+    </div>
+    <div class="q-kpis">
+      <div class="q-kpi qk-red"><div class="q-kpi-v" id="q-hot">0</div><div class="q-kpi-l">Hot Unworked</div></div>
+      <div class="q-kpi qk-gold"><div class="q-kpi-v" id="q-overdue">0</div><div class="q-kpi-l">Overdue</div></div>
+      <div class="q-kpi qk-green"><div class="q-kpi-v" id="q-worked">0</div><div class="q-kpi-l">Worked Today</div></div>
+    </div>
+    <div id="q-hot-sec"></div>
+    <div id="q-overdue-sec"></div>
   </div>
 
   <!-- REPORTS -->
@@ -688,8 +754,10 @@ function showTab(tab,btn){
   document.getElementById('tab-entries').style.display='none';
   document.getElementById('tab-reports').style.display='none';
   document.getElementById('tab-followups').style.display='none';
+  document.getElementById('tab-queue').style.display='none';
   if(tab==='reports'){document.getElementById('tab-reports').style.display='block';runReport();}
   else if(tab==='followups'){document.getElementById('tab-followups').style.display='block';renderFollowUps();}
+  else if(tab==='queue'){document.getElementById('tab-queue').style.display='block';renderQueue();}
   else{document.getElementById('tab-entries').style.display='block';renderEntries();}
 }
 
@@ -1042,17 +1110,163 @@ async function submitMW(){
   btn.textContent='✓ Mark Worked';btn.disabled=false;
 }
 
+// ═══ QUEUE SYSTEM ═══
+let ACTIVE_REPS=[];
+
+async function loadActiveReps(){
+  try{const res=await fetch(`${SB_URL}/rest/v1/sb_users_public?active=eq.true&select=name,first_name,role&order=name`,{headers:H});if(res.ok)ACTIVE_REPS=await res.json();}catch(e){console.error(e);}
+}
+
+function fmtElapsed(ms){
+  const m=Math.abs(Math.floor(ms/60000));
+  if(m<60) return m+'m';
+  const h=Math.floor(m/60),rm=m%60;
+  if(h<24) return h+'h '+(rm>0?rm+'m':'');
+  const d=Math.floor(h/24);return d+'d '+h%24+'h';
+}
+
+function getQueueData(){
+  const now=Date.now();
+  const open=TASKS.filter(t=>!t.completed_at);
+  const hotOpen=open.filter(t=>{
+    const e=ALL.find(x=>x.id===t.entry_id);
+    return e&&parseInt(e.eng_score)>=8;
+  }).sort((a,b)=>new Date(a.due_at)-new Date(b.due_at));
+  const allOverdue=open.filter(t=>new Date(t.due_at).getTime()<now)
+    .sort((a,b)=>new Date(a.due_at)-new Date(b.due_at));
+  const todayStart=new Date();todayStart.setHours(0,0,0,0);
+  const workedToday=TASKS.filter(t=>t.completed_at&&new Date(t.completed_at)>=todayStart).length;
+  return{hotOpen,allOverdue,workedToday};
+}
+
+function updateQueueBadge(){
+  const{hotOpen}=getQueueData();
+  document.getElementById('badge-queue').textContent=hotOpen.length;
+}
+
+function renderQueue(){
+  const{hotOpen,allOverdue,workedToday}=getQueueData();
+  document.getElementById('q-hot').textContent=hotOpen.length;
+  document.getElementById('q-overdue').textContent=allOverdue.length;
+  document.getElementById('q-worked').textContent=workedToday;
+
+  function renderQSec(containerId,items,label,badgeCls){
+    const el=document.getElementById(containerId);
+    if(!items.length){el.innerHTML=`<div class="q-sec"><div class="q-sec-hdr"><div class="q-sec-left"><div class="q-sec-t">${label}</div><span class="q-sec-badge ${badgeCls}">0</span></div></div><div class="q-empty">All clear — nothing here 🎉</div></div>`;return;}
+    el.innerHTML=`<div class="q-sec"><div class="q-sec-hdr"><div class="q-sec-left"><div class="q-sec-t">${label}</div><span class="q-sec-badge ${badgeCls}">${items.length}</span></div></div>${items.map(t=>renderQCard(t)).join('')}</div>`;
+  }
+  renderQSec('q-hot-sec',hotOpen,'🔥 Hot Unworked','qb-red');
+  // Filter allOverdue to exclude those already shown in hot queue
+  const hotIds=new Set(hotOpen.map(t=>t.id));
+  const overdueOnly=allOverdue.filter(t=>!hotIds.has(t.id));
+  renderQSec('q-overdue-sec',overdueOnly,'⏰ All Overdue','qb-gold');
+}
+
+function renderQCard(t){
+  const e=ALL.find(x=>x.id===t.entry_id);
+  if(!e) return '';
+  const sc=parseInt(e.eng_score)||0;
+  const tempCls=sc>=8?'qt-hot':sc>=5?'qt-warm':'qt-cool';
+  const veh=[e.veh_year,e.veh_make,e.veh_model].filter(Boolean).join(' ')||'—';
+  const now=Date.now(),due=new Date(t.due_at).getTime();
+  const diff=due-now;
+  const isOverdue=diff<=0;
+  const cardCls=isOverdue?'qc-overdue':sc>=8?'qc-hot':'qc-warm';
+  let dueLbl,dueCls;
+  if(isOverdue){dueLbl='Overdue '+fmtElapsed(Math.abs(diff));dueCls='qd-over';}
+  else if(diff<1800000){dueLbl='Due in '+fmtElapsed(diff);dueCls='qd-hot';}
+  else if(diff<7200000){dueLbl='Due in '+fmtElapsed(diff);dueCls='qd-warm';}
+  else{dueLbl='Due in '+fmtElapsed(diff);dueCls='qd-cool';}
+  const created=e.created_at?new Date(e.created_at):new Date();
+  const elapsed=fmtElapsed(now-created.getTime());
+  const repsHtml=ACTIVE_REPS.filter(r=>r.name!==t.assigned_to).map(r=>{
+    const ini=r.name.split(' ').map(w=>w[0]).join('');
+    return `<div class="qc-reassign-opt" onclick="reassignTask('${t.id}',${e.id},'${r.name.replace(/'/g,"\\'")}',this)"><div class="qc-reassign-av">${ini}</div>${r.first_name||r.name}</div>`;
+  }).join('');
+
+  return`<div class="qc ${cardCls}" id="qc-${t.id}">
+    <div class="qc-top">
+      <div class="qc-temp ${tempCls}"><div class="qc-temp-n">${sc}</div><div class="qc-temp-l">temp</div></div>
+      <div class="qc-info">
+        <div class="qc-name">${e.first_name||''} ${e.last_name||''}</div>
+        <div class="qc-meta">🚗 ${veh} · 👤 ${t.assigned_to} · ${e.phone||'—'}</div>
+      </div>
+      <div class="qc-right">
+        <div class="qc-due ${dueCls}">${dueLbl}</div>
+        <div class="qc-elapsed">⏱ ${elapsed} ago</div>
+      </div>
+    </div>
+    <div class="qc-actions">
+      <button class="qc-btn qb-work" onclick="openMW('${t.id}',${e.id},'${(e.first_name||'').replace(/'/g,"\\'")} ${(e.last_name||'').replace(/'/g,"\\'")}')">✓ Mark Worked</button>
+      <div class="qc-reassign-wrap">
+        <button class="qc-btn" onclick="toggleReassign('${t.id}')">↻ Reassign</button>
+        <div class="qc-reassign-dd" id="qrd-${t.id}">${repsHtml}</div>
+      </div>
+      <button class="qc-btn qb-view" onclick="openEdit(${e.id})">View Entry</button>
+    </div>
+  </div>`;
+}
+
+function toggleReassign(taskId){
+  // Close all other open dropdowns first
+  document.querySelectorAll('.qc-reassign-dd.open').forEach(dd=>{if(dd.id!=='qrd-'+taskId)dd.classList.remove('open');});
+  document.getElementById('qrd-'+taskId).classList.toggle('open');
+}
+// Close reassign dropdowns on outside click
+document.addEventListener('click',function(ev){
+  if(!ev.target.closest('.qc-reassign-wrap')) document.querySelectorAll('.qc-reassign-dd.open').forEach(dd=>dd.classList.remove('open'));
+});
+
+async function reassignTask(taskId,entryId,newRep,optEl){
+  try{
+    await Promise.all([
+      fetch(`${SB_URL}/rest/v1/s2s_followups?id=eq.${taskId}`,{method:'PATCH',headers:H,body:JSON.stringify({assigned_to:newRep})}),
+      fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${entryId}`,{method:'PATCH',headers:H,body:JSON.stringify({submitter:newRep})})
+    ]);
+    const task=TASKS.find(x=>x.id===taskId);if(task)task.assigned_to=newRep;
+    const entry=ALL.find(x=>x.id===entryId);if(entry)entry.submitter=newRep;
+    document.querySelectorAll('.qc-reassign-dd.open').forEach(dd=>dd.classList.remove('open'));
+    renderQueue();renderEntries();updateQueueBadge();
+    showToast(`✓ Lead reassigned to ${newRep.split(' ')[0]}`,'grn');
+  }catch(e){showToast('Reassign failed: '+e.message);}
+}
+
+async function refreshQueue(){
+  try{
+    const[eRes,tRes]=await Promise.all([
+      fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&deleted_at=is.null&order=id.desc&limit=1000`,{headers:H}),
+      fetch(`${SB_URL}/rest/v1/s2s_followups?select=*&order=due_at.desc&limit=2000`,{headers:H})
+    ]);
+    if(eRes.ok) ALL=await eRes.json();
+    if(tRes.ok) TASKS=await tRes.json();
+  }catch(e){console.error(e);}
+  renderQueue();renderKPIs();renderEntries();updateQueueBadge();
+  showToast('✓ Queue refreshed');
+}
+
+// Auto-refresh every 60s
+let _queueInterval=null;
+function startQueueRefresh(){
+  if(_queueInterval)clearInterval(_queueInterval);
+  _queueInterval=setInterval(()=>{
+    if(currentTab==='queue') renderQueue();
+    updateQueueBadge();
+  },60000);
+}
+
 // ── Init ──
 async function initDash(){
   await Promise.all([
     (async()=>{try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&deleted_at=is.null&order=id.desc&limit=1000`,{headers:H});if(res.ok)ALL=await res.json();}catch(e){console.error(e);}})(),
     (async()=>{try{const res=await fetch(`${SB_URL}/rest/v1/s2s_followups?select=*&order=due_at.desc&limit=2000`,{headers:H});if(res.ok)TASKS=await res.json();}catch(e){console.error(e);}})(),
-    loadFollowUpLog()
+    loadFollowUpLog(),
+    loadActiveReps()
   ]);
-  renderKPIs();renderEntries();
+  renderKPIs();renderEntries();updateQueueBadge();
   const now=new Date(),d30=new Date(now);d30.setDate(d30.getDate()-30);
   document.getElementById('rpt-from').value=d30.toISOString().slice(0,10);
   document.getElementById('rpt-to').value=now.toISOString().slice(0,10);
+  startQueueRefresh();
 }
 
 initDash();
