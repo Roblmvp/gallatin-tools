@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-(function(){
-  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
-  if (!rep) { window.location.replace('/login.html'); }
-})();
-</script>
+  <!-- ══ SUPABASE AUTH ══ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/auth-guard.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ServiceBridge — Performance Dashboard</title>
@@ -477,40 +474,36 @@ nav::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1p
 <script>
 const SB_URL='https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
-const H={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'};
+let H={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'};
+function _refreshH(){ const t=window.sbSession?.access_token||SB_KEY; H={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+t,'Prefer':'return=minimal'}; }
 
-// NAV INIT
-const currentRep=JSON.parse(sessionStorage.getItem('sb_rep')||'null');
-(function(){
-  if(!currentRep)return;
-  const n=currentRep.name||'',initials=n.split(' ').map(w=>w[0]).join('').slice(0,2);
-  document.getElementById('nav-avatar').textContent=initials;
-  document.getElementById('nav-name').textContent=n;
+// NAV INIT — deferred to SB_AUTH
+let currentRep=null;
+function _initDashNav(user){
+  currentRep={name:user.name,role:user.role,initials:user.initials};
+  document.getElementById('nav-avatar').textContent=user.initials;
+  document.getElementById('nav-name').textContent=user.name;
   const roleEl=document.getElementById('nav-role');
-  roleEl.textContent=currentRep.role||'Sales';
-  const roleClass=currentRep.role==='Admin'?'role-admin':currentRep.role==='Manager'?'role-manager':'role-sales';
-  roleEl.className='nav-role-pill '+roleClass;
-  document.getElementById('dd-name').textContent=currentRep.name;
-  document.getElementById('dd-role').textContent=currentRep.role+' · ServiceBridge';
-  if(currentRep.role==='Admin'){document.getElementById('admin-link').classList.add('show');document.getElementById('admin-div').classList.add('show');}
-  // Hide verify tab for sales reps
-  if(currentRep.role!=='Admin'&&currentRep.role!=='Manager'&&currentRep.role!=='admin'&&currentRep.role!=='manager'){
-    const vTab=document.getElementById('tab-verify');if(vTab)vTab.style.display='none';
-  }
-})();
+  roleEl.textContent=user.role;
+  roleEl.className='nav-role-pill '+(user.role==='Admin'?'role-admin':user.role==='Manager'?'role-manager':'role-sales');
+  document.getElementById('dd-name').textContent=user.name;
+  document.getElementById('dd-role').textContent=user.role+' · ServiceBridge';
+  if(user.role==='Admin'){document.getElementById('admin-link').classList.add('show');document.getElementById('admin-div').classList.add('show');}
+  if(user.role!=='Admin'&&user.role!=='Manager'){const vTab=document.getElementById('tab-verify');if(vTab)vTab.style.display='none';}
+}
 
 function toggleMenu(e){e.stopPropagation();document.getElementById('hamburger').classList.toggle('open');document.getElementById('nav-dropdown').classList.toggle('open');}
 document.addEventListener('click',()=>{document.getElementById('hamburger').classList.remove('open');document.getElementById('nav-dropdown').classList.remove('open');});
 document.getElementById('nav-dropdown').addEventListener('click',e=>e.stopPropagation());
 function goReports(){document.getElementById('nav-dropdown').classList.remove('open');document.getElementById('hamburger').classList.remove('open');switchTab('reports',document.getElementById('tab-reports'));}
-function signOut(){sessionStorage.removeItem('sb_rep');window.location.replace('/login.html');}
+function signOut(){if(window.signOut)window.signOut();else{sessionStorage.removeItem('sb_rep');window.location.replace('/login.html');}}
 
 // DATA
 let allEntries=[],currentTab='all';
 
 async function loadAll(){
   try{
-    const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=500`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=500`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+(window.sbSession?.access_token||SB_KEY)}});
     allEntries=await res.json();
     renderKPIs();renderEntries();renderVerifyQueue();
   }catch(e){
@@ -788,7 +781,7 @@ async function runReport(){
   document.getElementById('rpt-empty').style.display='none';document.getElementById('rpt-output').style.display='none';
   let url=`${SB_URL}/rest/v1/s2s_entries?select=*&created_at=gte.${from}T00:00:00&created_at=lte.${to}T23:59:59&order=created_at.asc&limit=2000`;
   const rep=document.getElementById('rpt-rep').value;if(rep)url+=`&submitter=eq.${encodeURIComponent(rep)}`;
-  const r=await fetch(url,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});rptS2S=await r.json();renderReport();
+  const r=await fetch(url,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+(window.sbSession?.access_token||SB_KEY)}});rptS2S=await r.json();renderReport();
 }
 
 function renderReport(){
@@ -816,8 +809,13 @@ function toCSV(rows,headers){const esc=v=>{if(v==null)return'';const s=String(v)
 function exportS2SCSV(){if(!allEntries.length)return alert('No entries loaded yet.');const h=['id','submitter','first_name','last_name','phone','email','veh_year','veh_make','veh_model','repair_cost','eng_score','outcome','verified_sold','verified_by','followup_status','manager_outcome','manager_claimed_by','manager_notes','notes','created_at'];const blob=new Blob([toCSV(allEntries,h)],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`s2s-entries-${new Date().toISOString().slice(0,10)}.csv`;a.click();}
 function exportS2SPDF(){if(!allEntries.length)return alert('No entries loaded yet.');const date=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});const rows=allEntries.map(e=>`<tr><td>${e.submitter||'—'}</td><td>${e.first_name||''} ${e.last_name||''}</td><td>${e.phone||'—'}</td><td>${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''}</td><td>${e.repair_cost?'$'+e.repair_cost:'—'}</td><td style="text-align:center;font-weight:700;">${e.eng_score||'—'}</td><td>${e.outcome||'—'}</td><td>${e.verified_sold?'✅':'⏳'}</td><td>${e.created_at?new Date(e.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—'}</td></tr>`).join('');const html=`<!DOCTYPE html><html><head><title>S2S Export</title><style>body{font-family:Arial,sans-serif;font-size:11px;padding:24px;}h1{font-size:18px;margin-bottom:4px;}.sub{color:#666;font-size:12px;margin-bottom:16px;}table{width:100%;border-collapse:collapse;}th{background:#1a1a2e;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;}td{padding:7px 10px;border-bottom:1px solid #eee;}tr:nth-child(even) td{background:#f9f9f9;}@media print{body{padding:0;}}</style></head><body><h1>ServiceBridge — S2S Entries</h1><div class="sub">Gallatin CDJR · Exported ${date} · ${allEntries.length} entries</div><table><thead><tr><th>Rep</th><th>Customer</th><th>Phone</th><th>Vehicle</th><th>Repair $</th><th>Temp</th><th>Outcome</th><th>Verified</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),500);}
 
-// INIT
-loadAll();
+// AUTH-GATED INIT
+(async function(){
+  const{currentUser}=await SB_AUTH.init({requiredRole:'any'});
+  _initDashNav(currentUser);
+  _refreshH();
+  await loadAll();
+})();
 </script>
 </body>
 </html>
