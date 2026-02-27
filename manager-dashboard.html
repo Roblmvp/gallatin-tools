@@ -331,6 +331,30 @@ textarea.min{resize:vertical;min-height:70px;}
 .audit-new{color:var(--green);font-weight:600;}
 .audit-arrow{color:var(--text3);opacity:0.5;}
 .audit-empty{text-align:center;padding:30px;color:var(--text3);font-size:12px;font-style:italic;}
+
+/* ═══ Follow-Up Task Badges ═══ */
+.fu-badge{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;}
+.fu-badge.fb-overdue{background:var(--red-soft);color:#F87171;border:1px solid rgba(224,27,54,0.2);animation:fuPulse 2s ease infinite;}
+.fu-badge.fb-hot{background:var(--red-soft);color:#F87171;border:1px solid rgba(224,27,54,0.2);}
+.fu-badge.fb-warm{background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2);}
+.fu-badge.fb-cool{background:var(--blue-soft);color:var(--blue);border:1px solid rgba(108,112,240,0.2);}
+.fu-badge.fb-done{background:var(--green-soft);color:var(--green);border:1px solid rgba(45,212,160,0.2);}
+@keyframes fuPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(224,27,54,0.3);}50%{opacity:0.85;box-shadow:0 0 0 4px rgba(224,27,54,0);}}
+.fu-work-btn{font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid rgba(45,212,160,0.3);background:var(--green-soft);color:var(--green);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;white-space:nowrap;}
+.fu-work-btn:hover{background:rgba(45,212,160,0.18);border-color:rgba(45,212,160,0.5);}
+
+/* Mark Worked mini modal */
+.mw-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;align-items:center;justify-content:center;}
+.mw-overlay.open{display:flex;}
+.mw-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rlg);padding:24px;max-width:420px;width:90%;box-shadow:0 24px 80px rgba(0,0,0,0.5);}
+.mw-title{font-family:'Instrument Serif',Georgia,serif;font-size:20px;margin-bottom:4px;}
+.mw-sub{font-size:12px;color:var(--text3);margin-bottom:16px;}
+.mw-note{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;padding:10px 14px;resize:none;outline:none;min-height:80px;margin-bottom:14px;}
+.mw-note:focus{border-color:var(--blue);}
+.mw-foot{display:flex;gap:8px;justify-content:flex-end;}
+.mw-cancel{padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:none;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;}
+.mw-save{padding:8px 20px;border-radius:8px;border:none;background:var(--green);color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;}
+.mw-save:hover{box-shadow:0 4px 16px rgba(45,212,160,0.3);}
 </style>
 </head>
 <body>
@@ -484,6 +508,19 @@ textarea.min{resize:vertical;min-height:70px;}
     </div>
   </div>
 </div>
+<!-- MARK WORKED MODAL -->
+<div class="mw-overlay" id="mw-modal">
+  <div class="mw-box">
+    <div class="mw-title">✓ Mark Follow-Up Worked</div>
+    <div class="mw-sub" id="mw-sub">Entry #—</div>
+    <input type="hidden" id="mw-fuid">
+    <textarea class="mw-note" id="mw-note" placeholder="What happened? (e.g. Called, set appointment for Friday, customer excited about Wrangler...)"></textarea>
+    <div class="mw-foot">
+      <button class="mw-cancel" onclick="closeMW()">Cancel</button>
+      <button class="mw-save" id="mw-save" onclick="submitMW()">✓ Mark Worked</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -491,7 +528,7 @@ const SB_URL='https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
 const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 const rep=JSON.parse(sessionStorage.getItem('sb_rep')||'null');
-let ALL=[];let currentTab='all';
+let ALL=[];let TASKS=[];let currentTab='all';
 const canClaim=rep&&(rep.role==='admin'||rep.role==='manager');
 
 // Nav
@@ -542,6 +579,30 @@ function getFiltered(){
   return ALL;
 }
 
+function getTaskForEntry(entryId){return TASKS.find(t=>t.entry_id===entryId);}
+function fuBadgeHtml(e){
+  const t=getTaskForEntry(e.id);
+  if(!t) return '';
+  if(t.completed_at) return '<span class="fu-badge fb-done">✅ Worked</span>';
+  const now=Date.now(),due=new Date(t.due_at).getTime();
+  const diff=due-now;
+  if(diff<=0){
+    const overMin=Math.round(Math.abs(diff)/60000);
+    const label=overMin>=60?Math.floor(overMin/60)+'h '+overMin%60+'m overdue':overMin+'m overdue';
+    return `<span class="fu-badge fb-overdue">🔴 ${label}</span>`;
+  }
+  const min=Math.round(diff/60000);
+  if(min<=30) return `<span class="fu-badge fb-hot">🔴 Due in ${min}m</span>`;
+  if(min<=120) return `<span class="fu-badge fb-warm">🟡 Due in ${min>=60?Math.floor(min/60)+'h '+(min%60)+'m':min+'m'}</span>`;
+  const hrs=Math.round(min/60);
+  return `<span class="fu-badge fb-cool">🔵 Due in ${hrs}h</span>`;
+}
+function fuBtnHtml(e){
+  const t=getTaskForEntry(e.id);
+  if(!t||t.completed_at) return '';
+  return `<button class="fu-work-btn" onclick="event.stopPropagation();openMW('${t.id}',${e.id},'${(e.first_name||'').replace(/'/g,"\\'")} ${(e.last_name||'').replace(/'/g,"\\'")}')">Mark Worked</button>`;
+}
+
 function renderEntries(){
   const list=getFiltered();
   const labels={'all':'All Entries','hot':'Hot Leads (8+)','aging':'Aging Follow-Ups','unclaimed':'Unclaimed Entries'};
@@ -552,13 +613,14 @@ function renderEntries(){
   el.innerHTML=list.map(e=>{
     const sc=parseInt(e.eng_score)||0;
     const tcls=sc>=8?'t-hot':sc>=5?'t-warm':'t-cool';
-    const cls=sc>=8?'hot':(currentTab==='aging'?'aging':'');
+    const task=getTaskForEntry(e.id);
+    const isOverdue=task&&!task.completed_at&&new Date(task.due_at).getTime()<Date.now();
+    const cls=sc>=8?'hot':(isOverdue?'hot':(currentTab==='aging'?'aging':''));
     const veh=[e.veh_year,e.veh_make,e.veh_model].filter(Boolean).join(' ')||'—';
     const otag=!e.outcome?'et-other':e.outcome.includes('Sold')?'et-sold':e.outcome==='Appointment Set'?'et-appt':e.outcome==='Follow-Up Required'?'et-follow':'et-other';
     const time=e.created_at?new Date(e.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):(e.timestamp||'—');
     const claimed=e.manager_claimed_by;
     const crmDone=e.crm_entry&&e.crm_entry.toLowerCase().includes('yes');
-    // age check
     let ageTag='';
     if(e.created_at){const hrs=(Date.now()-new Date(e.created_at).getTime())/3600000;if(hrs>48&&(!e.outcome||e.outcome==='Follow-Up Required'))ageTag='<span class="et et-aging">⏰ Aging</span>';}
     return`<div class="ec ${cls}" id="ec-${e.id}">
@@ -573,6 +635,7 @@ function renderEntries(){
             ${claimed?`<span class="et et-claimed">✓ ${claimed}</span>`:''}
             ${crmDone?'<span class="crm-ok">CRM ✓</span>':''}
             ${ageTag}
+            ${fuBadgeHtml(e)}
           </div>
         </div>
         <div class="eright">
@@ -581,6 +644,7 @@ function renderEntries(){
           <div style="display:flex;gap:5px;margin-top:2px;">
             <button class="ebtn" onclick="openEdit(${e.id})">Edit</button>
             <button class="crm" onclick="pushCRM(${e.id})" ${crmDone?'disabled':''}>CRM${crmDone?' ✓':''}</button>
+            ${fuBtnHtml(e)}
           </div>
         </div>
       </div>
@@ -946,10 +1010,43 @@ async function scheduleFU(entryId){
   renderFollowUps();showToast(`✓ Follow-up scheduled for ${nextDate}`,'grn');
 }
 
+// ═══ MARK WORKED MODAL ═══
+function openMW(fuId,entryId,custName){
+  document.getElementById('mw-fuid').value=fuId;
+  document.getElementById('mw-sub').textContent=`${custName} · Entry #${entryId}`;
+  document.getElementById('mw-note').value='';
+  document.getElementById('mw-modal').classList.add('open');
+}
+function closeMW(){document.getElementById('mw-modal').classList.remove('open');}
+document.getElementById('mw-modal').addEventListener('click',function(ev){if(ev.target===this)closeMW();});
+
+async function submitMW(){
+  const fuId=document.getElementById('mw-fuid').value;
+  const note=document.getElementById('mw-note').value.trim();
+  const worker=rep?rep.name:'Unknown';
+  const btn=document.getElementById('mw-save');
+  btn.textContent='Saving...';btn.disabled=true;
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/rpc/complete_followup`,{
+      method:'POST',headers:H,
+      body:JSON.stringify({p_followup_id:fuId,p_worker:worker,p_note:note||null})
+    });
+    if(!res.ok){const err=await res.json();showToast('Error: '+(err.message||'Failed'));btn.textContent='✓ Mark Worked';btn.disabled=false;return;}
+    const data=await res.json();
+    // Update local state
+    const task=TASKS.find(t=>t.id===fuId);
+    if(task){task.completed_at=new Date().toISOString();task.completed_by=worker;task.outcome_note=note;}
+    if(data.entry_id){const entry=ALL.find(x=>x.id===data.entry_id);if(entry)entry.follow_up_status='Complete';}
+    closeMW();renderEntries();renderKPIs();showToast('✓ Follow-up marked as worked','grn');
+  }catch(e){showToast('Error: '+e.message);}
+  btn.textContent='✓ Mark Worked';btn.disabled=false;
+}
+
 // ── Init ──
 async function initDash(){
   await Promise.all([
     (async()=>{try{const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&deleted_at=is.null&order=id.desc&limit=1000`,{headers:H});if(res.ok)ALL=await res.json();}catch(e){console.error(e);}})(),
+    (async()=>{try{const res=await fetch(`${SB_URL}/rest/v1/s2s_followups?select=*&order=due_at.desc&limit=2000`,{headers:H});if(res.ok)TASKS=await res.json();}catch(e){console.error(e);}})(),
     loadFollowUpLog()
   ]);
   renderKPIs();renderEntries();
