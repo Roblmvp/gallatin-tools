@@ -442,56 +442,33 @@ async function doEmailLogin() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  2FA (SMS) — Direct Twilio API + Supabase table
-//  No Edge Functions required
+//  2FA (SMS) — Twilio Verify API
+//  Handles code generation, sending, and verification
 // ═══════════════════════════════════════════════════════════
 const TWILIO_SID  = 'AC5cc95b34834d0a145c3e4423b3fd8be0';
 const TWILIO_TOK  = 'c872954e2df6ae422c4961caa67ef288';
-const TWILIO_FROM = '+16292495579';
-
-function generate2FACode() {
-  return String(Math.floor(100000 + Math.random() * 900000));
-}
+const VERIFY_SID  = 'VA7fe45868a971de956ce54518bd99f619';
 
 async function send2FACode(profile) {
   const phone = profile.two_factor_phone || profile.phone;
   if (!phone) { console.warn('No phone for 2FA'); return; }
 
-  // Generate code and store in Supabase
-  const code = generate2FACode();
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-
-  // Delete any existing code for this user, then insert new one
-  await fetch(SB_URL + '/rest/v1/two_factor_codes?user_id=eq.' + profile.id, {
-    method: 'DELETE', headers: { ...H, 'Prefer': 'return=minimal' }
-  }).catch(() => {});
-
-  await fetch(SB_URL + '/rest/v1/two_factor_codes', {
-    method: 'POST',
-    headers: { ...H, 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ user_id: profile.id, code, expires_at: expiresAt, used: false })
-  });
-
-  // Send SMS via Twilio
   let toPhone = phone.replace(/\D/g, '');
   if (toPhone.length === 10) toPhone = '1' + toPhone;
   if (!toPhone.startsWith('+')) toPhone = '+' + toPhone;
 
   try {
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`;
-    await fetch(twilioUrl, {
+    const res = await fetch(`https://verify.twilio.com/v2/Services/${VERIFY_SID}/Verifications`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': 'Basic ' + btoa(TWILIO_SID + ':' + TWILIO_TOK)
       },
-      body: new URLSearchParams({
-        To: toPhone,
-        From: TWILIO_FROM,
-        Body: `Your ServiceBridge verification code is: ${code}. It expires in 5 minutes.`
-      })
+      body: new URLSearchParams({ To: toPhone, Channel: 'sms' })
     });
-  } catch(e) { console.warn('Twilio send failed:', e); }
+    const data = await res.json();
+    if (!res.ok) console.warn('Verify send error:', data);
+  } catch(e) { console.warn('Twilio Verify send failed:', e); }
 
   // Start cooldown
   resendCooldown = 60;
@@ -523,45 +500,28 @@ async function verify2FA() {
   const btn = document.getElementById('btn-verify');
   btn.classList.add('btn-loading'); btn.disabled = true;
 
+  const phone = pendingUser.two_factor_phone || pendingUser.phone;
+  let toPhone = phone.replace(/\D/g, '');
+  if (toPhone.length === 10) toPhone = '1' + toPhone;
+  if (!toPhone.startsWith('+')) toPhone = '+' + toPhone;
+
   try {
-    // Look up the code in Supabase
-    const res = await fetch(SB_URL + '/rest/v1/two_factor_codes?user_id=eq.' + pendingUser.id + '&used=eq.false&select=*', {
-      headers: H
+    const res = await fetch(`https://verify.twilio.com/v2/Services/${VERIFY_SID}/VerificationCheck`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + btoa(TWILIO_SID + ':' + TWILIO_TOK)
+      },
+      body: new URLSearchParams({ To: toPhone, Code: code })
     });
-    const rows = await res.json();
-    const record = rows && rows[0];
+    const data = await res.json();
 
-    if (!record) {
-      showMsg('2fa-msg', 'No active code found. Request a new one.', 'error');
-      btn.classList.remove('btn-loading'); btn.disabled = false;
-      return;
-    }
-
-    // Check expiry
-    if (new Date(record.expires_at) < new Date()) {
-      showMsg('2fa-msg', 'Code expired. Request a new one.', 'error');
-      btn.classList.remove('btn-loading'); btn.disabled = false;
-      return;
-    }
-
-    // Check match
-    if (record.code !== code) {
+    if (data.status === 'approved') {
+      completeLogin(pendingUser, pendingUser.auth_token);
+    } else {
       showMsg('2fa-msg', 'Invalid code. Please try again.', 'error');
       for (let i=0; i<6; i++) document.getElementById('code-'+i).value = '';
       document.getElementById('code-0').focus();
-      btn.classList.remove('btn-loading'); btn.disabled = false;
-      return;
-    }
-
-    // Mark as used
-    await fetch(SB_URL + '/rest/v1/two_factor_codes?id=eq.' + record.id, {
-      method: 'PATCH',
-      headers: { ...H, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ used: true })
-    });
-
-    // Success
-    completeLogin(pendingUser, pendingUser.auth_token);
       btn.classList.remove('btn-loading'); btn.disabled = false;
     }
   } catch(e) {
