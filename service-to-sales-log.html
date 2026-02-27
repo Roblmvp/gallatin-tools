@@ -910,9 +910,16 @@ const gv=id=>{const e=document.getElementById(id);return e?(e.value||'—'):'—
 // ── Push to CRM (toggle — fires after submit) ──
 function isCRMEnabled(){ return document.getElementById('crm-cb').checked; }
 
-async function executeCRMPush(entry){
-  document.getElementById('crm').value='Yes — pushed to CRM';
+async function executeCRMPush(entry, entryId){
   try{
+    // Update the DB record to mark CRM pushed
+    if(entryId){
+      await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${entryId}`,{
+        method:'PATCH',headers:H,
+        body:JSON.stringify({crm_entry:'Yes — pushed to CRM'})
+      });
+    }
+    // Send ADF/XML email to DriveCentric via edge function
     const res=await fetch(`${SB_URL}/functions/v1/crm-push`,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
@@ -1053,7 +1060,7 @@ async function submitLog(){
   }
 
   // Execute CRM push if armed
-  if(isCRMEnabled()) executeCRMPush(entry);
+  if(isCRMEnabled()) executeCRMPush(entry, insertedId);
 
   // Reset button
   btn.textContent=origText;btn.classList.remove('btn-loading');
