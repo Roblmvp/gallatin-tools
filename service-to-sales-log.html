@@ -1,508 +1,1190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>
-(function(){
-  var rep = null;
-  try { rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null'); } catch(e) {}
-  if (!rep || !rep.name || !rep.role) { window.location.replace('/login.html'); }
-})();
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#06080E">
-<title>S2S Entry — ServiceBridge</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Service to Sales Log — Gallatin CDJR</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #06080E; --bg2: #0C0F18;
-  --surface: #111520; --surface2: #171C2A; --surface3: #1D2333;
-  --red: #E01B36; --red-soft: rgba(224,27,54,0.10); --red-glow: rgba(224,27,54,0.25);
-  --gold: #D4A73A; --gold-soft: rgba(212,167,58,0.10);
-  --green: #2DD4A0; --green-soft: rgba(45,212,160,0.10);
-  --blue: #6C70F0; --blue-soft: rgba(108,112,240,0.10);
-  --orange: #F59E0B; --orange-soft: rgba(245,158,11,0.10);
-  --text: #EDEEF2; --text2: rgba(237,238,242,0.62); --text3: rgba(237,238,242,0.34);
-  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.10); --border3: rgba(255,255,255,0.16);
-  --r: 14px; --rsm: 10px; --rlg: 18px;
-  --spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ink: #0C0C14;
+  --ink2: #15151F;
+  --surface: #F5F4F1;
+  --card: #FFFFFF;
+  --border: #E4E2DC;
+  --border-strong: #C9C5BC;
+  --muted: #8C897F;
+  --text: #18171A;
+  --subtext: #6A6760;
+  --red: #EF4444;
+  --red-dark: #9B0D22;
+  --red-light: #FEF2F3;
+  --gold: #C49A2A;
+  --gold-light: #FDF9EF;
+  --green: #14532D;
+  --green-mid: #166534;
+  --green-light: #F0FDF4;
+  --blue: #1E3A8A;
+  --blue-light: #EFF6FF;
+  --r: 10px;
+  --rsm: 6px;
+  --sh: 0 1px 3px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.05);
+  --sh-lg: 0 12px 48px rgba(0,0,0,0.12);
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  background: var(--bg); color: var(--text);
-  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-  min-height: 100vh; overflow-x: hidden;
-  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-  font-size: 15px; line-height: 1.5; letter-spacing: -0.01em;
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ── Background ── */
-.bg-noise { position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
-.bg-grad { position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 20% 0%,rgba(224,27,54,0.06) 0%,transparent 70%),radial-gradient(ellipse 50% 60% at 80% 100%,rgba(108,112,240,0.04) 0%,transparent 70%); }
-
-/* ── Header ── */
-.app-header {
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px 12px; padding-top:max(14px, env(safe-area-inset-top));
-  border-bottom:1px solid var(--border);
-  background:rgba(6,8,14,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  position:sticky;top:0;z-index:200;
+/* ══════════════════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════════════════ */
+.header {
+  background: var(--ink);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  overflow: hidden;
 }
-.app-header::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--red),var(--blue),transparent);opacity:0.4; }
-.header-left { display:flex;align-items:center;gap:10px; }
-.header-logo { width:30px;height:30px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center; }
-.header-logo svg { width:14px;height:14px; }
-.header-title { font-family:'Instrument Serif',Georgia,serif;font-size:17px;letter-spacing:-0.01em;color:var(--text); }
-.header-right { display:flex;align-items:center;gap:8px;position:relative; }
-.header-user { font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em; }
-
-/* Hamburger */
-.hamburger { background:none;border:1px solid var(--border2);border-radius:8px;width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all 0.18s;padding:0;flex-shrink:0; }
-.hamburger:hover { border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.03); }
-.hamburger span { display:block;width:14px;height:1.5px;background:rgba(255,255,255,0.55);border-radius:2px;transition:all 0.2s; }
-.hamburger.open span:nth-child(1) { transform:translateY(5.5px) rotate(45deg); }
-.hamburger.open span:nth-child(2) { opacity:0; }
-.hamburger.open span:nth-child(3) { transform:translateY(-5.5px) rotate(-45deg); }
-
-/* Dropdown */
-.nav-overlay { position:fixed;inset:0;z-index:190;display:none; }
-.nav-overlay.open { display:block; }
-.nav-dropdown { position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);min-width:230px;padding:6px;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:201;opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;transition:all 0.18s var(--spring); }
-.nav-dropdown.open { opacity:1;transform:translateY(0) scale(1);pointer-events:all; }
-.dd-item { display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--rsm);font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s; }
-.dd-item:hover { background:rgba(255,255,255,0.04);color:var(--text); }
-.dd-item.active-page { background:var(--red-soft);color:#F87171; }
-.dd-icon { font-size:14px;width:20px;text-align:center; }
-.dd-divider { height:1px;background:var(--border);margin:4px 0; }
-.dd-admin { display:none; }
-.dd-admin.show { display:flex; }
-.dd-divider.dd-admin.show { display:block; }
-.nav-user-info { display:flex;align-items:center;justify-content:space-between;padding:8px 14px 4px; }
-.nav-user-display { font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.08em; }
-.nav-role-pill { font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:20px; }
-.role-admin { background:var(--blue-soft);color:var(--blue);border:1px solid rgba(108,112,240,0.2); }
-.role-manager { background:var(--gold-soft);color:var(--gold);border:1px solid rgba(212,167,58,0.2); }
-.role-sales { background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08); }
-
-/* ── Progress Bar ── */
-.progress-bar {
-  display:flex;align-items:center;gap:0;padding:0 20px;
-  background:var(--bg2);border-bottom:1px solid var(--border);
-  overflow-x:auto;scrollbar-width:none;position:relative;z-index:1;
+.header-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  padding: 0 36px;
+  height: 76px;
+  gap: 24px;
+  position: relative;
 }
-.progress-bar::-webkit-scrollbar { display:none; }
+.header-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+}
+.header-accent {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red) 0%, #E8421A 40%, var(--gold) 100%);
+}
+.header-logo-wrap {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  flex-shrink: 0;
+}
+.header-logo-pill {
+  background: #fff;
+  border-radius: 7px;
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+}
+.header-logo-pill img {
+  height: 34px;
+  width: auto;
+  object-fit: contain;
+}
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.header-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  color: #FFFFFF;
+  letter-spacing: 0.01em;
+}
+.header-sub {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.header-right .hdr-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+}
+.header-right .hdr-time {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════════════
+   HERO
+   ══════════════════════════════════════════════════════ */
+.hero {
+  background: linear-gradient(180deg, var(--ink) 0%, var(--ink2) 100%);
+  padding: 32px 36px 36px;
+  text-align: center;
+}
+.hero-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  color: #FFFFFF;
+  line-height: 1.05;
+  margin-bottom: 8px;
+}
+.hero-tagline {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+}
+.hero-tagline span {
+  display: block;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+.hero-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.hero-logo-pill {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+.hero-logo-pill img { height: 32px; width: auto; }
+.divider-v { width: 1px; height: 32px; background: rgba(255,255,255,0.12); }
+
+/* ══════════════════════════════════════════════════════
+   MODE TOGGLE (Quick / Full)
+   ══════════════════════════════════════════════════════ */
+.mode-toggle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  width: fit-content;
+  margin: 20px auto 0;
+}
+.mode-btn {
+  padding: 8px 20px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.18s;
+}
+.mode-btn.active {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(200,16,46,0.25);
+}
+
+/* ══════════════════════════════════════════════════════
+   OFFLINE INDICATOR
+   ══════════════════════════════════════════════════════ */
+.offline-bar {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #FEF3C7;
+  border-bottom: 1px solid #F59E0B;
+  font-size: 12px;
+  font-weight: 600;
+  color: #78350F;
+  position: sticky;
+  top: 78px;
+  z-index: 99;
+}
+.offline-bar.visible { display: flex; }
+.offline-dot { width: 8px; height: 8px; border-radius: 50%; background: #F59E0B; animation: pulse-off 1.5s infinite; }
+@keyframes pulse-off { 0%,100%{opacity:1;}50%{opacity:0.4;} }
+.offline-queue-count { background: #FDE68A; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+
+/* ══════════════════════════════════════════════════════
+   SYNC TOAST
+   ══════════════════════════════════════════════════════ */
+.sync-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--green-mid);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.sync-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ══════════════════════════════════════════════════════
+   PROGRESS BAR (original stepper — full mode)
+   ══════════════════════════════════════════════════════ */
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 16px 24px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 78px;
+  z-index: 90;
+}
 .step {
-  display:flex;align-items:center;gap:7px;
-  padding:12px 16px 12px 0;
-  font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
-  color:var(--text3);border-bottom:2px solid transparent;
-  white-space:nowrap;transition:all 0.25s var(--spring);cursor:default;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  position: relative;
+  transition: color 0.2s;
 }
-.step.active { color:var(--red);border-bottom-color:var(--red); }
-.step.done { color:var(--green);border-bottom-color:var(--green); }
+.step::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background 0.2s;
+}
+.step.active { color: var(--red); }
+.step.active::after { background: var(--red); }
+.step.done { color: var(--green-mid); }
+.step.done::after { background: var(--green-mid); }
 .step-n {
-  width:20px;height:20px;border-radius:50%;
-  border:1.5px solid currentColor;
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:500;
-  flex-shrink:0;transition:all 0.25s var(--spring);
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  transition: all 0.2s;
 }
-.step.done .step-n { background:var(--green);border-color:var(--green);color:var(--bg); }
+.step.active .step-n { border-color: var(--red); color: var(--red); background: var(--red-light); }
+.step.done .step-n { border-color: var(--green-mid); color: #fff; background: var(--green-mid); font-size: 9px; }
 
-/* ── Page ── */
-.page { max-width:800px;margin:0 auto;padding:28px 20px 120px;position:relative;z-index:1; }
-
-/* ── Section Headers ── */
-.section-head { margin:32px 0 14px;display:flex;align-items:flex-end;justify-content:space-between; }
-.section-head:first-child { margin-top:0; }
+/* ══════════════════════════════════════════════════════
+   PAGE & CARDS (Full mode)
+   ══════════════════════════════════════════════════════ */
+.page { max-width: 900px; margin: 0 auto; padding: 40px 24px 100px; }
+.sh {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin: 36px 0 14px;
+}
+.sh:first-child { margin-top: 0; }
 .sh-left {}
-.sh-eyebrow { font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--red);opacity:0.7;margin-bottom:5px; }
-.sh-title { font-family:'Instrument Serif',Georgia,serif;font-size:24px;letter-spacing:-0.02em;color:var(--text);line-height:1.1; }
-.sh-desc { font-size:13px;font-weight:450;color:var(--text3);margin-top:4px; }
-.sh-num { font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:var(--text3); }
-
-/* ── Cards ── */
+.sh-title { font-family: 'DM Serif Display', serif; font-size: 23px; color: var(--text); line-height: 1; }
+.sh-desc { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.sh-num { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); opacity: 0.6; }
 .card {
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);
-  padding:24px 22px;margin-bottom:10px;position:relative;
-  animation:fadeUp 0.4s ease both;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px 30px;
+  box-shadow: var(--sh);
+  margin-bottom: 10px;
 }
 
-/* ── Submitter Grid ── */
-.sub-grid { display:grid;grid-template-columns:repeat(auto-fill, minmax(150px,1fr));gap:8px; }
+/* ── SUBMITTER ── */
+.sub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px,1fr)); gap: 10px; }
 .sub-pill {
-  background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);
-  padding:14px 14px 12px;cursor:pointer;transition:all 0.2s var(--spring);
-  position:relative;overflow:hidden;
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  padding: 14px 16px 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: var(--card);
+  position: relative;
+  overflow: hidden;
 }
-.sub-pill:hover { border-color:var(--border2);background:var(--surface2);transform:translateY(-1px); }
-.sub-pill.sel { border-color:rgba(108,112,240,0.5);background:var(--blue-soft);box-shadow:0 0 0 1px rgba(108,112,240,0.3); }
-.sub-pill.mgr.sel { border-color:rgba(212,167,58,0.5);background:var(--gold-soft);box-shadow:0 0 0 1px rgba(212,167,58,0.3); }
-.sub-pill.sel::before { content:'✓';position:absolute;top:10px;right:12px;font-size:11px;color:var(--blue);font-weight:700; }
-.sub-pill.mgr.sel::before { color:var(--gold); }
-.sub-avatar { width:32px;height:32px;border-radius:8px;background:var(--surface3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:8px; }
-.sub-pill.sel .sub-avatar { background:linear-gradient(135deg,var(--blue),var(--red));color:#fff;border-color:transparent; }
-.sub-pill.mgr.sel .sub-avatar { background:linear-gradient(135deg,var(--gold),var(--orange));color:#fff;border-color:transparent; }
-.sub-name { font-size:14px;font-weight:650;color:var(--text);line-height:1.2; }
-.sub-role { font-size:10px;font-weight:600;margin-top:3px;color:var(--text3);letter-spacing:0.04em; }
-.sub-pill.sel .sub-role { color:var(--blue); }
-.sub-pill.mgr.sel .sub-role { color:var(--gold); }
+.sub-pill::after { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:transparent; transition:background 0.18s; border-radius: var(--rsm) var(--rsm) 0 0; }
+.sub-pill:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: var(--sh); }
+.sub-pill.sel { border-color: var(--red); background: var(--red-light); }
+.sub-pill.sel::after { background: var(--red); }
+.sub-pill.mgr.sel { border-color: var(--gold); background: var(--gold-light); }
+.sub-pill.mgr.sel::after { background: var(--gold); }
+.sub-name { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text); line-height: 1.2; }
+.sub-role { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.sub-pill.sel .sub-role { color: var(--red); }
+.sub-pill.mgr.sel .sub-role { color: var(--gold); }
+.sub-chk { position:absolute; top:10px; right:10px; width:17px; height:17px; border-radius:50%; background:var(--red); display:none; align-items:center; justify-content:center; }
+.sub-pill.mgr .sub-chk { background: var(--gold); }
+.sub-pill.sel .sub-chk { display: flex; }
+.sub-chk svg { width:9px; height:9px; }
 
-/* ── Timestamp ── */
-.ts-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
-.ts-block { background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:14px 16px; }
-.ts-lbl { font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px; }
-.ts-val { font-family:'Instrument Serif',Georgia,serif;font-size:20px;color:var(--text);line-height:1; }
-.ts-sub { font-size:11px;color:var(--text3);margin-top:4px; }
+/* ── TIMESTAMP ── */
+.ts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ts-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rsm); padding: 14px 18px; }
+.ts-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.ts-val { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--text); line-height: 1; }
+.ts-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
-/* ── Form Elements ── */
-.g2 { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
-.g3 { display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px; }
-.g4 { display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px; }
-.s2 { grid-column:span 2; }
-.sf { grid-column:1/-1; }
-.mt { margin-top:16px; }
-.field { display:flex;flex-direction:column;gap:5px; }
-.lbl { font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:4px; }
-.req { color:var(--red);font-size:13px;line-height:1; }
-.hint { font-size:11px;color:var(--text3);margin-top:-1px;font-style:italic;opacity:0.7; }
+/* ── FORM ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 18px; }
+.s2 { grid-column: span 2; }
+.sf { grid-column: 1/-1; }
+.mt { margin-top: 18px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: var(--subtext); display: flex; align-items: center; gap: 4px; }
+.req { color: var(--red); font-size: 14px; line-height: 1; }
+.hint { font-size: 11px; color: var(--muted); margin-top: -2px; font-style: italic; }
 
 input[type=text], input[type=tel], input[type=email],
 input[type=number], input[type=date], select, textarea {
-  background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--rsm);
-  color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:14px;padding:11px 14px;transition:all 0.18s;outline:none;
-  width:100%;-webkit-appearance:none;appearance:none;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  padding: 11px 14px;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  outline: none;
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
 }
 input:focus, select:focus, textarea:focus {
-  border-color:var(--blue);background:var(--surface);
-  box-shadow:0 0 0 3px rgba(108,112,240,0.1);
+  border-color: var(--red);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(200,16,46,0.09);
 }
-input::placeholder, textarea::placeholder { color:var(--text3);opacity:0.6; }
+input::placeholder, textarea::placeholder { color: #C2BFB9; }
 select {
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='rgba(237,238,242,0.34)' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238C897F' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  cursor: pointer;
 }
-select option { background:var(--surface); }
-textarea { resize:vertical;min-height:88px;line-height:1.6; }
-
-/* ── Validation ── */
-.field-error input, .field-error select, .field-error textarea { border-color:var(--red) !important;background:rgba(224,27,54,0.04) !important; }
-.field-error .lbl { color:#F87171 !important; }
-.val-msg { font-size:11px;color:#F87171;font-weight:600;margin-top:2px;display:none;animation:fadeIn 0.2s ease; }
-.field-error .val-msg { display:block; }
-.score-error .score-wrap { outline:2px solid var(--red);border-radius:8px; }
-.score-error .val-msg { display:block; }
-.pills-error .pill-group { outline:2px solid var(--red);border-radius:8px; }
-.pills-error .val-msg { display:block; }
-.sub-error { padding:8px 14px;background:var(--red-soft);border:1px solid rgba(224,27,54,0.3);border-radius:var(--rsm);color:#F87171;font-size:12px;font-weight:600;margin-top:6px;display:none; }
-.sub-error.show { display:block; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(-4px);} to{opacity:1;transform:translateY(0);} }
-@keyframes shake { 0%,100%{transform:translateX(0);} 10%,30%,50%,70%,90%{transform:translateX(-4px);} 20%,40%,60%,80%{transform:translateX(4px);} }
-.shake { animation:shake 0.4s ease; }
-.btn-loading { pointer-events:none;opacity:0.7; }
-.btn-spinner { display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px; }
-@keyframes spin { to{transform:rotate(360deg);} }
-.toast-err { border-color:rgba(224,27,54,0.3) !important; }
-.toast-err .toast-dot { background:var(--red) !important; }
+textarea { resize: vertical; min-height: 88px; line-height: 1.65; }
 
 .ro-display {
-  background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--rsm);
-  padding:11px 14px;font-size:14px;color:var(--text3);font-style:italic;
-  min-height:44px;display:flex;align-items:center;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  padding: 11px 14px;
+  font-size: 16px;
+  color: var(--muted);
+  font-style: italic;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
-.ro-display.filled { font-style:normal;color:var(--gold);font-weight:600;background:var(--gold-soft);border-color:rgba(212,167,58,0.3); }
+.ro-display.filled { font-style: normal; color: var(--text); font-weight: 500; background: var(--gold-light); border-color: #E2C06E; }
 
-/* ── Pills ── */
-.pill-group { display:flex;flex-wrap:wrap;gap:7px;margin-top:2px; }
+/* ── PILLS ── */
+.pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
 .pill {
-  padding:8px 15px;border-radius:20px;
-  border:1.5px solid var(--border2);
-  font-size:12px;font-weight:600;letter-spacing:0.02em;
-  color:var(--text2);cursor:pointer;transition:all 0.18s var(--spring);
-  user-select:none;background:var(--bg2);
+  padding: 8px 16px; border-radius: 20px;
+  border: 1.5px solid var(--border);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.03em;
+  color: var(--muted); cursor: pointer;
+  transition: all 0.15s; user-select: none;
+  background: var(--card);
 }
-.pill:hover { border-color:var(--border3);color:var(--text);transform:translateY(-1px); }
-.p-red { border-color:var(--red)!important;background:var(--red-soft)!important;color:#F87171!important;box-shadow:0 0 0 1px rgba(224,27,54,0.2)!important; }
-.p-green { border-color:rgba(45,212,160,0.5)!important;background:var(--green-soft)!important;color:var(--green)!important;box-shadow:0 0 0 1px rgba(45,212,160,0.2)!important; }
-.p-blue { border-color:rgba(108,112,240,0.5)!important;background:var(--blue-soft)!important;color:var(--blue)!important;box-shadow:0 0 0 1px rgba(108,112,240,0.2)!important; }
-.p-gold { border-color:rgba(212,167,58,0.5)!important;background:var(--gold-soft)!important;color:var(--gold)!important;box-shadow:0 0 0 1px rgba(212,167,58,0.2)!important; }
+.pill:hover { border-color: var(--border-strong); color: var(--text); }
+.p-red { border-color: var(--red)!important; background: var(--red)!important; color: #fff!important; }
+.p-green { border-color: var(--green-mid)!important; background: var(--green-mid)!important; color: #fff!important; }
+.p-blue { border-color: var(--blue)!important; background: var(--blue)!important; color: #fff!important; }
+.p-gold { border-color: var(--gold)!important; background: var(--gold)!important; color: #fff!important; }
 
-/* ── Toggle ── */
+/* ── TOGGLE ── */
 .tog-row {
-  display:flex;align-items:center;gap:14px;
-  padding:14px 16px;background:var(--bg2);
-  border:1.5px solid var(--border2);border-radius:var(--rsm);
-  cursor:pointer;transition:all 0.18s;
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
 }
-.tog-row:hover { border-color:var(--border3); }
-.tog-row.on { border-color:rgba(108,112,240,0.4);background:var(--blue-soft); }
-.tog { position:relative;width:42px;height:24px;flex-shrink:0; }
-.tog input { opacity:0;width:0;height:0;position:absolute; }
-.tog-track { position:absolute;inset:0;background:var(--surface3);border-radius:24px;transition:background 0.2s; }
-.tog input:checked ~ .tog-track { background:var(--blue); }
-.tog-knob { position:absolute;width:18px;height:18px;top:3px;left:3px;background:#fff;border-radius:50%;transition:transform 0.2s var(--spring);box-shadow:0 1px 4px rgba(0,0,0,0.3); }
-.tog input:checked ~ .tog-knob { transform:translateX(18px); }
-.tog-txt { font-size:14px;font-weight:600;color:var(--text); }
-.tog-sub { font-size:11px;color:var(--text3);margin-top:1px; }
-.expand { display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border); }
-.expand.open { display:block; }
+.tog-row:hover { border-color: var(--border-strong); }
+.tog-row.on { border-color: var(--red); background: var(--red-light); }
+.tog { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+.tog input { opacity: 0; width: 0; height: 0; position: absolute; }
+.tog-track { position: absolute; inset: 0; background: var(--border-strong); border-radius: 24px; transition: background 0.2s; }
+.tog input:checked ~ .tog-track { background: var(--red); }
+.tog-knob { position: absolute; width: 18px; height: 18px; top: 3px; left: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.tog input:checked ~ .tog-knob { transform: translateX(18px); }
+.tog-txt { font-size: 14px; font-weight: 500; color: var(--text); }
+.tog-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.expand { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.expand.open { display: block; }
 
-/* ── Score ── */
-.score-wrap { display:flex;gap:5px; }
+/* ── SCORE ── */
+.score-wrap { display: flex; gap: 5px; }
 .s-btn {
-  flex:1;aspect-ratio:1;max-width:44px;
-  border:1.5px solid var(--border2);border-radius:var(--rsm);
-  background:var(--bg2);font-size:13px;font-weight:700;color:var(--text3);
-  cursor:pointer;transition:all 0.15s var(--spring);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'JetBrains Mono',monospace;
+  flex: 1; aspect-ratio: 1; max-width: 46px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  background: var(--card);
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif;
 }
-.s-btn:hover { border-color:var(--border3);color:var(--text);transform:translateY(-1px); }
-.a1,.a2 { background:rgba(224,27,54,0.15)!important;border-color:rgba(224,27,54,0.4)!important;color:#F87171!important; }
-.a3,.a4 { background:rgba(245,158,11,0.15)!important;border-color:rgba(245,158,11,0.4)!important;color:var(--orange)!important; }
-.a5,.a6,.a7 { background:var(--blue-soft)!important;border-color:rgba(108,112,240,0.4)!important;color:var(--blue)!important; }
-.a8,.a9,.a10 { background:var(--green-soft)!important;border-color:rgba(45,212,160,0.4)!important;color:var(--green)!important; }
-.score-labels { font-size:11px;color:var(--text3);margin-top:7px;display:flex;justify-content:space-between; }
+.s-btn:hover { border-color: var(--border-strong); color: var(--text); }
+.a1,.a2 { background:#FEE2E2!important; border-color:#EF4444!important; color:#991B1B!important; }
+.a3,.a4 { background:#FEF3C7!important; border-color:#F59E0B!important; color:#78350F!important; }
+.a5,.a6,.a7 { background:#DBEAFE!important; border-color:#3B82F6!important; color:#1E3A8A!important; }
+.a8,.a9,.a10 { background:#DCFCE7!important; border-color:#22C55E!important; color:#14532D!important; }
+.score-labels { font-size: 11px; color: var(--muted); margin-top: 7px; display: flex; justify-content: space-between; }
 
-/* ── Divider ── */
-.div { border:none;border-top:1px solid var(--border);margin:18px 0; }
+/* ── DIVIDER ── */
+.div { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
 
-/* ── Callout ── */
+/* ── CALLOUT ── */
 .callout {
-  background:var(--blue-soft);border:1px solid rgba(108,112,240,0.2);
-  border-radius:var(--rsm);padding:12px 16px;
-  font-size:12px;color:rgba(108,112,240,0.9);font-weight:500;
-  margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;line-height:1.6;
+  background: var(--blue-light);
+  border: 1px solid #BFDBFE;
+  border-radius: var(--rsm);
+  padding: 12px 16px;
+  font-size: 12px; color: #1E40AF; font-weight: 500;
+  margin-bottom: 18px;
+  display: flex; gap: 10px; align-items: flex-start; line-height: 1.6;
 }
 
-/* ── Submit Bar ── */
+/* ── SUBMIT BAR ── */
 .submit-bar {
-  background:var(--surface);border:1px solid var(--border2);border-radius:var(--rlg);
-  padding:22px 24px;display:flex;align-items:center;justify-content:space-between;
-  margin-top:28px;gap:20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px 30px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: var(--sh); margin-top: 28px; gap: 20px;
 }
-.submit-bar-title { font-family:'Instrument Serif',Georgia,serif;font-size:20px;color:var(--text); }
-.submit-bar-sub { font-size:12px;color:var(--text3);margin-top:3px; }
-.submit-bar-actions { display:flex;gap:8px;flex-shrink:0; }
+.submit-bar-left {}
+.submit-bar-title { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--text); }
+.submit-bar-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.submit-bar-actions { display: flex; gap: 10px; flex-shrink: 0; }
 .btn-p {
-  background:var(--red);color:#fff;border:none;border-radius:var(--rsm);
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.04em;
-  padding:12px 28px;cursor:pointer;transition:all 0.18s var(--spring);
-  box-shadow:0 4px 16px -4px var(--red-glow);
+  background: var(--red); color: #fff; border: none;
+  border-radius: var(--rsm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+  padding: 12px 30px; cursor: pointer;
+  transition: background 0.18s, transform 0.1s, box-shadow 0.18s;
+  box-shadow: 0 2px 10px rgba(200,16,46,0.28);
 }
-.btn-p:hover { background:#C4162E;transform:translateY(-1px);box-shadow:0 6px 24px -4px var(--red-glow); }
-.btn-p:active { transform:scale(0.97); }
+.btn-p:hover { background: var(--red-dark); box-shadow: 0 4px 18px rgba(200,16,46,0.32); }
+.btn-p:active { transform: scale(0.98); }
 .btn-g {
-  background:transparent;color:var(--text2);border:1.5px solid var(--border2);
-  border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:13px;font-weight:600;padding:12px 20px;cursor:pointer;transition:all 0.18s;
+  background: transparent; color: var(--muted);
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  padding: 12px 22px; cursor: pointer;
+  transition: all 0.18s;
 }
-.btn-g:hover { border-color:var(--border3);color:var(--text); }
+.btn-g:hover { border-color: var(--border-strong); color: var(--text); }
 
-/* ── Preview ── */
-.preview-wrap { display:none;margin-top:14px; }
-.preview-wrap.open { display:block; }
+/* ── PREVIEW ── */
+.preview-wrap { display: none; margin-top: 24px; }
+.preview-wrap.open { display: block; }
 .preview-card {
-  background:var(--surface);border:1px solid var(--border2);border-radius:var(--rlg);
-  padding:24px;position:relative;overflow:hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden;
 }
-.preview-card::before {
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--red),var(--gold));
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
-.preview-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:18px; }
-.preview-label { font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--text3); }
-.preview-badge { font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;border:1px solid var(--border2);color:var(--text3); }
-.preview-grid { display:grid;grid-template-columns:140px 1fr;gap:6px 14px; }
-.pk { font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.04em;align-self:center; }
-.pv { font-size:13px;color:var(--text2);font-weight:500; }
-.pv.hl { color:var(--gold);font-weight:700; }
-.pdiv { grid-column:1/-1;border-top:1px solid var(--border);margin:3px 0; }
+.preview-header-left { display: flex; align-items: center; gap: 10px; }
+.preview-header-logo img { height: 22px; }
+.preview-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.preview-badge { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px; background: var(--blue-light); color: var(--blue); }
+.preview-grid { display: grid; grid-template-columns: auto 1fr; padding: 16px 20px; gap: 6px 16px; }
+.pk { font-size: 12px; font-weight: 600; color: var(--muted); }
+.pv { font-size: 13px; font-weight: 500; color: var(--text); }
+.pv.hl { color: var(--red); font-weight: 700; }
+.pdiv { grid-column: 1/-1; border-top: 1px solid var(--border); margin: 6px 0; }
 
-/* ── Toast ── */
+/* ── FOOTER ── */
+.footer {
+  background: var(--card);
+  margin-top: 60px;
+  padding: 28px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid var(--border);
+}
+.footer-logos { display: flex; align-items: center; gap: 14px; }
+.footer-logo-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.footer-logo-pill img { height: 28px; width: auto; object-fit: contain; }
+.footer-logos .fv { width: 1px; height: 24px; background: var(--border-strong); }
+.footer-copy { font-size: 11px; color: var(--muted); letter-spacing: 0.04em; text-align: right; line-height: 1.8; }
+
+/* ── TOAST ── */
 .toast {
-  position:fixed;bottom:28px;left:50%;
-  transform:translateX(-50%) translateY(100px);
-  background:var(--surface);color:var(--text);
-  padding:13px 24px;border-radius:40px;
-  font-size:13px;font-weight:600;
-  display:flex;align-items:center;gap:10px;
-  box-shadow:0 12px 48px rgba(0,0,0,0.5);
-  transition:transform 0.4s var(--spring);
-  z-index:999;white-space:nowrap;
-  border:1px solid var(--border2);
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--green-mid);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  display: flex; align-items: center; gap: 10px;
+  opacity: 0;
+  transition: opacity 0.35s, transform 0.35s;
+  z-index: 120;
+  pointer-events: none;
 }
-.toast.show { transform:translateX(-50%) translateY(0); }
-.toast-dot { width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 1.4s ease infinite; }
-@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; animation: pulse-off 1.2s infinite; }
 
-/* ── Recent Entries ── */
-.recent-section { margin-top:32px;padding-top:20px;border-top:1px solid var(--border); }
-.recent-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px; }
-.recent-label { font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--text3); }
-.recent-refresh { font-size:11px;font-weight:600;color:var(--text3);background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:color 0.15s; }
-.recent-refresh:hover { color:var(--text); }
-.recent-entry {
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 14px;background:var(--bg2);border:1px solid var(--border);
-  border-radius:var(--rsm);margin-bottom:6px;transition:all 0.15s;
+/* ══════════════════════════════════════════════════════
+   QUICK LOG MODE
+   ══════════════════════════════════════════════════════ */
+.ql-wrap {
+  display: none;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 16px 100px;
 }
-.recent-entry:hover { border-color:var(--border2); }
-.re-name { font-size:13px;font-weight:700;color:var(--text); }
-.re-name span { color:var(--text3);font-weight:400; }
-.re-meta { font-size:11px;color:var(--text3);margin-top:2px; }
-.re-edit {
-  padding:6px 14px;border-radius:8px;background:var(--blue-soft);
-  border:1px solid rgba(108,112,240,0.2);color:var(--blue);
-  font-size:12px;font-weight:700;cursor:pointer;
-  font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;transition:all 0.15s;
-}
-.re-edit:hover { background:rgba(108,112,240,0.18);transform:translateY(-1px); }
+.ql-wrap.active { display: block; }
 
-/* ── Edit Modal ── */
-.modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px; }
-.modal-overlay.open { display:flex; }
-.modal-box {
-  background:var(--surface);border:1px solid var(--border2);border-radius:var(--rlg);
-  width:100%;max-width:600px;max-height:88vh;overflow-y:auto;position:relative;
+/* Quick Log progress */
+.ql-progress {
+  padding: 16px 0 20px;
 }
-.modal-box::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--red));border-radius:var(--rlg) var(--rlg) 0 0; }
-.modal-header { padding:22px 24px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px; }
-.modal-title { font-family:'Instrument Serif',Georgia,serif;font-size:24px;color:var(--text); }
-.modal-close { background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:color 0.15s; }
-.modal-close:hover { color:var(--text); }
-.modal-body { padding:0 24px 24px; }
-.modal-field { margin-bottom:14px; }
-.modal-label { font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px; }
-.modal-input,.modal-select,.modal-textarea {
-  width:100%;background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--rsm);
-  color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;
-  padding:11px 14px;transition:border-color 0.18s;-webkit-appearance:none;
+.ql-step-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 8px;
+  text-align: center;
 }
-.modal-input:focus,.modal-select:focus,.modal-textarea:focus { outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(108,112,240,0.1); }
-.modal-textarea { resize:none;min-height:72px; }
-.modal-select option { background:var(--surface); }
-.modal-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
-.modal-footer { display:flex;gap:10px;margin-top:20px; }
-.modal-save { flex:1;padding:13px;border-radius:var(--rsm);background:var(--blue);color:#fff;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s; }
-.modal-save:hover { transform:translateY(-1px);box-shadow:0 6px 16px rgba(108,112,240,0.3); }
-.modal-cancel { padding:13px 20px;border-radius:var(--rsm);background:var(--bg2);border:1.5px solid var(--border2);color:var(--text3);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer; }
-.modal-cancel:hover { color:var(--text); }
-.modal-del { padding:13px 14px;border-radius:var(--rsm);background:var(--red-soft);border:1px solid rgba(224,27,54,0.25);color:#FC8181;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer; }
-.modal-del:hover { background:rgba(224,27,54,0.18); }
-
-/* Edit toast */
-.edit-toast {
-  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
-  background:var(--surface);border:1px solid var(--border2);border-radius:12px;
-  padding:12px 22px;font-size:13px;font-weight:600;color:var(--text);z-index:999;
-  transition:transform 0.35s var(--spring);box-shadow:0 12px 32px rgba(0,0,0,0.4);white-space:nowrap;
+.ql-step-label strong { color: var(--text); }
+.ql-bar-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
 }
-.edit-toast.show { transform:translateX(-50%) translateY(0); }
-.edit-toast.green { border-color:rgba(45,212,160,0.3);color:var(--green); }
+.ql-bar-fill {
+  height: 100%;
+  background: var(--red);
+  border-radius: 4px;
+  transition: width 0.35s ease;
+}
 
-/* ── Animations ── */
-@keyframes fadeUp { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
+/* Quick Log back button */
+.ql-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 8px 0;
+  font-family: 'DM Sans', sans-serif;
+  margin-bottom: 8px;
+  transition: color 0.15s;
+}
+.ql-back:hover { color: var(--text); }
 
-/* ── Responsive ── */
-@media(max-width:680px){
-  .page { padding:20px 16px 100px; }
-  .card { padding:20px 16px; }
-  .g2,.g3,.g4 { grid-template-columns:1fr; }
-  .s2,.sf { grid-column:1; }
-  .submit-bar { flex-direction:column;text-align:center; }
-  .submit-bar-actions { flex-direction:column;width:100%; }
-  .btn-p,.btn-g { width:100%;text-align:center; }
-  .ts-grid { grid-template-columns:1fr; }
-  .preview-grid { grid-template-columns:120px 1fr; }
-  .modal-grid { grid-template-columns:1fr; }
+/* Quick Log step panels */
+.ql-step {
+  display: none;
+  animation: ql-slide-in 0.25s ease;
+}
+.ql-step.active { display: block; }
+@keyframes ql-slide-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.ql-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 24px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.ql-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+/* Quick Log rep pills */
+.ql-rep-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ql-rep {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: var(--card);
+}
+.ql-rep:hover { border-color: var(--border-strong); }
+.ql-rep.sel { border-color: var(--red); background: var(--red-light); }
+.ql-rep.mgr.sel { border-color: var(--gold); background: var(--gold-light); }
+.ql-rep-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.ql-rep-role {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ql-rep.sel .ql-rep-role { color: var(--red); }
+.ql-rep.mgr.sel .ql-rep-role { color: var(--gold); }
+
+/* Quick Log fields */
+.ql-field {
+  margin-bottom: 14px;
+}
+.ql-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  margin-bottom: 6px;
+}
+.ql-field input, .ql-field select {
+  font-size: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  width: 100%;
+  background: var(--card);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.ql-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath fill='%238C897F' d='M6 7L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+.ql-field input:focus, .ql-field select:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 4px rgba(200,16,46,0.1);
+}
+.ql-field input::placeholder { color: #C2BFB9; }
+.ql-next {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--red);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.18s, transform 0.1s;
+  box-shadow: 0 4px 16px rgba(200,16,46,0.3);
+}
+.ql-next:hover { background: var(--red-dark); }
+.ql-next:active { transform: scale(0.98); }
+.ql-next:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Quick Log vehicle row */
+.ql-veh-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Quick Log score buttons */
+.ql-score-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.ql-score-btn {
+  min-height: 56px;
+  min-width: 52px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ql-score-btn:hover { border-color: var(--border-strong); color: var(--text); }
+.ql-score-btn.qs1,.ql-score-btn.qs2 { border-color:#EF4444; background:#FEE2E2; color:#991B1B; }
+.ql-score-btn.qs3,.ql-score-btn.qs4 { border-color:#F59E0B; background:#FEF3C7; color:#78350F; }
+.ql-score-btn.qs5,.ql-score-btn.qs6,.ql-score-btn.qs7 { border-color:#3B82F6; background:#DBEAFE; color:#1E3A8A; }
+.ql-score-btn.qs8,.ql-score-btn.qs9,.ql-score-btn.qs10 { border-color:#22C55E; background:#DCFCE7; color:#14532D; }
+.ql-score-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+  padding: 0 4px;
+}
+
+/* Quick Log outcome pills */
+.ql-outcome-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ql-outcome {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: var(--card);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.ql-outcome:hover { border-color: var(--border-strong); }
+.ql-outcome .ql-o-icon { font-size: 22px; margin-bottom: 4px; }
+.ql-outcome.sel-green { border-color: var(--green-mid); background: var(--green-light); }
+.ql-outcome.sel-blue { border-color: var(--blue); background: var(--blue-light); }
+.ql-outcome.sel-gold { border-color: var(--gold); background: var(--gold-light); }
+.ql-outcome.sel-red { border-color: var(--red); background: var(--red-light); }
+
+/* Quick Log submit */
+.ql-submit-btn {
+  width: 100%;
+  padding: 20px;
+  border: none;
+  border-radius: 14px;
+  background: var(--red);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.18s, transform 0.1s;
+  box-shadow: 0 6px 24px rgba(200,16,46,0.35);
+  letter-spacing: 0.02em;
+}
+.ql-submit-btn:hover { background: var(--red-dark); }
+.ql-submit-btn:active { transform: scale(0.98); }
+.ql-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Quick Log success screen */
+.ql-success {
+  display: none;
+  text-align: center;
+  padding: 60px 20px 40px;
+}
+.ql-success.active { display: block; }
+.ql-success-icon { font-size: 64px; margin-bottom: 16px; }
+.ql-success-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  color: var(--green-mid);
+  margin-bottom: 8px;
+}
+.ql-success-detail {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+.ql-success-detail strong { color: var(--text); }
+.ql-log-another {
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 14px;
+  background: var(--red);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(200,16,46,0.3);
+  margin-bottom: 12px;
+}
+.ql-log-another:active { transform: scale(0.98); }
+.ql-go-home {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+
+/* Recent submissions */
+.recent-section {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+  position: relative;
+  z-index: 1;
+}
+.recent-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .header-inner { padding: 0 16px; height: 60px; gap: 12px; }
+  .header-logo-pill { padding: 5px 10px; }
+  .header-logo-pill img { height: 26px; }
+  .header-title { font-size: 14px; }
+  .header-sub { font-size: 9px; }
+  .header-right .hdr-date { font-size: 11px; }
+  .hero { padding: 20px 16px 24px; }
+  .hero-title { font-size: 24px; }
+  .hero-logos { gap: 10px; }
+  .hero-logo-pill { padding: 6px 10px; }
+  .hero-logo-pill img { height: 24px; }
+  .progress-wrap { padding: 12px 10px; top: 60px; overflow-x: auto; }
+  .step { padding: 6px 8px; font-size: 10px; white-space: nowrap; }
+  .offline-bar { top: 62px; }
+  .page { padding: 20px 16px 80px; }
+  .card { padding: 20px 16px; }
+  .g2, .g3, .g4 { grid-template-columns: 1fr; gap: 14px; }
+  .s2 { grid-column: auto; }
+  .sh-title { font-size: 19px; }
+  .sub-grid { grid-template-columns: 1fr 1fr; }
+  .ts-grid { grid-template-columns: 1fr; }
+  .submit-bar { flex-direction: column; text-align: center; padding: 20px 16px; }
+  .submit-bar-actions { width: 100%; }
+  .submit-bar-actions .btn-p, .submit-bar-actions .btn-g { flex: 1; }
+  .footer { flex-direction: column; text-align: center; padding: 20px 16px; }
+  .footer-copy { text-align: center; }
+  .score-wrap { gap: 4px; }
+  .s-btn { max-width: none; min-height: 40px; font-size: 14px; }
 }
 </style>
 </head>
 <body>
 
-<div class="bg-noise"></div>
-<div class="bg-grad"></div>
-
-<!-- ── HEADER ── -->
-<header class="app-header">
-  <div class="header-left">
-    <div class="header-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-    </div>
-    <div class="header-title">S2S Entry</div>
-  </div>
-  <div class="header-right">
-    <span class="header-user" id="hdr-user"></span>
-    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="nav-dropdown" id="nav-dropdown">
-      <div class="nav-user-info">
-        <span class="nav-user-display" id="nav-user-display"></span>
-        <span class="nav-role-pill" id="nav-role-pill"></span>
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <div class="header-logo-pill">
+        <img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868303/TAA062407W-GallatinLogos-Web-CDJR-2_yn1fwh.png" alt="Gallatin CDJR">
       </div>
-      <div class="dd-divider"></div>
-      <a href="app.html" class="dd-item"><span class="dd-icon">🏠</span> Home</a>
-      <a href="service-to-sales-log.html" class="dd-item active-page"><span class="dd-icon">📋</span> S2S Entry</a>
-      <a href="manager-dashboard.html" class="dd-item"><span class="dd-icon">📊</span> Dashboard</a>
-      <a href="scorecards.html" class="dd-item"><span class="dd-icon">🏆</span> Scorecards</a>
-      <div class="dd-divider dd-admin" id="dd-admin-divider"></div>
-      <a href="admin-panel.html" class="dd-item dd-admin" id="dd-admin-link"><span class="dd-icon">⚙️</span> Admin Panel</a>
+    </div>
+    <div class="header-center">
+      <div class="header-title">Service-to-Sales Log</div>
+      <div class="header-sub">Internal S2S Tracking System</div>
+    </div>
+    <div class="header-right">
+      <div class="hdr-date" id="hdr-date">—</div>
+      <div class="hdr-time" id="hdr-time">—</div>
     </div>
   </div>
+  <div class="header-accent"></div>
 </header>
-<div class="nav-overlay" id="nav-overlay" onclick="closeMenu()"></div>
 
-<!-- ── PROGRESS ── -->
-<div class="progress-bar">
+<!-- OFFLINE BAR -->
+<div class="offline-bar" id="offline-bar">
+  <span class="offline-dot"></span>
+  You're offline — entries will be saved and synced when you reconnect
+  <span class="offline-queue-count" id="offline-queue-count" style="display:none;">0 queued</span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logos">
+    <div class="hero-logo-pill">
+      <img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1749920754/YGQ_3x_zibhq.png" alt="WeAuto">
+    </div>
+    <div class="divider-v"></div>
+    <div class="hero-logo-pill">
+      <img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868289/MSG-CDJR_cfgryx.png" alt="Worry Free Guarantee">
+    </div>
+  </div>
+  <div class="hero-tagline">
+    WeAuto Dealer Group
+    <span>Gallatin, Tennessee</span>
+  </div>
+  <!-- Mode toggle -->
+  <div class="mode-toggle-bar" id="mode-toggle">
+    <button class="mode-btn active" id="mode-quick-btn" onclick="setMode('quick')">⚡ Quick Log</button>
+    <button class="mode-btn" id="mode-full-btn" onclick="setMode('full')">📋 Full Log</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     QUICK LOG MODE
+     ══════════════════════════════════════════════════════ -->
+<div class="ql-wrap" id="ql-wrap">
+  <div class="ql-progress" id="ql-progress">
+    <div class="ql-step-label" id="ql-step-label">Step <strong>1</strong> of 6</div>
+    <div class="ql-bar-track"><div class="ql-bar-fill" id="ql-bar-fill" style="width:16.6%"></div></div>
+  </div>
+
+  <!-- QL Step 1: Who are you? -->
+  <div class="ql-step active" id="ql-s1">
+    <div class="ql-title">Who's logging?</div>
+    <div class="ql-desc">Tap your name</div>
+    <div class="ql-rep-grid">
+      <div class="ql-rep mgr" onclick="qlSelectRep(this,'Tyler Doyle','S2S Manager','manager')">
+        <div class="ql-rep-name">Tyler</div>
+        <div class="ql-rep-role">S2S Manager</div>
+      </div>
+      <div class="ql-rep" onclick="qlSelectRep(this,'Andrew Kirk','Sales','sales')">
+        <div class="ql-rep-name">Andrew</div>
+        <div class="ql-rep-role">Sales</div>
+      </div>
+      <div class="ql-rep" onclick="qlSelectRep(this,'DJ Rogers','Sales','sales')">
+        <div class="ql-rep-name">DJ</div>
+        <div class="ql-rep-role">Sales</div>
+      </div>
+      <div class="ql-rep" onclick="qlSelectRep(this,'Kody McCann','Sales','sales')">
+        <div class="ql-rep-name">Kody</div>
+        <div class="ql-rep-role">Sales</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QL Step 2: Customer -->
+  <div class="ql-step" id="ql-s2">
+    <button class="ql-back" onclick="qlBack()">← Back</button>
+    <div class="ql-title">Customer Info</div>
+    <div class="ql-desc">Name and phone — the essentials</div>
+    <div class="ql-field">
+      <label>First Name *</label>
+      <input type="text" id="ql-fname" placeholder="First name" autocomplete="given-name">
+    </div>
+    <div class="ql-field">
+      <label>Last Name *</label>
+      <input type="text" id="ql-lname" placeholder="Last name" autocomplete="family-name">
+    </div>
+    <div class="ql-field">
+      <label>Phone</label>
+      <input type="tel" id="ql-phone" placeholder="(615) 000-0000" inputmode="tel" autocomplete="tel">
+    </div>
+    <button class="ql-next" onclick="qlNext()" id="ql-next-2">Next →</button>
+  </div>
+
+  <!-- QL Step 3: Vehicle -->
+  <div class="ql-step" id="ql-s3">
+    <button class="ql-back" onclick="qlBack()">← Back</button>
+    <div class="ql-title">Vehicle</div>
+    <div class="ql-desc">What did they drive in?</div>
+    <div class="ql-field">
+      <label>Year</label>
+      <input type="text" id="ql-year" placeholder="2019" inputmode="numeric" maxlength="4" pattern="[0-9]*">
+    </div>
+    <div class="ql-field">
+      <label>Make</label>
+      <select id="ql-make">
+        <option value="">Select make...</option>
+        <option>Ram</option><option>Jeep</option><option>Dodge</option><option>Chrysler</option>
+        <option>Ford</option><option>Chevrolet</option><option>GMC</option><option>Toyota</option>
+        <option>Honda</option><option>Hyundai</option><option>Kia</option><option>Nissan</option>
+        <option>Subaru</option><option>Other</option>
+      </select>
+    </div>
+    <div class="ql-field">
+      <label>Model</label>
+      <select id="ql-model">
+        <option value="">Select model...</option>
+      </select>
+    </div>
+    <button class="ql-next" onclick="qlNext()">Next →</button>
+  </div>
+
+  <!-- QL Step 4: Temperature -->
+  <div class="ql-step" id="ql-s4">
+    <button class="ql-back" onclick="qlBack()">← Back</button>
+    <div class="ql-title">Buying Temperature</div>
+    <div class="ql-desc">How warm is this customer?</div>
+    <div class="ql-score-grid" id="ql-score-grid"></div>
+    <div class="ql-score-labels"><span>❄️ Cold</span><span>🌡 Warm</span><span>🔥 Hot</span></div>
+  </div>
+
+  <!-- QL Step 5: Outcome -->
+  <div class="ql-step" id="ql-s5">
+    <button class="ql-back" onclick="qlBack()">← Back</button>
+    <div class="ql-title">Outcome</div>
+    <div class="ql-desc">What happened?</div>
+    <div class="ql-outcome-grid">
+      <div class="ql-outcome" onclick="qlSelectOutcome(this,'New Vehicle Sold','sel-green')">
+        <div class="ql-o-icon">🏆</div>New Sold
+      </div>
+      <div class="ql-outcome" onclick="qlSelectOutcome(this,'Used Vehicle Sold','sel-green')">
+        <div class="ql-o-icon">🏆</div>Used Sold
+      </div>
+      <div class="ql-outcome" onclick="qlSelectOutcome(this,'Appointment Set','sel-blue')">
+        <div class="ql-o-icon">📅</div>Appt Set
+      </div>
+      <div class="ql-outcome" onclick="qlSelectOutcome(this,'Follow-Up Required','sel-gold')">
+        <div class="ql-o-icon">🔔</div>Follow-Up
+      </div>
+      <div class="ql-outcome" onclick="qlSelectOutcome(this,'Not Interested','sel-red')">
+        <div class="ql-o-icon">✗</div>Not Interested
+      </div>
+      <div class="ql-outcome" onclick="qlSelectOutcome(this,'Info Gathered Only','sel-gold')">
+        <div class="ql-o-icon">📋</div>Info Only
+      </div>
+    </div>
+  </div>
+
+  <!-- QL Step 6: Submit -->
+  <div class="ql-step" id="ql-s6">
+    <button class="ql-back" onclick="qlBack()">← Back</button>
+    <div class="ql-title">Review & Submit</div>
+    <div class="ql-desc">Double-check and send it</div>
+    <div id="ql-review" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:8px;"></div>
+    <div class="ql-field">
+      <label>Notes (optional)</label>
+      <input type="text" id="ql-notes" placeholder="Quick note...">
+    </div>
+    <button class="ql-submit-btn" id="ql-submit-btn" onclick="qlSubmit()">Submit Entry →</button>
+  </div>
+
+  <!-- QL Success -->
+  <div class="ql-success" id="ql-success">
+    <div class="ql-success-icon">✅</div>
+    <div class="ql-success-title">Entry Logged!</div>
+    <div class="ql-success-detail" id="ql-success-detail"></div>
+    <button class="ql-log-another" onclick="qlReset()">Log Another →</button>
+    <button class="ql-go-home" onclick="window.location.href='app.html'">← Back to Home</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     FULL LOG MODE (preserved existing form)
+     ══════════════════════════════════════════════════════ -->
+<!-- PROGRESS (full mode) -->
+<div class="progress-wrap" id="full-progress">
   <div class="step active" id="s1"><div class="step-n">1</div>Submitter</div>
   <div class="step" id="s2"><div class="step-n">2</div>Customer</div>
   <div class="step" id="s3"><div class="step-n">3</div>Vehicle</div>
-  <div class="step" id="s4"><div class="step-n">4</div>Service</div>
-  <div class="step" id="s5"><div class="step-n">5</div>Sales</div>
+  <div class="step" id="s4"><div class="step-n">4</div>Service Visit</div>
+  <div class="step" id="s5"><div class="step-n">5</div>Sales Activity</div>
   <div class="step" id="s6"><div class="step-n">6</div>Outcome</div>
 </div>
 
-<!-- ── PAGE ── -->
-<div class="page">
+<div class="page" id="full-page">
 
   <!-- 01 SUBMITTER -->
-  <div class="section-head">
-    <div class="sh-left">
-      <div class="sh-eyebrow">Step 01</div>
-      <div class="sh-title">Who's Logging This?</div>
-      <div class="sh-desc">Select your name — auto-assigns and timestamps on submit</div>
-    </div>
-    <div class="sh-num">01 / 06</div>
-  </div>
+  <div class="sh"><div class="sh-left"><div class="sh-title">Who's Logging This Entry?</div><div class="sh-desc">Select your name — the form auto-assigns and timestamps on submit</div></div><div class="sh-num">01 / 06</div></div>
   <div class="card">
     <div class="sub-grid">
       <div class="sub-pill mgr" onclick="selectSub(this,'Tyler Doyle','S2S Manager','manager')">
-        <div class="sub-avatar">TD</div>
+        <div class="sub-chk"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="sub-name">Tyler Doyle</div><div class="sub-role">S2S Manager</div>
       </div>
       <div class="sub-pill" onclick="selectSub(this,'Andrew Kirk','Sales Consultant','sales')">
-        <div class="sub-avatar">AK</div>
+        <div class="sub-chk"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="sub-name">Andrew Kirk</div><div class="sub-role">Sales</div>
       </div>
       <div class="sub-pill" onclick="selectSub(this,'DJ Rogers','Sales Consultant','sales')">
-        <div class="sub-avatar">DJ</div>
+        <div class="sub-chk"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="sub-name">DJ Rogers</div><div class="sub-role">Sales</div>
       </div>
       <div class="sub-pill" onclick="selectSub(this,'Kody McCann','Sales Consultant','sales')">
-        <div class="sub-avatar">KM</div>
+        <div class="sub-chk"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="sub-name">Kody McCann</div><div class="sub-role">Sales</div>
       </div>
     </div>
     <input type="hidden" id="sub-name"><input type="hidden" id="sub-role">
-    <div class="sub-error" id="sub-error">Select your name to continue</div>
   </div>
 
   <!-- TIMESTAMP -->
@@ -514,21 +1196,14 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
   </div>
 
   <!-- 02 CUSTOMER -->
-  <div class="section-head">
-    <div class="sh-left">
-      <div class="sh-eyebrow">Step 02</div>
-      <div class="sh-title">Customer Information</div>
-      <div class="sh-desc">Contact details for follow-up and CRM entry</div>
-    </div>
-    <div class="sh-num">02 / 06</div>
-  </div>
+  <div class="sh"><div class="sh-left"><div class="sh-title">Customer Information</div><div class="sh-desc">Contact details for follow-up and CRM entry</div></div><div class="sh-num">02 / 06</div></div>
   <div class="card">
     <div class="g2">
-      <div class="field" id="f-fname"><label class="lbl">First Name <span class="req">*</span></label><input type="text" id="fname" placeholder="First name"><div class="val-msg">First name is required</div></div>
-      <div class="field" id="f-lname"><label class="lbl">Last Name <span class="req">*</span></label><input type="text" id="lname" placeholder="Last name"><div class="val-msg">Last name is required</div></div>
-      <div class="field" id="f-phone"><label class="lbl">Phone Number <span class="req">*</span></label><input type="tel" id="phone" placeholder="(615) 000-0000"><div class="val-msg">Phone number is required</div></div>
+      <div class="field"><label class="lbl">First Name <span class="req">*</span></label><input type="text" id="fname" placeholder="First name"></div>
+      <div class="field"><label class="lbl">Last Name <span class="req">*</span></label><input type="text" id="lname" placeholder="Last name"></div>
+      <div class="field"><label class="lbl">Phone Number</label><input type="tel" id="phone" placeholder="(615) 000-0000"></div>
       <div class="field"><label class="lbl">Email Address</label><input type="email" id="email" placeholder="customer@email.com"></div>
-      <div class="field"><label class="lbl">Preferred Contact</label>
+      <div class="field"><label class="lbl">Preferred Contact Method</label>
         <select id="cpref"><option value="">Select...</option><option>Phone Call</option><option>Text Message</option><option>Email</option><option>No Preference</option></select>
       </div>
       <div class="field"><label class="lbl">Best Time to Reach</label>
@@ -538,51 +1213,37 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
   </div>
 
   <!-- 03 VEHICLE -->
-  <div class="section-head">
-    <div class="sh-left">
-      <div class="sh-eyebrow">Step 03</div>
-      <div class="sh-title">Customer's Current Vehicle</div>
-      <div class="sh-desc">The vehicle they drove in for service today</div>
-    </div>
-    <div class="sh-num">03 / 06</div>
-  </div>
+  <div class="sh"><div class="sh-left"><div class="sh-title">Customer's Current Vehicle</div><div class="sh-desc">The vehicle they drove in for service today</div></div><div class="sh-num">03 / 06</div></div>
   <div class="card">
     <div class="g4">
-      <div class="field" id="f-vy"><label class="lbl">Year <span class="req">*</span></label><select id="vy"><option value="">Year</option></select><div class="val-msg">Year is required</div></div>
-      <div class="field" id="f-vmk"><label class="lbl">Make <span class="req">*</span></label><select id="vmk"><option value="">Make</option></select><div class="val-msg">Make is required</div></div>
-      <div class="field" id="f-vmd"><label class="lbl">Model <span class="req">*</span></label><select id="vmd"><option value="">Model</option></select><div class="val-msg">Model is required</div></div>
+      <div class="field"><label class="lbl">Year</label><select id="vy"><option value="">Year</option></select></div>
+      <div class="field"><label class="lbl">Make</label><select id="vmk"><option value="">Make</option></select></div>
+      <div class="field"><label class="lbl">Model</label><select id="vmd"><option value="">Model</option></select></div>
       <div class="field"><label class="lbl">Mileage</label><input type="number" id="vmi" placeholder="e.g. 72000"></div>
     </div>
     <div class="g3 mt">
       <div class="field"><label class="lbl">Trim / Package</label><input type="text" id="vtr" placeholder="e.g. Laramie, Sport"></div>
       <div class="field"><label class="lbl">Color</label><input type="text" id="vcl" placeholder="e.g. Bright White"></div>
-      <div class="field"><label class="lbl">Ownership</label>
+      <div class="field"><label class="lbl">Ownership Status</label>
         <select id="vow"><option value="">Select...</option><option>Paid Off / Own Outright</option><option>Financing</option><option>Leasing</option><option>Unknown</option></select>
       </div>
     </div>
     <hr class="div">
     <div class="g3">
-      <div class="field"><label class="lbl">Est. Payoff</label><input type="text" id="vpay" placeholder="$0,000"><div class="hint">If financing — approx. owed</div></div>
-      <div class="field"><label class="lbl">Lease End</label><input type="text" id="vlease" placeholder="MM/YYYY"><div class="hint">If leasing — when expires?</div></div>
-      <div class="field"><label class="lbl">Condition</label>
+      <div class="field"><label class="lbl">Est. Payoff Balance</label><input type="text" id="vpay" placeholder="$0,000"><div class="hint">If financing — approx. amount owed</div></div>
+      <div class="field"><label class="lbl">Lease End Date</label><input type="text" id="vlease" placeholder="MM/YYYY"><div class="hint">If leasing — when does it expire?</div></div>
+      <div class="field"><label class="lbl">Vehicle Condition</label>
         <select id="vcond"><option value="">Select...</option><option>Excellent</option><option>Good</option><option>Fair</option><option>Poor</option></select>
       </div>
     </div>
   </div>
 
   <!-- 04 SERVICE VISIT -->
-  <div class="section-head">
-    <div class="sh-left">
-      <div class="sh-eyebrow">Step 04</div>
-      <div class="sh-title">Service Visit Details</div>
-      <div class="sh-desc">Capture the reason for today's visit</div>
-    </div>
-    <div class="sh-num">04 / 06</div>
-  </div>
+  <div class="sh"><div class="sh-left"><div class="sh-title">Service Visit Details</div><div class="sh-desc">Capture the reason for today's visit — this is your S2S conversation anchor</div></div><div class="sh-num">04 / 06</div></div>
   <div class="card">
-    <div class="callout"><span>ℹ️</span><span>High-opportunity triggers: repair estimates over $1,500, high-mileage vehicles, repeat failures, or customers expressing frustration.</span></div>
+    <div class="callout"><span>ℹ</span><span>High-opportunity triggers: repair estimates over $1,500, high-mileage vehicles, repeat failures, or customers expressing frustration with their vehicle. Document accurately — this opens the door.</span></div>
     <div class="g2">
-      <div class="field"><label class="lbl">RO #</label><input type="text" id="ro" placeholder="e.g. RO-24871"></div>
+      <div class="field"><label class="lbl">Repair Order (RO) #</label><input type="text" id="ro" placeholder="e.g. RO-24871"></div>
       <div class="field"><label class="lbl">Service Advisor</label><input type="text" id="sva" placeholder="Advisor name"></div>
       <div class="field s2"><label class="lbl">Primary Reason for Visit</label>
         <select id="vreason"><option value="">Select...</option><option>Routine Maintenance (Oil, Tires, Filters)</option><option>Scheduled Service / Recall</option><option>Major Mechanical Repair</option><option>Transmission / Drivetrain</option><option>Engine Concern</option><option>Electrical / Technology Issue</option><option>Body / Collision</option><option>High Mileage Service</option><option>Safety — Brakes / Suspension</option><option>Customer Pay — Other</option><option>Warranty Claim</option></select>
@@ -590,16 +1251,16 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
     </div>
     <hr class="div">
     <div class="g3">
-      <div class="field"><label class="lbl">Est. Repair Cost</label><input type="text" id="rcost" placeholder="$0,000"></div>
-      <div class="field"><label class="lbl">Cost vs. Value</label>
-        <select id="rratio"><option value="">Select...</option><option>Low — Under 20%</option><option>Moderate — 20–40%</option><option>High — 40–75%</option><option>Exceeds vehicle value</option></select>
+      <div class="field"><label class="lbl">Estimated Repair Cost</label><input type="text" id="rcost" placeholder="$0,000"></div>
+      <div class="field"><label class="lbl">Cost vs. Vehicle Value</label>
+        <select id="rratio"><option value="">Select...</option><option>Low — Under 20% of vehicle value</option><option>Moderate — 20–40%</option><option>High — 40–75%</option><option>Exceeds vehicle value</option></select>
       </div>
-      <div class="field"><label class="lbl">Customer Emotion</label>
-        <select id="cemo"><option value="">Select...</option><option>Satisfied / Neutral</option><option>Frustrated with Cost</option><option>Frustrated with Reliability</option><option>Anxious / Stressed</option><option>Open &amp; Receptive</option><option>Excited / Considering Upgrade</option></select>
+      <div class="field"><label class="lbl">Customer's Emotional State</label>
+        <select id="cemo"><option value="">Select...</option><option>Satisfied / Neutral</option><option>Frustrated with Repair Cost</option><option>Frustrated with Reliability</option><option>Anxious / Stressed</option><option>Open &amp; Receptive</option><option>Excited / Already Considering Upgrade</option></select>
       </div>
     </div>
     <hr class="div">
-    <div class="field"><label class="lbl">Sales Introduction Made?</label>
+    <div class="field"><label class="lbl">Sales Introduction Made in Service Drive?</label>
       <div class="pill-group">
         <div class="pill" onclick="ps(this,'intro','Yes — by Service Advisor','p-green')">Yes — by Service Advisor</div>
         <div class="pill" onclick="ps(this,'intro','Yes — by Sales Team','p-green')">Yes — by Sales Team</div>
@@ -611,41 +1272,33 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
   </div>
 
   <!-- 05 SALES ACTIVITY -->
-  <div class="section-head">
-    <div class="sh-left">
-      <div class="sh-eyebrow">Step 05</div>
-      <div class="sh-title">Sales Activity & Engagement</div>
-      <div class="sh-desc">Document the sales interaction</div>
-    </div>
-    <div class="sh-num">05 / 06</div>
-  </div>
+  <div class="sh"><div class="sh-left"><div class="sh-title">Sales Activity & Engagement</div><div class="sh-desc">Document what happened during the sales interaction</div></div><div class="sh-num">05 / 06</div></div>
   <div class="card">
-    <div class="field" style="margin-bottom:16px;">
+    <div class="field" style="margin-bottom:18px;">
       <label class="lbl">Trade-In Interest</label>
       <div class="tog-row" id="tr-row" onclick="tog('tr-cb','tr-exp','tr-row')">
         <label class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="tr-cb" onchange="tog('tr-cb','tr-exp','tr-row')"><div class="tog-track"></div><div class="tog-knob"></div></label>
-        <div><div class="tog-txt">Customer interested in trading</div><div class="tog-sub">Enable to capture trade details</div></div>
+        <div><div class="tog-txt">Customer is interested in trading their vehicle</div><div class="tog-sub">Enable to capture trade details</div></div>
       </div>
       <div class="expand" id="tr-exp">
         <div class="g3">
-          <div class="field"><label class="lbl">Est. ACV</label><input type="text" id="tacv" placeholder="$0,000"></div>
-          <div class="field"><label class="lbl">Customer's Expected</label><input type="text" id="texp" placeholder="$0,000"><div class="hint">What do they think it's worth?</div></div>
+          <div class="field"><label class="lbl">Estimated ACV</label><input type="text" id="tacv" placeholder="$0,000"></div>
+          <div class="field"><label class="lbl">Customer's Expected Value</label><input type="text" id="texp" placeholder="$0,000"></div>
           <div class="field"><label class="lbl">Equity Position</label>
-            <select id="teq"><option value="">Select...</option><option>Positive Equity</option><option>At or Near Breakeven</option><option>Negative Equity</option><option>Unknown</option></select>
+            <select id="teq"><option value="">Select...</option><option>Positive Equity</option><option>Negative Equity</option><option>Break Even</option><option>Unknown</option></select>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="field" style="margin-bottom:16px;">
-      <label class="lbl">Vehicle Shown or Discussed?</label>
-      <div class="tog-row" id="vh-row" onclick="tog('vh-cb','vh-exp','vh-row')">
-        <label class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="vh-cb" onchange="tog('vh-cb','vh-exp','vh-row')"><div class="tog-track"></div><div class="tog-knob"></div></label>
-        <div><div class="tog-txt">Yes — a vehicle was presented</div><div class="tog-sub">Enable to capture vehicle of interest</div></div>
+    <div class="field" style="margin-bottom:18px;">
+      <label class="lbl">Vehicle of Interest (VOI)</label>
+      <div class="tog-row" id="voi-row" onclick="tog('voi-cb','voi-exp','voi-row')">
+        <label class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="voi-cb" onchange="tog('voi-cb','voi-exp','voi-row')"><div class="tog-track"></div><div class="tog-knob"></div></label>
+        <div><div class="tog-txt">Customer expressed interest in a specific vehicle</div><div class="tog-sub">Enable to capture vehicle preferences</div></div>
       </div>
-      <div class="expand" id="vh-exp">
+      <div class="expand" id="voi-exp">
         <div class="g3">
-          <div class="field"><label class="lbl">Vehicle of Interest</label><input type="text" id="voi" placeholder="e.g. 2024 Ram 1500 Laramie"></div>
+          <div class="field s2"><label class="lbl">Vehicle of Interest</label><input type="text" id="voi" placeholder="e.g. 2024 Ram 1500 Laramie"></div>
           <div class="field"><label class="lbl">New or Used?</label>
             <select id="voity"><option value="">Select...</option><option>New</option><option>Used / CPO</option><option>Either / Open</option></select>
           </div>
@@ -653,38 +1306,28 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
         </div>
       </div>
     </div>
-
     <hr class="div">
-    <div class="g2" style="margin-bottom:16px;">
-      <div class="field"><label class="lbl">Finance Conversation</label>
-        <select id="finconv"><option value="">Select...</option><option>Not Discussed</option><option>Good Credit Mentioned</option><option>Credit Concerns</option><option>Pre-Approval Initiated</option><option>Outside Financing</option><option>Cash Buyer</option></select>
+    <div class="g2" style="margin-bottom:18px;">
+      <div class="field"><label class="lbl">Finance / Credit Conversation</label>
+        <select id="finconv"><option value="">Select...</option><option>Not Discussed</option><option>Customer Mentioned Good Credit</option><option>Customer Mentioned Credit Concerns</option><option>Pre-Approval Discussion Initiated</option><option>Customer Has Outside Financing</option><option>Cash Buyer</option></select>
       </div>
       <div class="field"><label class="lbl">Purchase Timeline</label>
         <select id="timeline"><option value="">Select...</option><option>Immediate — Ready Now</option><option>Within 30 Days</option><option>1–3 Months</option><option>3–6 Months</option><option>6+ Months / Just Looking</option><option>Unknown</option></select>
       </div>
     </div>
-
-    <div class="field" id="f-escore">
-      <label class="lbl">Customer Buying Temperature <span class="req">*</span></label>
+    <div class="field">
+      <label class="lbl">Customer Buying Temperature</label>
       <div class="hint" style="margin-bottom:8px;">Rate 1 (cold) to 10 (ready to sign)</div>
       <div class="score-wrap" id="score-wrap"></div>
       <div class="score-labels"><span>Cold</span><span>Warm</span><span>Hot 🔥</span></div>
       <input type="hidden" id="escore">
-      <div class="val-msg">Select a buying temperature (1–10)</div>
     </div>
   </div>
 
   <!-- 06 OUTCOME -->
-  <div class="section-head">
-    <div class="sh-left">
-      <div class="sh-eyebrow">Step 06</div>
-      <div class="sh-title">Outcome & Next Steps</div>
-      <div class="sh-desc">Record disposition and assign follow-up</div>
-    </div>
-    <div class="sh-num">06 / 06</div>
-  </div>
+  <div class="sh"><div class="sh-left"><div class="sh-title">Outcome & Next Steps</div><div class="sh-desc">Record the disposition and assign follow-up responsibility</div></div><div class="sh-num">06 / 06</div></div>
   <div class="card">
-    <div class="field" id="f-outcome" style="margin-bottom:18px;">
+    <div class="field" style="margin-bottom:20px;">
       <label class="lbl">Disposition / Outcome <span class="req">*</span></label>
       <div class="pill-group">
         <div class="pill" onclick="ps(this,'outcome','New Vehicle Sold','p-green')">🏆 New Vehicle Sold</div>
@@ -694,162 +1337,123 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
         <div class="pill" onclick="ps(this,'outcome','Not Interested','p-red')">✗ Not Interested</div>
       </div>
       <input type="hidden" id="outcome">
-      <div class="val-msg">Select an outcome</div>
     </div>
     <div class="g2">
       <div class="field"><label class="lbl">Assigned Salesperson</label><div class="ro-display" id="sp-disp">Select your name above to auto-assign</div><input type="hidden" id="sp"></div>
       <div class="field"><label class="lbl">Follow-Up Date</label><input type="date" id="fdate"></div>
       <div class="field"><label class="lbl">Follow-Up Method</label>
-        <select id="fmeth"><option value="">Select...</option><option>Phone Call</option><option>Text Message</option><option>Email</option><option>In-Person at Next Visit</option></select>
+        <select id="fmeth"><option value="">Select...</option><option>Phone Call</option><option>Text Message</option><option>Email</option><option>In-Person at Next Service Visit</option></select>
       </div>
-      <div class="field"><label class="lbl">Push to CRM</label>
-        <div class="tog-row" id="crm-row" onclick="document.getElementById('crm-cb').checked=!document.getElementById('crm-cb').checked;document.getElementById('crm-row').classList.toggle('on',document.getElementById('crm-cb').checked);">
-          <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">Auto-push to CRM</div><div style="font-size:11px;color:var(--text3);margin-top:1px;">Customer will be sent to CRM after entry is logged</div></div>
-          <label class="tog"><input type="checkbox" id="crm-cb"><div class="tog-track"></div><div class="tog-knob"></div></label>
-        </div>
-        <input type="hidden" id="crm" value="">
+      <div class="field"><label class="lbl">CRM / DMS Entry Made?</label>
+        <select id="crm"><option value="">Select...</option><option>Yes — entered in CRM</option><option>Pending — will enter after this log</option><option>No — customer declined data entry</option></select>
       </div>
-      <div class="field sf"><label class="lbl">Notes & Context</label>
-        <textarea id="notes" placeholder="Key objections, preferences, personal details, agreed follow-up talking points..."></textarea>
+      <div class="field sf"><label class="lbl">Notes & Additional Context</label>
+        <textarea id="notes" placeholder="Key objections, specific preferences, personal details to remember, agreed talking points for follow-up..."></textarea>
       </div>
     </div>
   </div>
 
   <!-- SUBMIT -->
   <div class="submit-bar">
-    <div>
+    <div class="submit-bar-left">
       <div class="submit-bar-title">Ready to submit?</div>
-      <div class="submit-bar-sub">Logs to Supabase and sends notifications.</div>
+      <div class="submit-bar-sub">Logs to spreadsheet and posts to the Sales Team channel in Teams.</div>
     </div>
     <div class="submit-bar-actions">
-      <button class="btn-g" onclick="resetForm()">Clear</button>
-      <button class="btn-p" id="submit-btn" onclick="submitLog()">Submit Entry →</button>
+      <button class="btn-g" onclick="resetForm()">Clear Form</button>
+      <button class="btn-p" onclick="submitLog()">Submit Entry →</button>
     </div>
   </div>
 
-  <!-- PREVIEW -->
   <div class="preview-wrap" id="preview-wrap">
     <div class="preview-card">
       <div class="preview-header">
-        <div class="preview-label">Entry Preview</div>
-        <div class="preview-badge">ServiceBridge</div>
+        <div class="preview-header-left">
+          <div class="preview-header-logo"><img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868303/TAA062407W-GallatinLogos-Web-CDJR-2_yn1fwh.png" alt="Gallatin CDJR"></div>
+          <div class="preview-label">Teams Channel Preview</div>
+        </div>
+        <div class="preview-badge">Sales Team Channel</div>
       </div>
       <div class="preview-grid" id="preview-grid"></div>
     </div>
   </div>
-
-  <!-- RECENT ENTRIES -->
-  <div class="recent-section">
-    <div class="recent-header">
-      <div class="recent-label">Recent Submissions</div>
-      <button class="recent-refresh" onclick="loadRecent()">↻ Refresh</button>
-    </div>
-    <div id="recent-entries"><p style="color:var(--text3);font-size:13px;">Loading...</p></div>
-  </div>
-
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg">Entry logged successfully ✓</span></div>
-
-<!-- EDIT MODAL -->
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title">Edit Entry</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="edit-id">
-      <div class="modal-grid">
-        <div class="modal-field"><label class="modal-label">Submitter</label>
-          <select class="modal-select" id="edit-submitter"><option>Tyler Doyle</option><option>Andrew Kirk</option><option>DJ Rogers</option><option>Kody McCann</option></select>
-        </div>
-        <div class="modal-field"><label class="modal-label">First Name</label><input class="modal-input" id="edit-first" type="text"></div>
-      </div>
-      <div class="modal-grid">
-        <div class="modal-field"><label class="modal-label">Last Name</label><input class="modal-input" id="edit-last" type="text"></div>
-        <div class="modal-field"><label class="modal-label">Phone</label><input class="modal-input" id="edit-phone" type="text"></div>
-      </div>
-      <div class="modal-grid">
-        <div class="modal-field"><label class="modal-label">Vehicle Year</label><input class="modal-input" id="edit-year" type="text"></div>
-        <div class="modal-field"><label class="modal-label">Make</label><input class="modal-input" id="edit-make" type="text"></div>
-      </div>
-      <div class="modal-grid">
-        <div class="modal-field"><label class="modal-label">Model</label><input class="modal-input" id="edit-model" type="text"></div>
-        <div class="modal-field"><label class="modal-label">Repair Cost ($)</label><input class="modal-input" id="edit-repair" type="text"></div>
-      </div>
-      <div class="modal-grid">
-        <div class="modal-field"><label class="modal-label">Outcome</label>
-          <select class="modal-select" id="edit-outcome"><option>Sold New</option><option>Sold Used</option><option>Appointment Set</option><option>Working Deal</option><option>Follow-Up Required</option><option>Not Interested</option><option>No Show</option></select>
-        </div>
-        <div class="modal-field"><label class="modal-label">Engagement Score (1-10)</label><input class="modal-input" id="edit-score" type="number" min="1" max="10"></div>
-      </div>
-      <div class="modal-field"><label class="modal-label">Notes</label><textarea class="modal-textarea" id="edit-notes"></textarea></div>
-      <div class="modal-footer">
-        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
-        <button class="modal-del" onclick="deleteEntry()">🗑 Delete</button>
-        <button class="modal-save" onclick="saveEdit()">✓ Save Changes</button>
-      </div>
-    </div>
+<!-- FOOTER -->
+<footer class="footer" id="footer">
+  <div class="footer-logos">
+    <div class="footer-logo-pill"><img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868289/WE_Auto_Badge_1_f5djzq.png" alt="WeAuto"></div>
+    <div class="fv"></div>
+    <div class="footer-logo-pill"><img src="https://res.cloudinary.com/di5ujiwjp/image/upload/v1769868289/MSG-CDJR_cfgryx.png" alt="Worry Free Guarantee"></div>
   </div>
-</div>
-<div class="edit-toast" id="edit-toast"></div>
+  <div class="footer-copy">
+    <strong>Gallatin Chrysler Dodge Jeep Ram</strong><br>
+    WeAuto Dealer Group · Service Drive Operations<br>
+    Internal use only — confidential customer data
+  </div>
+</footer>
+
+<!-- TOASTS -->
+<div class="toast" id="toast"><div class="toast-dot"></div>Entry logged — Teams notification sent ✓</div>
+<div class="sync-toast" id="sync-toast"></div>
 
 <script>
+// ══════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ══════════════════════════════════════════════════════
 const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
-const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
-const currentRep = JSON.parse(sessionStorage.getItem('sb_rep')||'null');
+const SB_HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SB_KEY,
+  'Authorization': `Bearer ${SB_KEY}`,
+  'Prefer': 'return=minimal'
+};
 
-// ── NAV INIT ──
-(function initNav(){
-  if(!currentRep) return;
-  const first = currentRep.first_name || currentRep.name.split(' ')[0];
-  document.getElementById('hdr-user').textContent = first;
-  document.getElementById('nav-user-display').textContent = currentRep.name;
-  const pillEl = document.getElementById('nav-role-pill');
-  const role = (currentRep.role||'sales').toLowerCase();
-  pillEl.textContent = role.charAt(0).toUpperCase()+role.slice(1);
-  pillEl.className = 'nav-role-pill '+(role==='admin'?'role-admin':role==='manager'?'role-manager':'role-sales');
-  if(role==='admin'){
-    document.getElementById('dd-admin-link').classList.add('show');
-    document.getElementById('dd-admin-divider').classList.add('show');
-  }
-})();
-
-function toggleMenu(){
-  const hb=document.getElementById('hamburger'),dd=document.getElementById('nav-dropdown'),ov=document.getElementById('nav-overlay');
-  const isOpen=dd.classList.contains('open');
-  hb.classList.toggle('open',!isOpen);dd.classList.toggle('open',!isOpen);ov.classList.toggle('open',!isOpen);
-}
-function closeMenu(){
-  document.getElementById('hamburger').classList.remove('open');
-  document.getElementById('nav-dropdown').classList.remove('open');
-  document.getElementById('nav-overlay').classList.remove('open');
-}
-
-// ── CLOCK ──
+// ══════════════════════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════════════════════
 function tick(){
   const n=new Date(),mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
   da=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  document.getElementById('ts-date').textContent=`${mo[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()}`;
-  document.getElementById('ts-day').textContent=da[n.getDay()];
-  document.getElementById('ts-time').textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+  const dateEl = document.getElementById('hdr-date');
+  const timeEl = document.getElementById('hdr-time');
+  if(dateEl) dateEl.textContent=`${da[n.getDay()]}, ${mo[n.getMonth()]} ${n.getDate()}`;
+  if(timeEl) timeEl.textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})+' CT';
+  const td = document.getElementById('ts-date');
+  if(td) td.textContent=`${mo[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()}`;
+  const tday = document.getElementById('ts-day');
+  if(tday) tday.textContent=da[n.getDay()];
+  const tt = document.getElementById('ts-time');
+  if(tt) tt.textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
 }
-tick();setInterval(tick,1000);
+tick(); setInterval(tick,1000);
 
-// ── YEARS ──
+// ══════════════════════════════════════════════════════
+// VEHICLE DATA (shared between modes)
+// ══════════════════════════════════════════════════════
+const vd={"Acura":["ILX","MDX","RDX","TLX","RLX"],"BMW":["3 Series","5 Series","X3","X5","X7","7 Series"],"Buick":["Enclave","Encore","Encore GX","Envision"],"Cadillac":["CT4","CT5","Escalade","XT4","XT5","XT6"],"Chevrolet":["Colorado","Silverado 1500","Silverado 2500","Equinox","Traverse","Tahoe","Suburban","Malibu","Blazer","Trailblazer"],"Chrysler":["300","Pacifica","Voyager"],"Dodge":["Challenger","Charger","Durango","Grand Caravan","Hornet"],"Ford":["F-150","F-250","F-350","Explorer","Edge","Escape","Expedition","Mustang","Bronco","Ranger","Maverick"],"GMC":["Sierra 1500","Sierra 2500","Canyon","Terrain","Acadia","Yukon","Yukon XL"],"Honda":["Accord","Civic","CR-V","HR-V","Odyssey","Pilot","Ridgeline","Passport"],"Hyundai":["Elantra","Tucson","Santa Fe","Palisade","Sonata","Kona"],"Jeep":["Wrangler","Grand Cherokee","Cherokee","Compass","Renegade","Gladiator","Wagoneer","Grand Wagoneer"],"Kia":["Sorento","Telluride","Sportage","Forte","K5","Carnival"],"Lexus":["ES","RX","NX","GX","LX","IS"],"Lincoln":["Navigator","Aviator","Corsair","Nautilus"],"Mazda":["CX-5","CX-9","Mazda3","Mazda6","CX-30","MX-5 Miata"],"Mercedes-Benz":["C-Class","E-Class","GLC","GLE","GLS","S-Class"],"Nissan":["Altima","Sentra","Maxima","Rogue","Pathfinder","Frontier","Titan","Murano","Armada"],"Ram":["1500","2500","3500","ProMaster","ProMaster City"],"Subaru":["Outback","Forester","Crosstrek","Ascent","Impreza","Legacy"],"Tesla":["Model 3","Model Y","Model S","Model X"],"Toyota":["Camry","Corolla","RAV4","Highlander","Tacoma","Tundra","4Runner","Sequoia","Sienna","Venza","Prius","Avalon"],"Volkswagen":["Jetta","Tiguan","Atlas","Passat","ID.4"],"Volvo":["XC40","XC60","XC90","S60","V60"]};
+
+// Full mode: populate years
 const vy=document.getElementById('vy');
 for(let y=new Date().getFullYear()+1;y>=2000;y--) vy.innerHTML+=`<option value="${y}">${y}</option>`;
 
-// ── MAKES / MODELS ──
-const vd={"Acura":["ILX","MDX","RDX","TLX","RLX"],"BMW":["3 Series","5 Series","X3","X5","X7","7 Series"],"Buick":["Enclave","Encore","Encore GX","Envision"],"Cadillac":["CT4","CT5","Escalade","XT4","XT5","XT6"],"Chevrolet":["Colorado","Silverado 1500","Silverado 2500","Equinox","Traverse","Tahoe","Suburban","Malibu","Blazer","Trailblazer"],"Chrysler":["300","Pacifica","Voyager"],"Dodge":["Challenger","Charger","Durango","Grand Caravan"],"Ford":["F-150","F-250","F-350","Explorer","Edge","Escape","Expedition","Mustang","Bronco","Ranger","Maverick"],"GMC":["Sierra 1500","Sierra 2500","Canyon","Terrain","Acadia","Yukon","Yukon XL"],"Honda":["Accord","Civic","CR-V","HR-V","Odyssey","Pilot","Ridgeline","Passport"],"Hyundai":["Elantra","Tucson","Santa Fe","Palisade","Sonata","Kona"],"Jeep":["Wrangler","Grand Cherokee","Cherokee","Compass","Renegade","Gladiator","Wagoneer","Grand Wagoneer"],"Kia":["Sorento","Telluride","Sportage","Forte","K5","Carnival"],"Lexus":["ES","RX","NX","GX","LX","IS"],"Lincoln":["Navigator","Aviator","Corsair","Nautilus"],"Mazda":["CX-5","CX-9","Mazda3","Mazda6","CX-30","MX-5 Miata"],"Mercedes-Benz":["C-Class","E-Class","GLC","GLE","GLS","S-Class"],"Nissan":["Altima","Sentra","Maxima","Rogue","Pathfinder","Frontier","Titan","Murano","Armada"],"Ram":["1500","2500","3500","ProMaster","ProMaster City"],"Subaru":["Outback","Forester","Crosstrek","Ascent","Impreza","Legacy"],"Tesla":["Model 3","Model Y","Model S","Model X"],"Toyota":["Camry","Corolla","RAV4","Highlander","Tacoma","Tundra","4Runner","Sequoia","Sienna","Venza","Prius","Avalon"],"Volkswagen":["Jetta","Tiguan","Atlas","Passat","ID.4"],"Volvo":["XC40","XC60","XC90","S60","V60"]};
+// Full mode: populate makes/models
 const vmk=document.getElementById('vmk'),vmd=document.getElementById('vmd');
 Object.keys(vd).sort().forEach(m=>vmk.innerHTML+=`<option value="${m}">${m}</option>`);
 vmk.addEventListener('change',()=>{vmd.innerHTML='<option value="">Model</option>';(vd[vmk.value]||[]).forEach(m=>vmd.innerHTML+=`<option value="${m}">${m}</option>`);});
 
-// ── SUBMITTER ──
+// Quick mode: populate models on make change
+document.getElementById('ql-make').addEventListener('change', function(){
+  const sel = document.getElementById('ql-model');
+  sel.innerHTML = '<option value="">Select model...</option>';
+  const models = vd[this.value] || [];
+  models.forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
+});
+
+// ══════════════════════════════════════════════════════
+// FULL MODE — EXISTING LOGIC (preserved)
+// ══════════════════════════════════════════════════════
 function selectSub(el,name,role,type){
   document.querySelectorAll('.sub-pill').forEach(p=>p.classList.remove('sel'));
   el.classList.add('sel');
@@ -857,11 +1461,10 @@ function selectSub(el,name,role,type){
   document.getElementById('sub-role').value=type;
   document.getElementById('sp').value=name;
   const d=document.getElementById('sp-disp');
-  d.textContent=name+' — '+role;d.classList.add('filled');
+  d.textContent=name+' — '+role; d.classList.add('filled');
   mark(1);
 }
 
-// ── PILL SELECT ──
 function ps(el,fid,val,cls){
   el.closest('.pill-group').querySelectorAll('.pill').forEach(p=>{p.className='pill';});
   el.classList.add(cls);
@@ -869,17 +1472,16 @@ function ps(el,fid,val,cls){
   if(fid==='outcome') mark(6);
 }
 
-// ── TOGGLE ──
 function tog(cbId,expId,rowId){
   const cb=document.getElementById(cbId),exp=document.getElementById(expId),row=document.getElementById(rowId);
   cb.checked?(exp.classList.add('open'),row.classList.add('on')):(exp.classList.remove('open'),row.classList.remove('on'));
 }
 
-// ── SCORE ──
+// Full mode score buttons
 const sw=document.getElementById('score-wrap');
 for(let i=1;i<=10;i++){
   const b=document.createElement('button');
-  b.type='button';b.className='s-btn';b.textContent=i;
+  b.type='button'; b.className='s-btn'; b.textContent=i;
   b.onclick=function(){
     document.querySelectorAll('.s-btn').forEach(x=>{x.className='s-btn';});
     this.classList.add(`a${i}`);
@@ -889,7 +1491,7 @@ for(let i=1;i<=10;i++){
   sw.appendChild(b);
 }
 
-// ── PHONE FORMAT ──
+// Phone format (full mode)
 document.getElementById('phone').addEventListener('input',function(){
   let v=this.value.replace(/\D/g,'');
   if(v.length>=6) v=`(${v.slice(0,3)}) ${v.slice(3,6)}-${v.slice(6,10)}`;
@@ -897,228 +1499,60 @@ document.getElementById('phone').addEventListener('input',function(){
   this.value=v;
 });
 
-// ── PROGRESS ──
+// Phone format (quick mode)
+document.getElementById('ql-phone').addEventListener('input',function(){
+  let v=this.value.replace(/\D/g,'');
+  if(v.length>=6) v=`(${v.slice(0,3)}) ${v.slice(3,6)}-${v.slice(6,10)}`;
+  else if(v.length>=3) v=`(${v.slice(0,3)}) ${v.slice(3)}`;
+  this.value=v;
+});
+
+// Progress marks (full mode)
 function mark(n){const s=document.getElementById(`s${n}`);if(!s)return;s.classList.add('done');s.classList.remove('active');s.querySelector('.step-n').textContent='✓';}
 ['fname','lname'].forEach(id=>document.getElementById(id).addEventListener('input',()=>mark(2)));
 ['vy','vmk','vmd'].forEach(id=>document.getElementById(id).addEventListener('change',()=>mark(3)));
 document.getElementById('vreason').addEventListener('change',()=>mark(4));
 
-// ── GET VALUE ──
 const gv=id=>{const e=document.getElementById(id);return e?(e.value||'—'):'—';};
 
-// ── SUBMIT ──
-// ── Push to CRM (toggle — fires after submit) ──
-function isCRMEnabled(){ return document.getElementById('crm-cb').checked; }
-
-async function executeCRMPush(entry, entryId){
-  try{
-    // Update the DB record to mark CRM pushed
-    if(entryId){
-      await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${entryId}`,{
-        method:'PATCH',headers:H,
-        body:JSON.stringify({crm_entry:'Yes — pushed to CRM'})
-      });
-    }
-    // Send ADF/XML email to DriveCentric via edge function
-    const res=await fetch(`${SB_URL}/functions/v1/crm-push`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
-      body:JSON.stringify(entry)
-    });
-    if(!res.ok){
-      const err=await res.json().catch(()=>({}));
-      console.error('CRM push failed:',err);
-      showToast('⚠ CRM push failed — entry still saved',true);
-      return;
-    }
-    console.log('CRM push success');
-  }catch(e){
-    console.error('CRM push error:',e);
-    showToast('⚠ CRM push failed — entry still saved',true);
-  }
-}
-
-// ── Phone auto-format ──
-document.getElementById('phone').addEventListener('blur',function(){
-  let v=this.value.replace(/\D/g,'');
-  if(v.length===10) this.value=`(${v.slice(0,3)}) ${v.slice(3,6)}-${v.slice(6)}`;
-  else if(v.length===11&&v[0]==='1') this.value=`(${v.slice(1,4)}) ${v.slice(4,7)}-${v.slice(7)}`;
-});
-
-// ── Validation ──
-function clearErrors(){
-  document.querySelectorAll('.field-error,.score-error,.pills-error').forEach(e=>e.classList.remove('field-error','score-error','pills-error'));
-  document.getElementById('sub-error').classList.remove('show');
-}
-
-function validateForm(){
-  clearErrors();
-  const errs=[];
-  function req(fid,id){const v=gv(id);if(!v||v==='—'||v===''){const el=document.getElementById(fid);if(el)el.classList.add('field-error');errs.push(fid);}}
-  // Submitter
-  if(!gv('sub-name')){document.getElementById('sub-error').classList.add('show');errs.push('sub-error');}
-  // Customer
-  req('f-fname','fname');req('f-lname','lname');req('f-phone','phone');
-  // Vehicle
-  req('f-vy','vy');req('f-vmk','vmk');req('f-vmd','vmd');
-  // Score
-  const sc=gv('escore');
-  if(!sc||sc==='—'||parseInt(sc)<1||parseInt(sc)>10){const sel=document.getElementById('f-escore');if(sel)sel.classList.add('score-error');errs.push('f-escore');}
-  // Outcome
-  if(!gv('outcome')){const oel=document.getElementById('f-outcome');if(oel)oel.classList.add('pills-error');errs.push('f-outcome');}
-  // Phone format check
-  const ph=gv('phone').replace(/\D/g,'');
-  if(ph&&ph.length<10){const pel=document.getElementById('f-phone');if(pel){pel.classList.add('field-error');pel.querySelector('.val-msg').textContent='Enter a valid 10-digit phone number';}errs.push('f-phone');}
-  return errs;
-}
-
-function showToast(msg,isError){
-  const t=document.getElementById('toast');
-  document.getElementById('toast-msg').textContent=msg;
-  t.classList.toggle('toast-err',!!isError);
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),isError?6000:4000);
-}
-
-async function submitLog(){
-  // Validate
-  const errs=validateForm();
-  if(errs.length>0){
-    const first=document.getElementById(errs[0]);
-    if(first){first.scrollIntoView({behavior:'smooth',block:'center'});first.classList.add('shake');setTimeout(()=>first.classList.remove('shake'),500);}
-    showToast(`${errs.length} required field${errs.length>1?'s':''} missing — scroll up to fix`,true);
-    return;
-  }
-
-  // Show loading
-  const btn=document.getElementById('submit-btn');
-  const origText=btn.textContent;
-  btn.innerHTML='<span class="btn-spinner"></span>Submitting...';
-  btn.classList.add('btn-loading');
-
+// Full mode submit
+function submitLog(){
   const n=new Date(),mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const ts=`${mo[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()} at ${n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})} CT`;
-  const veh=[gv('vy'),gv('vmk'),gv('vmd')].filter(v=>v&&v!=='—').join(' ')||'—';
-  const cust=(gv('fname')+' '+gv('lname')).trim()||'—';
   const score=gv('escore');
   const role=gv('sub-role');
 
-  const entry={
-    timestamp:ts,entry_type:role==='manager'?'Manager Entry':'Sales Entry',
-    submitter:gv('sub-name'),first_name:gv('fname'),last_name:gv('lname'),
-    phone:gv('phone'),email:gv('email'),contact_pref:gv('cpref'),best_time:gv('ctime'),
-    veh_year:gv('vy')||null,veh_make:gv('vmk'),veh_model:gv('vmd'),veh_miles:gv('vmi')||null,
-    veh_trim:gv('vtr'),veh_color:gv('vcl'),veh_ownership:gv('vow'),
-    veh_payoff:gv('vpay'),veh_lease:gv('vlease'),veh_condition:gv('vcond'),
-    ro_num:gv('ro'),svc_advisor:gv('sva'),visit_reason:gv('vreason'),
-    repair_cost:gv('rcost'),repair_ratio:gv('rratio'),cust_emotion:gv('cemo'),
-    intro_made:gv('intro'),
+  const entry = {
+    timestamp:ts, entry_type:role==='manager'?'Manager Entry':'Sales Entry',
+    submitter:gv('sub-name'), first_name:gv('fname'), last_name:gv('lname'),
+    phone:gv('phone'), email:gv('email'), contact_pref:gv('cpref'), best_time:gv('ctime'),
+    veh_year:gv('vy')||null, veh_make:gv('vmk'), veh_model:gv('vmd'),
+    veh_miles:gv('vmi')||null, veh_trim:gv('vtr'), veh_color:gv('vcl'),
+    veh_ownership:gv('vow'), veh_payoff:gv('vpay'), veh_lease:gv('vlease'), veh_condition:gv('vcond'),
+    ro_num:gv('ro'), svc_advisor:gv('sva'), visit_reason:gv('vreason'),
+    repair_cost:gv('rcost'), repair_ratio:gv('rratio'), cust_emotion:gv('cemo'), intro_made:gv('intro'),
     trade_interest:document.getElementById('tr-cb').checked?'Yes':'No',
-    trade_acv:gv('tacv'),trade_expect:gv('texp'),trade_equity:gv('teq'),
-    voi:gv('voi'),voi_type:gv('voity'),voi_budget:gv('voibdg'),
-    finance_conv:gv('finconv'),timeline:gv('timeline'),
-    eng_score:parseInt(score),
-    outcome:gv('outcome'),salesperson:gv('sp'),
-    followup_date:gv('fdate')||null,followup_method:gv('fmeth'),
-    crm_entry:gv('crm'),notes:gv('notes'),
+    trade_acv:gv('tacv'), trade_expect:gv('texp'), trade_equity:gv('teq'),
+    voi:gv('voi'), voi_type:gv('voity'), voi_budget:gv('voibdg'),
+    finance_conv:gv('finconv'), timeline:gv('timeline'),
+    eng_score:score!=='—'?parseInt(score):null,
+    outcome:gv('outcome'), salesperson:gv('sp'),
+    followup_date:gv('fdate')||null, followup_method:gv('fmeth'),
+    crm_entry:gv('crm'), notes:gv('notes'),
   };
 
-  let insertedId=null;
-  try{
-    const res=await fetch(`${SB_URL}/rest/v1/s2s_entries`,{
-      method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify(entry)
-    });
-    if(!res.ok){
-      let errMsg='Save failed';
-      try{const errData=await res.json();errMsg=errData.message||errData.details||errData.hint||errMsg;}catch(e){}
-      btn.textContent=origText;btn.classList.remove('btn-loading');
-      showToast(`Error: ${errMsg}`,true);
-      return;
-    }
-    const inserted=await res.json();
-    if(inserted&&inserted.length>0) insertedId=inserted[0].id;
-  }catch(err){
-    btn.textContent=origText;btn.classList.remove('btn-loading');
-    showToast(`Network error: ${err.message||'Check connection'}`,true);
-    return;
-  }
+  submitEntry(entry);
 
-  // Create follow-up task via RPC
-  let slaLabel='';
-  const sc=parseInt(score);
-  if(insertedId){
-    try{
-      const fuRes=await fetch(`${SB_URL}/rest/v1/rpc/create_followup_task`,{
-        method:'POST',headers:H,
-        body:JSON.stringify({p_entry_id:insertedId,p_submitter:entry.submitter,p_eng_score:sc})
-      });
-      if(fuRes.ok){
-        const fuData=await fuRes.json();
-        slaLabel=fuData.sla_label||'';
-      }
-    }catch(e){console.warn('Follow-up task creation failed:',e);}
-  }
-
-  // Execute CRM push if armed
-  if(isCRMEnabled()) executeCRMPush(entry, insertedId);
-
-  // Reset button
-  btn.textContent=origText;btn.classList.remove('btn-loading');
-
-  // Note: Push notifications now handled server-side via Supabase webhook on INSERT
-  // The edge function /functions/v1/notify fires automatically
-
-  // Hot lead email
-  if(parseInt(score)>=8){
-    const recipients=['Rob.l@gallatincdjr.com','Tyler.d@gallatincdjr.com','Joe.s@gallatincdjr.com','Jbarba@weauto.us','dominick.f@gallatincdjr.com','Mich.s@gallatincdjr.com'];
-    const tempColor=parseInt(score)>=9?'#C8102E':'#C49A2A';
-    const emailHtml=`<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F5F4F1;font-family:Arial,sans-serif;">
-<div style="max-width:600px;margin:0 auto;padding:24px 16px;">
-  <div style="background:#0C0C14;border-radius:12px 12px 0 0;padding:24px 28px;">
-    <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Vyaxis · ServiceBridge</div>
-    <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">🔥 Hot Lead Alert</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.5);">Gallatin CDJR · Service Drive</div>
-  </div>
-  <div style="background:#fff;padding:28px;border-left:1px solid #E4E2DC;border-right:1px solid #E4E2DC;">
-    <div style="display:inline-block;background:${tempColor};color:#fff;border-radius:6px;padding:6px 16px;font-size:14px;font-weight:700;margin-bottom:20px;">🌡 Buying Temperature: ${score}/10</div>
-    <table style="width:100%;border-collapse:collapse;">
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;width:35%;">Customer</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;font-weight:600;">${entry.first_name} ${entry.last_name}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Phone</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.phone||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Vehicle</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.veh_year||''} ${entry.veh_make||''} ${entry.veh_model||''}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Visit Reason</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.visit_reason||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Repair Cost</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.repair_cost||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Equity</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.trade_equity||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Timeline</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.timeline||'—'}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Logged By</td><td style="padding:8px 0;border-bottom:1px solid #F0EEEB;font-size:13px;">${entry.submitter||'—'}</td></tr>
-      <tr><td style="padding:8px 0;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;">Outcome</td><td style="padding:8px 0;font-size:13px;font-weight:600;color:#C49A2A;">${entry.outcome||'—'}</td></tr>
-    </table>
-    ${entry.notes?`<div style="background:#F5F4F1;border-radius:6px;padding:14px 16px;margin-top:16px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8C897F;margin-bottom:6px;">Notes</div><div style="font-size:13px;">${entry.notes}</div></div>`:''}
-    <div style="margin-top:20px;"><a href="https://servicebridge.vyaxis.com/manager-dashboard.html" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;border-radius:6px;padding:12px 24px;font-size:13px;font-weight:600;">View in Dashboard →</a></div>
-  </div>
-  <div style="background:#EDECEA;border:1px solid #E4E2DC;border-top:none;border-radius:0 0 12px 12px;padding:16px 28px;text-align:center;">
-    <div style="font-size:11px;color:#8C897F;">ServiceBridge by Vyaxis · Gallatin CDJR · ${ts}</div>
-  </div>
-</div></body></html>`;
-    fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:recipients,subject:`🔥 Hot Lead Alert — ${entry.first_name} ${entry.last_name} · Temp ${score}/10 · ${entry.veh_year||''} ${entry.veh_make||''} ${entry.veh_model||''}`,html:emailHtml})}).catch(()=>{});
-  }
-
-  // Preview
+  // Show preview
   const rows=[
-    ['🏷 Entry Type',role==='manager'?'🟡 Manager Entry':'🔴 Sales Entry',true],
-    ['👤 Submitted By',gv('sub-name'),false],['📅 Timestamp',ts,false],null,
-    ['👤 Customer',cust,false],['📞 Phone',gv('phone'),false],['✉ Email',gv('email'),false],
-    ['📲 Contact Pref.',gv('cpref'),false],['⏰ Best Time',gv('ctime'),false],null,
-    ['🚗 Vehicle',veh,false],
-    ['📍 Mileage',gv('vmi')?Number(gv('vmi')).toLocaleString()+' mi':'—',false],
-    ['🔑 Ownership',gv('vow'),false],['💳 Equity',gv('teq'),false],['⚙️ Condition',gv('vcond'),false],null,
-    ['🔧 Visit Reason',gv('vreason'),false],['💰 Repair Cost',gv('rcost'),false],
-    ['📊 Cost vs. Value',gv('rratio'),false],['😐 Customer Mood',gv('cemo'),false],
-    ['🤝 Intro Made',gv('intro'),false],null,
-    ['🔥 Buying Temp.',score!=='—'?`${score}/10`:'—',false],
-    ['⏱ Timeline',gv('timeline'),false],['🏦 Finance',gv('finconv'),false],null,
-    ['✅ Outcome',gv('outcome'),true],['👨‍💼 Salesperson',gv('sp'),false],
-    ['📆 Follow-Up',gv('fdate'),false],['📞 Follow-Up Via',gv('fmeth'),false],
-    ['💾 CRM Entry',gv('crm'),false],['📝 Notes',gv('notes'),false],
+    ['👤 Submitter',entry.submitter,false],['📋 Type',entry.entry_type,false],null,
+    ['🧑 Customer',`${entry.first_name} ${entry.last_name}`,true],
+    ['📱 Phone',entry.phone,false],['✉ Email',entry.email,false],null,
+    ['🚗 Vehicle',[entry.veh_year,entry.veh_make,entry.veh_model].filter(v=>v&&v!='—').join(' ')||'—',false],
+    ['📏 Mileage',entry.veh_miles?entry.veh_miles+' mi':'—',false],null,
+    ['🔧 Visit Reason',entry.visit_reason,false],['💰 Repair Est.',entry.repair_cost,false],
+    ['🌡 Temp',score!=='—'?`${score}/10`:'—',false],
+    ['✅ Outcome',entry.outcome,true],['📝 Notes',entry.notes,false],
   ];
   let html='';
   rows.forEach(r=>{
@@ -1127,31 +1561,21 @@ async function submitLog(){
   });
   document.getElementById('preview-grid').innerHTML=html;
   document.getElementById('preview-wrap').classList.add('open');
-  const crmMsg=isCRMEnabled()?' CRM pushed.':'';
-  showToast(slaLabel?`Entry logged ✓ Follow-up due in ${slaLabel}.${crmMsg}`:`Entry logged successfully ✓${crmMsg}`,false);
+  const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);
   document.getElementById('preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
   for(let i=1;i<=6;i++) mark(i);
-  clearErrors();
-  loadRecent();
 }
 
-// ── RESET ──
 function resetForm(){
-  clearErrors();
-  document.querySelectorAll('input:not([type=checkbox]):not([type=hidden])').forEach(i=>i.value='');
-  document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
-  document.querySelectorAll('textarea').forEach(t=>t.value='');
-  document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
+  document.querySelectorAll('#full-page input:not([type=checkbox])').forEach(i=>i.value='');
+  document.querySelectorAll('#full-page select').forEach(s=>s.selectedIndex=0);
+  document.querySelectorAll('#full-page textarea').forEach(t=>t.value='');
+  document.querySelectorAll('#full-page input[type=checkbox]').forEach(c=>c.checked=false);
   document.querySelectorAll('.expand').forEach(e=>e.classList.remove('open'));
   document.querySelectorAll('.tog-row').forEach(r=>r.classList.remove('on'));
   document.querySelectorAll('.pill').forEach(p=>p.className='pill');
   document.querySelectorAll('.sub-pill').forEach(p=>p.classList.remove('sel'));
   document.querySelectorAll('.s-btn').forEach(b=>b.className='s-btn');
-  document.getElementById('sub-name').value='';document.getElementById('sub-role').value='';
-  document.getElementById('escore').value='';document.getElementById('outcome').value='';document.getElementById('intro').value='';
-  document.getElementById('crm').value='';
-  document.getElementById('crm-cb').checked=false;
-  document.getElementById('crm-row').classList.remove('on');
   vmd.innerHTML='<option value="">Model</option>';
   const d=document.getElementById('sp-disp');d.textContent='Select your name above to auto-assign';d.classList.remove('filled');
   document.getElementById('preview-wrap').classList.remove('open');
@@ -1160,92 +1584,316 @@ function resetForm(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ── RECENT ENTRIES ──
-async function loadRecent(){
-  const container=document.getElementById('recent-entries');
-  try{
-    const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?select=*&order=id.desc&limit=10`,{headers:H});
-    const data=await res.json();
-    if(!data.length){container.innerHTML='<p style="color:var(--text3);font-size:13px;padding:12px 0;">No entries yet.</p>';return;}
-    container.innerHTML=data.map(e=>`
-      <div class="recent-entry">
-        <div>
-          <div class="re-name">${e.submitter||'—'} <span>· ${e.first_name||''} ${e.last_name||''}</span></div>
-          <div class="re-meta">${e.veh_year||''} ${e.veh_make||''} ${e.veh_model||''} · ${e.outcome||'—'} · Score: ${e.eng_score||'—'} · ${e.created_at?new Date(e.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—'}</div>
-        </div>
-        <button class="re-edit" onclick="openEdit(${e.id})">Edit</button>
-      </div>`).join('');
-  }catch(err){container.innerHTML='<p style="color:var(--text3);font-size:13px;">Failed to load entries.</p>';}
-}
+// ══════════════════════════════════════════════════════
+// SHARED SUBMIT FUNCTION (both modes use this)
+// ══════════════════════════════════════════════════════
+function submitEntry(entry) {
+  if (!navigator.onLine) {
+    queueOffline(entry);
+    return;
+  }
 
-// ── EDIT MODAL ──
-async function openEdit(id){
-  const res=await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${id}`,{headers:H});
-  const data=await res.json();
-  if(!data.length)return;
-  const e=data[0];
-  document.getElementById('edit-id').value=e.id;
-  document.getElementById('edit-submitter').value=e.submitter||'';
-  document.getElementById('edit-first').value=e.first_name||'';
-  document.getElementById('edit-last').value=e.last_name||'';
-  document.getElementById('edit-phone').value=e.phone||'';
-  document.getElementById('edit-year').value=e.veh_year||'';
-  document.getElementById('edit-make').value=e.veh_make||'';
-  document.getElementById('edit-model').value=e.veh_model||'';
-  document.getElementById('edit-repair').value=e.repair_cost||'';
-  document.getElementById('edit-outcome').value=e.outcome||'';
-  document.getElementById('edit-score').value=e.eng_score||'';
-  document.getElementById('edit-notes').value=e.notes||'';
-  document.getElementById('edit-modal').classList.add('open');
-}
-function closeModal(){document.getElementById('edit-modal').classList.remove('open');}
-document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
-
-function showEditToast(msg,type=''){
-  const el=document.getElementById('edit-toast');
-  el.textContent=msg;el.className='edit-toast show '+type;
-  setTimeout(()=>el.className='edit-toast',3000);
-}
-
-async function saveEdit(){
-  const id=document.getElementById('edit-id').value;
-  const payload={
-    submitter:document.getElementById('edit-submitter').value,
-    first_name:document.getElementById('edit-first').value,
-    last_name:document.getElementById('edit-last').value,
-    phone:document.getElementById('edit-phone').value,
-    veh_year:document.getElementById('edit-year').value,
-    veh_make:document.getElementById('edit-make').value,
-    veh_model:document.getElementById('edit-model').value,
-    repair_cost:document.getElementById('edit-repair').value,
-    outcome:document.getElementById('edit-outcome').value,
-    eng_score:document.getElementById('edit-score').value,
-    notes:document.getElementById('edit-notes').value,
-  };
-  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${id}`,{method:'PATCH',headers:H,body:JSON.stringify(payload)});
-  closeModal();showEditToast('✓ Entry updated','green');loadRecent();
-}
-
-async function deleteEntry(){
-  if(!confirm('Delete this entry? Cannot be undone.'))return;
-  const id=document.getElementById('edit-id').value;
-  await fetch(`${SB_URL}/rest/v1/s2s_entries?id=eq.${id}`,{method:'DELETE',headers:H});
-  closeModal();showEditToast('Entry deleted');loadRecent();
-}
-
-// ── AUTO-SELECT LOGGED-IN USER ──
-(function autoSelectSub(){
-  if(!currentRep) return;
-  const pills=document.querySelectorAll('.sub-pill');
-  pills.forEach(p=>{
-    const nameEl=p.querySelector('.sub-name');
-    if(nameEl && nameEl.textContent.trim()===currentRep.name){
-      p.click();
-    }
+  fetch(`${SB_URL}/rest/v1/s2s_entries`, {
+    method: 'POST', headers: SB_HEADERS, body: JSON.stringify(entry)
+  }).catch(err => {
+    console.warn('Supabase save failed, queuing offline:', err);
+    queueOffline(entry);
   });
+
+  // Push notification
+  const pushPayload = {
+    title: `${entry.eng_score ? (entry.eng_score >= 8 ? '🔥' : entry.eng_score >= 5 ? '🌡' : '📋') : '📋'} New S2S Entry — ${entry.first_name} ${entry.last_name}`,
+    body: `${entry.veh_year || ''} ${entry.veh_make || ''} ${entry.veh_model || ''} · Score: ${entry.eng_score || '?'}/10 · ${entry.outcome || 'Logged'} · Rep: ${entry.submitter || 'Unknown'}`,
+    url: '/manager-dashboard.html',
+    entry
+  };
+  fetch('/api/send-push', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(pushPayload)
+  }).catch(() => {});
+
+  // Hot lead email alert (temp 8-10)
+  if(parseInt(entry.eng_score) >= 8) {
+    const recipients = ['Rob.l@gallatincdjr.com','Tyler.d@gallatincdjr.com','Joe.s@gallatincdjr.com','Jbarba@weauto.us','dominick.f@gallatincdjr.com','Mich.s@gallatincdjr.com'];
+    fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: recipients,
+        subject: `🔥 Hot Lead Alert — ${entry.first_name} ${entry.last_name} (Temp ${entry.eng_score}/10)`,
+        html: `<h2>🔥 Hot Service Drive Lead</h2><p><strong>${entry.first_name} ${entry.last_name}</strong> · ${entry.veh_year||''} ${entry.veh_make||''} ${entry.veh_model||''}</p><p>Temp: ${entry.eng_score}/10 · Rep: ${entry.submitter} · ${entry.outcome||'Logged'}</p><p>${entry.notes||''}</p>`
+      })
+    }).catch(() => {});
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// QUICK LOG MODE
+// ══════════════════════════════════════════════════════
+let qlStep = 1;
+const qlData = { submitter: '', sub_role: '', first_name: '', last_name: '', phone: '', veh_year: null, veh_make: '', veh_model: '', eng_score: null, outcome: '', notes: '' };
+
+// Build score buttons
+(function(){
+  const grid = document.getElementById('ql-score-grid');
+  for(let i=1; i<=10; i++){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ql-score-btn';
+    btn.textContent = i;
+    btn.onclick = function(){
+      document.querySelectorAll('.ql-score-btn').forEach(b => b.className = 'ql-score-btn');
+      this.classList.add(`qs${i}`);
+      qlData.eng_score = i;
+      setTimeout(() => qlGoTo(5), 200);
+    };
+    grid.appendChild(btn);
+  }
 })();
 
-loadRecent();
+function qlSelectRep(el, name, role, type) {
+  document.querySelectorAll('.ql-rep').forEach(r => r.classList.remove('sel'));
+  el.classList.add('sel');
+  qlData.submitter = name;
+  qlData.sub_role = type;
+  setTimeout(() => qlGoTo(2), 250);
+}
+
+function qlSelectOutcome(el, val, cls) {
+  document.querySelectorAll('.ql-outcome').forEach(o => { o.className = 'ql-outcome'; });
+  el.classList.add(cls);
+  qlData.outcome = val;
+  setTimeout(() => qlGoTo(6), 250);
+}
+
+function qlGoTo(step) {
+  qlStep = step;
+  document.querySelectorAll('.ql-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ql-success').classList.remove('active');
+
+  const panel = document.getElementById(`ql-s${step}`);
+  if (panel) panel.classList.add('active');
+
+  // Update progress
+  const pct = Math.min((step / 6) * 100, 100);
+  document.getElementById('ql-bar-fill').style.width = pct + '%';
+  document.getElementById('ql-step-label').innerHTML = `Step <strong>${step}</strong> of 6`;
+
+  // Show/hide progress bar
+  document.getElementById('ql-progress').style.display = step <= 6 ? 'block' : 'none';
+
+  // Auto-focus first input on step 2
+  if (step === 2) {
+    setTimeout(() => { const f = document.getElementById('ql-fname'); if(f) f.focus(); }, 300);
+  }
+
+  // Build review on step 6
+  if (step === 6) buildQLReview();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function qlNext() {
+  if (qlStep === 2) {
+    qlData.first_name = document.getElementById('ql-fname').value.trim();
+    qlData.last_name = document.getElementById('ql-lname').value.trim();
+    qlData.phone = document.getElementById('ql-phone').value.trim();
+    if (!qlData.first_name || !qlData.last_name) {
+      document.getElementById('ql-fname').style.borderColor = qlData.first_name ? 'var(--border)' : '#EF4444';
+      document.getElementById('ql-lname').style.borderColor = qlData.last_name ? 'var(--border)' : '#EF4444';
+      return;
+    }
+  }
+  if (qlStep === 3) {
+    qlData.veh_year = document.getElementById('ql-year').value.trim() || null;
+    qlData.veh_make = document.getElementById('ql-make').value;
+    qlData.veh_model = document.getElementById('ql-model').value;
+  }
+  qlGoTo(qlStep + 1);
+}
+
+function qlBack() {
+  if (qlStep > 1) qlGoTo(qlStep - 1);
+}
+
+function buildQLReview() {
+  const veh = [qlData.veh_year, qlData.veh_make, qlData.veh_model].filter(Boolean).join(' ') || 'Not specified';
+  const sc = qlData.eng_score || '—';
+  const scColor = sc >= 8 ? 'var(--green-mid)' : sc >= 5 ? 'var(--gold)' : sc >= 1 ? 'var(--red)' : 'var(--muted)';
+  document.getElementById('ql-review').innerHTML = `
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;">
+      <div style="color:var(--muted);font-weight:600;">Rep</div><div style="font-weight:600;">${qlData.submitter}</div>
+      <div style="color:var(--muted);font-weight:600;">Customer</div><div style="font-weight:600;">${qlData.first_name} ${qlData.last_name}</div>
+      ${qlData.phone ? `<div style="color:var(--muted);font-weight:600;">Phone</div><div>${qlData.phone}</div>` : ''}
+      <div style="color:var(--muted);font-weight:600;">Vehicle</div><div>${veh}</div>
+      <div style="color:var(--muted);font-weight:600;">Temp</div><div style="font-weight:800;color:${scColor};">${sc}/10</div>
+      <div style="color:var(--muted);font-weight:600;">Outcome</div><div style="font-weight:600;">${qlData.outcome}</div>
+    </div>`;
+}
+
+function qlSubmit() {
+  const btn = document.getElementById('ql-submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  qlData.notes = document.getElementById('ql-notes').value.trim();
+
+  const n=new Date(),mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const ts=`${mo[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()} at ${n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})} CT`;
+
+  const entry = {
+    timestamp: ts,
+    entry_type: qlData.sub_role === 'manager' ? 'Manager Entry' : 'Sales Entry',
+    submitter: qlData.submitter,
+    first_name: qlData.first_name,
+    last_name: qlData.last_name,
+    phone: qlData.phone || null,
+    veh_year: qlData.veh_year,
+    veh_make: qlData.veh_make || null,
+    veh_model: qlData.veh_model || null,
+    eng_score: qlData.eng_score,
+    outcome: qlData.outcome,
+    salesperson: qlData.submitter,
+    notes: qlData.notes || null,
+  };
+
+  submitEntry(entry);
+
+  // Show success screen
+  const veh = [qlData.veh_year, qlData.veh_make, qlData.veh_model].filter(Boolean).join(' ') || '';
+  document.getElementById('ql-success-detail').innerHTML = `
+    <strong>${qlData.first_name} ${qlData.last_name}</strong>${veh ? ` · ${veh}` : ''}<br>
+    Temp ${qlData.eng_score || '—'}/10 · ${qlData.outcome}<br>
+    Logged by ${qlData.submitter} · ${ts}
+  `;
+
+  document.querySelectorAll('.ql-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ql-progress').style.display = 'none';
+  document.getElementById('ql-success').classList.add('active');
+
+  btn.disabled = false;
+  btn.textContent = 'Submit Entry →';
+}
+
+function qlReset() {
+  qlStep = 1;
+  qlData.submitter = ''; qlData.sub_role = ''; qlData.first_name = ''; qlData.last_name = '';
+  qlData.phone = ''; qlData.veh_year = null; qlData.veh_make = ''; qlData.veh_model = '';
+  qlData.eng_score = null; qlData.outcome = ''; qlData.notes = '';
+
+  document.querySelectorAll('.ql-rep').forEach(r => r.classList.remove('sel'));
+  document.getElementById('ql-fname').value = '';
+  document.getElementById('ql-lname').value = '';
+  document.getElementById('ql-phone').value = '';
+  document.getElementById('ql-year').value = '';
+  document.getElementById('ql-make').selectedIndex = 0;
+  document.getElementById('ql-model').innerHTML = '<option value="">Select model...</option>';
+  document.querySelectorAll('.ql-score-btn').forEach(b => b.className = 'ql-score-btn');
+  document.querySelectorAll('.ql-outcome').forEach(o => o.className = 'ql-outcome');
+  document.getElementById('ql-notes').value = '';
+  document.getElementById('ql-fname').style.borderColor = '';
+  document.getElementById('ql-lname').style.borderColor = '';
+
+  document.getElementById('ql-success').classList.remove('active');
+  qlGoTo(1);
+}
+
+// ══════════════════════════════════════════════════════
+// MODE SWITCHING
+// ══════════════════════════════════════════════════════
+let currentMode = 'quick';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-quick-btn').classList.toggle('active', mode === 'quick');
+  document.getElementById('mode-full-btn').classList.toggle('active', mode === 'full');
+  document.getElementById('ql-wrap').classList.toggle('active', mode === 'quick');
+  document.getElementById('full-progress').style.display = mode === 'full' ? 'flex' : 'none';
+  document.getElementById('full-page').style.display = mode === 'full' ? 'block' : 'none';
+  document.getElementById('footer').style.display = mode === 'full' ? 'flex' : 'none';
+  localStorage.setItem('sb_log_mode', mode);
+}
+
+// Auto-detect mode on load
+(function initMode(){
+  const saved = localStorage.getItem('sb_log_mode');
+  const isMobile = window.innerWidth < 768;
+  const mode = saved || (isMobile ? 'quick' : 'full');
+  setMode(mode);
+})();
+
+// ══════════════════════════════════════════════════════
+// OFFLINE SUPPORT
+// ══════════════════════════════════════════════════════
+const OFFLINE_KEY = 'sb_offline_queue';
+
+function getOfflineQueue() {
+  try { return JSON.parse(localStorage.getItem(OFFLINE_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function queueOffline(entry) {
+  const queue = getOfflineQueue();
+  queue.push(entry);
+  localStorage.setItem(OFFLINE_KEY, JSON.stringify(queue));
+  updateOfflineUI();
+}
+
+function updateOfflineUI() {
+  const bar = document.getElementById('offline-bar');
+  const badge = document.getElementById('offline-queue-count');
+  const queue = getOfflineQueue();
+  const isOffline = !navigator.onLine;
+
+  bar.classList.toggle('visible', isOffline || queue.length > 0);
+  if (queue.length > 0) {
+    badge.style.display = 'inline';
+    badge.textContent = `${queue.length} queued`;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+async function syncOfflineQueue() {
+  const queue = getOfflineQueue();
+  if (queue.length === 0) return;
+
+  let synced = 0;
+  const remaining = [];
+
+  for (const entry of queue) {
+    try {
+      const res = await fetch(`${SB_URL}/rest/v1/s2s_entries`, {
+        method: 'POST', headers: SB_HEADERS, body: JSON.stringify(entry)
+      });
+      if (res.ok) synced++;
+      else remaining.push(entry);
+    } catch {
+      remaining.push(entry);
+    }
+  }
+
+  localStorage.setItem(OFFLINE_KEY, JSON.stringify(remaining));
+  updateOfflineUI();
+
+  if (synced > 0) {
+    const toast = document.getElementById('sync-toast');
+    toast.textContent = `✓ ${synced} offline entr${synced === 1 ? 'y' : 'ies'} synced`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+}
+
+window.addEventListener('online', () => {
+  updateOfflineUI();
+  syncOfflineQueue();
+});
+window.addEventListener('offline', updateOfflineUI);
+updateOfflineUI();
+
+// Try syncing on load if online
+if (navigator.onLine) syncOfflineQueue();
 </script>
 </body>
 </html>
