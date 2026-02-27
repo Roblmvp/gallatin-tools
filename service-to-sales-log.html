@@ -988,9 +988,10 @@ async function submitLog(){
     crm_entry:gv('crm'),notes:gv('notes'),
   };
 
+  let insertedId=null;
   try{
     const res=await fetch(`${SB_URL}/rest/v1/s2s_entries`,{
-      method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(entry)
+      method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify(entry)
     });
     if(!res.ok){
       let errMsg='Save failed';
@@ -999,10 +1000,28 @@ async function submitLog(){
       showToast(`Error: ${errMsg}`,true);
       return;
     }
+    const inserted=await res.json();
+    if(inserted&&inserted.length>0) insertedId=inserted[0].id;
   }catch(err){
     btn.textContent=origText;btn.classList.remove('btn-loading');
     showToast(`Network error: ${err.message||'Check connection'}`,true);
     return;
+  }
+
+  // Create follow-up task via RPC
+  let slaLabel='';
+  const sc=parseInt(score);
+  if(insertedId){
+    try{
+      const fuRes=await fetch(`${SB_URL}/rest/v1/rpc/create_followup_task`,{
+        method:'POST',headers:H,
+        body:JSON.stringify({p_entry_id:insertedId,p_submitter:entry.submitter,p_eng_score:sc})
+      });
+      if(fuRes.ok){
+        const fuData=await fuRes.json();
+        slaLabel=fuData.sla_label||'';
+      }
+    }catch(e){console.warn('Follow-up task creation failed:',e);}
   }
 
   // Reset button
@@ -1075,7 +1094,7 @@ async function submitLog(){
   });
   document.getElementById('preview-grid').innerHTML=html;
   document.getElementById('preview-wrap').classList.add('open');
-  showToast('Entry logged successfully ✓',false);
+  showToast(slaLabel?`Entry logged ✓ Follow-up due in ${slaLabel}.`:'Entry logged successfully ✓',false);
   document.getElementById('preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
   for(let i=1;i<=6;i++) mark(i);
   clearErrors();
