@@ -211,14 +211,6 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
 .toast-err { border-color:rgba(224,27,54,0.3) !important; }
 .toast-err .toast-dot { background:var(--red) !important; }
 
-/* ── CRM Push Button ── */
-.crm-push { display:flex;flex-direction:column;align-items:center;gap:6px;width:100%; }
-.crm-btn { width:100%;padding:12px 18px;border-radius:var(--rsm);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s var(--spring);border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);display:flex;align-items:center;justify-content:center;gap:8px; }
-.crm-btn:hover { border-color:var(--blue);color:var(--text);background:var(--blue-soft);transform:translateY(-1px); }
-.crm-btn.crm-armed { border-color:rgba(108,112,240,0.4);background:var(--blue-soft);color:var(--blue); }
-.crm-btn.crm-pushed { border-color:rgba(45,212,160,0.4);background:var(--green-soft);color:var(--green);pointer-events:none; }
-.crm-status { font-size:11px;color:var(--text3);font-style:italic; }
-
 .ro-display {
   background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--rsm);
   padding:11px 14px;font-size:14px;color:var(--text3);font-style:italic;
@@ -711,9 +703,9 @@ textarea { resize:vertical;min-height:88px;line-height:1.6; }
         <select id="fmeth"><option value="">Select...</option><option>Phone Call</option><option>Text Message</option><option>Email</option><option>In-Person at Next Visit</option></select>
       </div>
       <div class="field"><label class="lbl">Push to CRM</label>
-        <div class="crm-push">
-          <button type="button" class="crm-btn" id="crm-btn" onclick="pushToCRM()">📤 Push to CRM</button>
-          <div class="crm-status" id="crm-status"></div>
+        <div class="tog-row" id="crm-row" onclick="document.getElementById('crm-cb').checked=!document.getElementById('crm-cb').checked;document.getElementById('crm-row').classList.toggle('on',document.getElementById('crm-cb').checked);">
+          <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">Auto-push to CRM</div><div style="font-size:11px;color:var(--text3);margin-top:1px;">Customer will be sent to CRM after entry is logged</div></div>
+          <label class="tog"><input type="checkbox" id="crm-cb"><div class="tog-track"></div><div class="tog-knob"></div></label>
         </div>
         <input type="hidden" id="crm" value="">
       </div>
@@ -915,39 +907,13 @@ document.getElementById('vreason').addEventListener('change',()=>mark(4));
 const gv=id=>{const e=document.getElementById(id);return e?(e.value||'—'):'—';};
 
 // ── SUBMIT ──
-// ── Push to CRM (arm/disarm toggle — fires after submit) ──
-let crmArmed=false;
-function pushToCRM(){
-  const btn=document.getElementById('crm-btn');
-  const status=document.getElementById('crm-status');
-  if(crmArmed){
-    crmArmed=false;
-    btn.innerHTML='📤 Push to CRM';
-    btn.classList.remove('crm-armed');
-    status.textContent='';
-    document.getElementById('crm').value='';
-  } else {
-    crmArmed=true;
-    btn.innerHTML='✓ CRM push queued — will send on submit';
-    btn.classList.add('crm-armed');
-    status.textContent='Click again to cancel';
-    document.getElementById('crm').value='Yes — pushed to CRM';
-  }
-}
+// ── Push to CRM (toggle — fires after submit) ──
+function isCRMEnabled(){ return document.getElementById('crm-cb').checked; }
 
 function executeCRMPush(entry){
-  // This fires after successful Supabase insert
-  const btn=document.getElementById('crm-btn');
-  const status=document.getElementById('crm-status');
-  btn.innerHTML='<span class="btn-spinner"></span> Pushing to CRM...';
-  btn.classList.remove('crm-armed');
-  // Replace this timeout with actual CRM API integration
-  setTimeout(()=>{
-    btn.innerHTML='✅ Pushed to CRM';
-    btn.classList.add('crm-pushed');
-    const now=new Date();
-    status.textContent=`Pushed ${now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true})} · ${entry.first_name} ${entry.last_name}${entry.phone?' · '+entry.phone:''}`;
-  },800);
+  document.getElementById('crm').value='Yes — pushed to CRM';
+  // Replace this timeout with actual CRM API integration (VinSolutions, DealerSocket, etc.)
+  console.log('CRM push fired for:',entry.first_name,entry.last_name,entry.phone);
 }
 
 // ── Phone auto-format ──
@@ -1072,7 +1038,7 @@ async function submitLog(){
   }
 
   // Execute CRM push if armed
-  if(crmArmed) executeCRMPush(entry);
+  if(isCRMEnabled()) executeCRMPush(entry);
 
   // Reset button
   btn.textContent=origText;btn.classList.remove('btn-loading');
@@ -1144,7 +1110,8 @@ async function submitLog(){
   });
   document.getElementById('preview-grid').innerHTML=html;
   document.getElementById('preview-wrap').classList.add('open');
-  showToast(slaLabel?`Entry logged ✓ Follow-up due in ${slaLabel}.`:'Entry logged successfully ✓',false);
+  const crmMsg=isCRMEnabled()?' CRM pushed.':'';
+  showToast(slaLabel?`Entry logged ✓ Follow-up due in ${slaLabel}.${crmMsg}`:`Entry logged successfully ✓${crmMsg}`,false);
   document.getElementById('preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
   for(let i=1;i<=6;i++) mark(i);
   clearErrors();
@@ -1166,9 +1133,8 @@ function resetForm(){
   document.getElementById('sub-name').value='';document.getElementById('sub-role').value='';
   document.getElementById('escore').value='';document.getElementById('outcome').value='';document.getElementById('intro').value='';
   document.getElementById('crm').value='';
-  crmArmed=false;
-  const crmBtn=document.getElementById('crm-btn');crmBtn.innerHTML='📤 Push to CRM';crmBtn.classList.remove('crm-pushed','crm-armed');
-  document.getElementById('crm-status').textContent='';
+  document.getElementById('crm-cb').checked=false;
+  document.getElementById('crm-row').classList.remove('on');
   vmd.innerHTML='<option value="">Model</option>';
   const d=document.getElementById('sp-disp');d.textContent='Select your name above to auto-assign';d.classList.remove('filled');
   document.getElementById('preview-wrap').classList.remove('open');
