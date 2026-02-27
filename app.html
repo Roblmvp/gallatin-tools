@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-(function(){
-  const rep = JSON.parse(sessionStorage.getItem('sb_rep') || 'null');
-  if (!rep) { window.location.replace('/login.html'); }
-})();
-</script>
+  <!-- ══ SUPABASE AUTH ══ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/auth-guard.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -452,14 +449,9 @@
 const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
 const SB_HEADERS = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+function _authH(){ const t=window.sbSession?.access_token||SB_KEY; return {'apikey':SB_KEY,'Authorization':'Bearer '+t}; }
 
-const USERS = [
-  { id: 'rl', name: 'Robert Lisowski', first: 'Robert', role: 'admin',   pin: '5757' },
-  { id: 'td', name: 'Tyler Doyle',     first: 'Tyler',  role: 'manager', pin: '1234' },
-  { id: 'ak', name: 'Andrew Kirk',     first: 'Andrew', role: 'sales',   pin: '1234' },
-  { id: 'dj', name: 'DJ Rogers',       first: 'DJ',     role: 'sales',   pin: '1234' },
-  { id: 'km', name: 'Kody McCann',     first: 'Kody',   role: 'sales',   pin: '1234' },
-];
+// USERS removed — auth via SB_AUTH + user_profiles table
 let currentUser = null;
 let homeEntries = [];
 
@@ -468,7 +460,7 @@ function loadSession() {
   try {
     const s = JSON.parse(sessionStorage.getItem('sb_session') || 'null');
     if (!s || Date.now() - s.time > 8*60*60*1000) return null;
-    return USERS.find(u => u.id === s.id) || null;
+    return s || null; // Legacy compat — returns raw session object
   } catch { return null; }
 }
 function clearSession() { sessionStorage.removeItem('sb_session'); sessionStorage.removeItem('sb_rep'); }
@@ -594,7 +586,7 @@ async function buildHome() {
 
   // Fetch live data from Supabase
   try {
-    const res = await fetch(SB_URL + '/rest/v1/s2s_entries?select=*&order=id.desc&limit=200', { headers: SB_HEADERS });
+    const res = await fetch(SB_URL + '/rest/v1/s2s_entries?select=*&order=id.desc&limit=200', { headers: _authH() });
     homeEntries = await res.json();
   } catch(e) { homeEntries = []; }
 
@@ -768,11 +760,6 @@ function goTo(url) { window.location.href = url; }
 function buildAdminPanel() {
   const logs = getLoginLogs();
   const todayLogs = logs.filter(l => new Date(l.time).toDateString() === new Date().toDateString());
-  const activeCount = USERS.filter(u => getUserActive(u.id)).length;
-  const userRows = USERS.map(u => {
-    const active = getUserActive(u.id);
-    return `<div class="user-row"><div class="user-avatar ${u.role}">${u.first[0]}</div><div class="user-info"><div class="user-name">${u.name}</div><div class="user-meta"><span class="role-badge ${u.role}">${u.role}</span>&nbsp;PIN: ${u.pin}</div></div><div class="user-controls"><button class="toggle-switch ${active?'on':''}" id="tog-${u.id}" onclick="toggleUserActive('${u.id}')" ${u.id==='rl'?'disabled style="opacity:0.4;cursor:not-allowed"':''}></button></div></div>`;
-  }).join('');
   const logItems = logs.length === 0 ? '<p style="color:var(--muted);font-size:13px;padding:12px 0;">No login activity yet.</p>'
     : logs.slice(0,15).map(l => {
         const d = new Date(l.time);
@@ -781,11 +768,9 @@ function buildAdminPanel() {
       }).join('');
   document.getElementById('admin-content').innerHTML = `
     <div class="stat-grid" style="margin-top:20px;">
-      <div class="stat-card"><div class="stat-val">${USERS.length}</div><div class="stat-lbl">Users</div></div>
-      <div class="stat-card"><div class="stat-val">${activeCount}</div><div class="stat-lbl">Active</div></div>
       <div class="stat-card"><div class="stat-val">${todayLogs.length}</div><div class="stat-lbl">Logins Today</div></div>
     </div>
-    <div class="admin-section"><div class="admin-section-title">User Access</div>${userRows}</div>
+    <div class="admin-section"><div class="admin-section-title">User Management</div><p style="color:var(--muted);font-size:13px;padding:12px 0;">User management has moved to the <a href="admin-panel.html" style="color:var(--red);">Admin Panel</a>.</p></div>
     <div class="admin-section"><div class="admin-section-title">Recent Login Activity</div><div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;padding:4px 16px;">${logItems}</div></div>
     <div class="admin-section"><div class="admin-section-title">Quick Actions</div>
       <div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;margin-bottom:10px;" onclick="clearLoginLog()">
@@ -801,10 +786,10 @@ function toggleUserActive(id) {
   if (id === 'rl') return;
   const current = getUserActive(id); setUserActive(id, !current);
   const tog = document.getElementById('tog-' + id); if (tog) tog.classList.toggle('on', !current);
-  const user = USERS.find(u => u.id === id); showToast(`${user.first} ${!current?'activated':'deactivated'}`);
+  showToast(`User ${!current?'activated':'deactivated'}`);
 }
 function clearLoginLog() { if (!confirm('Clear all login history?')) return; localStorage.removeItem('sb_login_log'); buildAdminPanel(); showToast('Login log cleared'); }
-function logout() { currentUser = null; clearSession(); unsubscribeFromPush(); document.getElementById('nav-bar').classList.remove('visible'); window.location.replace('/login.html'); }
+function logout() { currentUser = null; clearSession(); unsubscribeFromPush(); document.getElementById('nav-bar').classList.remove('visible'); if(window.signOut) window.signOut(); else window.location.replace('/login.html'); }
 function showToast(msg) { const t = document.getElementById('app-toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
 
 // ── PUSH NOTIFICATIONS ──
@@ -845,28 +830,27 @@ async function initNotifButton() { updateNotifButton(await checkNotifStatus()); 
 if ('serviceWorker' in navigator) { window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})}); }
 
 // ── INIT ──
-function init() {
-  const sbRep = JSON.parse(sessionStorage.getItem('sb_rep')||'null');
-  if (sbRep) {
-    const matched = USERS.find(u => u.name === sbRep.name);
-    if (matched) {
-      currentUser = matched;
-      ensureSbRep(currentUser);
-      addLoginLog(currentUser);
-      saveSession(currentUser);
-      buildHome(); buildNav(); initAppNav(); showScreen('screen-home');
-      subscribeToPush(currentUser);
-      return;
-    }
-  }
-  const saved = loadSession();
-  if (saved) {
-    currentUser = saved;
-    ensureSbRep(currentUser);
-    buildHome(); buildNav(); initAppNav(); showScreen('screen-home');
-    return;
-  }
-  window.location.replace('/login.html');
+// ── AUTH-GATED INIT ──
+async function init() {
+  const { currentUser: authUser } = await SB_AUTH.init({ requiredRole: 'any' });
+
+  // Map auth user to legacy currentUser shape
+  currentUser = {
+    id: authUser.id,
+    name: authUser.name,
+    first: authUser.first,
+    role: authUser.role.toLowerCase(),
+    pin: '****',
+  };
+
+  ensureSbRep(currentUser);
+  addLoginLog(currentUser);
+  saveSession(currentUser);
+  buildHome();
+  buildNav();
+  initAppNav();
+  showScreen('screen-home');
+  subscribeToPush(currentUser);
 }
 init();
 </script>
