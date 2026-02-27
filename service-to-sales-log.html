@@ -1043,13 +1043,8 @@ async function submitLog(){
   // Reset button
   btn.textContent=origText;btn.classList.remove('btn-loading');
 
-  // Push notification
-  const pushPayload={
-    title:`${parseInt(score)>=8?'🔥':parseInt(score)>=5?'🌡':'📋'} New S2S Entry — ${entry.first_name} ${entry.last_name}`,
-    body:`${entry.veh_year||''} ${entry.veh_make||''} ${entry.veh_model||''} · Score: ${entry.eng_score}/10 · ${entry.outcome||'Logged'} · Rep: ${entry.submitter||'Unknown'}`,
-    url:'/manager-dashboard.html',entry
-  };
-  fetch('/api/send-push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pushPayload)}).catch(()=>{});
+  // Note: Push notifications now handled server-side via Supabase webhook on INSERT
+  // The edge function /functions/v1/notify fires automatically
 
   // Hot lead email
   if(parseInt(score)>=8){
