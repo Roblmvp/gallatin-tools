@@ -174,6 +174,7 @@ body { background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-
   .code-digit { width:42px;height:50px;font-size:20px; }
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <div class="bg-grid"></div>
@@ -318,6 +319,7 @@ body { background: var(--ink); color: var(--text); font-family: 'DM Sans', sans-
 const SB_URL = 'https://jbkgwtohwsbaorhvuuqb.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impia2d3dG9od3NiYW9yaHZ1dXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjkwNDIsImV4cCI6MjA4NzU0NTA0Mn0.GRXOYbIuVDxU9-FEBYmyd1QmytVUrMIAxbnOSfepzuU';
 const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+const _sb = window.supabase.createClient(SB_URL, SB_KEY);
 
 let profiles = [];
 let selectedProfile = null;
@@ -390,19 +392,17 @@ async function doEmailLogin() {
   btn.classList.add('btn-loading'); btn.disabled = true;
 
   try {
-    // Authenticate with Supabase Auth
-    const res = await fetch(SB_URL + '/auth/v1/token?grant_type=password', {
-      method: 'POST',
-      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    const data = await res.json();
+    // Authenticate with Supabase Auth SDK — this stores the session properly
+    const { data, error } = await _sb.auth.signInWithPassword({ email, password });
 
-    if (!res.ok || data.error) {
-      showMsg('login-msg', data.error_description || data.msg || 'Invalid email or password.', 'error');
+    if (error) {
+      showMsg('login-msg', error.message || 'Invalid email or password.', 'error');
       btn.classList.remove('btn-loading'); btn.disabled = false;
       return;
     }
+
+    const session = data.session;
+    const authToken = session?.access_token;
 
     // Find matching profile
     const profile = profiles.find(p => p.email && p.email.toLowerCase() === email);
@@ -414,7 +414,7 @@ async function doEmailLogin() {
 
     // Check if must reset password on first login
     if (profile.must_reset_password) {
-      pendingUser = { ...profile, auth_token: data.access_token };
+      pendingUser = { ...profile, auth_token: authToken };
       document.getElementById('set-pw-sub').textContent = `Welcome, ${profile.first_name}! Create a secure password for your account.`;
       btn.classList.remove('btn-loading'); btn.disabled = false;
       showStep('step-set-password');
@@ -423,7 +423,7 @@ async function doEmailLogin() {
 
     // Check if 2FA is enabled
     if (profile.two_factor_enabled && profile.two_factor_phone) {
-      pendingUser = { ...profile, auth_token: data.access_token };
+      pendingUser = { ...profile, auth_token: authToken };
       const masked = maskPhone(profile.two_factor_phone || profile.phone);
       document.getElementById('2fa-sub').textContent = `We sent a 6-digit code to your phone ending in ${masked}.`;
       btn.classList.remove('btn-loading'); btn.disabled = false;
@@ -433,7 +433,7 @@ async function doEmailLogin() {
     }
 
     // Success — no 2FA
-    completeLogin(profile, data.access_token);
+    completeLogin(profile, authToken);
 
   } catch(e) {
     showMsg('login-msg', 'Connection error. Please try again.', 'error');
@@ -547,10 +547,8 @@ async function doForgotPassword() {
   if (!email || !email.includes('@')) { showMsg('forgot-msg', 'Please enter a valid email.', 'error'); return; }
 
   try {
-    const res = await fetch(SB_URL + '/auth/v1/recover', {
-      method: 'POST',
-      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, gotrue_meta_security: {}, options: {} })
+    await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login.html'
     });
     showMsg('forgot-msg', 'If an account exists with this email, you will receive a password reset link.', 'success');
   } catch(e) {
@@ -575,14 +573,10 @@ async function doSetPassword() {
   }
 
   try {
-    // Update password via Supabase Auth
-    const res = await fetch(SB_URL + '/auth/v1/user', {
-      method: 'PUT',
-      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + pendingUser.auth_token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw })
-    });
+    // Update password via Supabase Auth SDK
+    const { data, error } = await _sb.auth.updateUser({ password: pw });
 
-    if (res.ok) {
+    if (!error) {
       // Clear the must_reset flag if we have a profile ID
       if (pendingUser.id) {
         await fetch(SB_URL + '/rest/v1/user_profiles?id=eq.' + pendingUser.id, {
@@ -604,8 +598,7 @@ async function doSetPassword() {
         completeLogin(pendingUser, pendingUser.auth_token);
       }
     } else {
-      const errData = await res.json().catch(() => ({}));
-      showMsg('setpw-msg', errData.msg || errData.error_description || 'Could not set password. The link may have expired — try "Forgot password" again.', 'error');
+      showMsg('setpw-msg', error.message || 'Could not set password. The link may have expired — try "Forgot password" again.', 'error');
     }
   } catch(e) {
     showMsg('setpw-msg', 'Connection error. Please try again.', 'error');
@@ -737,12 +730,13 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ── DETECT PASSWORD RESET TOKEN FROM URL ──
-function checkForResetToken() {
+async function checkForResetToken() {
   // Supabase sends tokens in the URL hash: #access_token=xxx&type=recovery
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
   const accessToken = params.get('access_token');
   const type = params.get('type');
+  const refreshToken = params.get('refresh_token');
 
   // Also check query params (some Supabase versions use these)
   const query = new URLSearchParams(window.location.search);
@@ -753,24 +747,26 @@ function checkForResetToken() {
   const tokenType = type || qType;
 
   if (token && (tokenType === 'recovery' || tokenType === 'signup' || tokenType === 'invite')) {
-    // We have a valid recovery/invite token — show set password form
+    // Set the session in the Supabase SDK so updateUser works
+    if (refreshToken) {
+      await _sb.auth.setSession({ access_token: token, refresh_token: refreshToken });
+    }
+
     pendingUser = { auth_token: token, fromReset: true };
 
     // Try to get the user info from the token
-    fetch(SB_URL + '/auth/v1/user', {
-      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token }
-    }).then(r => r.json()).then(userData => {
-      if (userData && userData.email) {
-        // Find matching profile
-        const profile = profiles.find(p => p.email && p.email.toLowerCase() === userData.email.toLowerCase());
+    try {
+      const { data: { user } } = await _sb.auth.getUser(token);
+      if (user && user.email) {
+        const profile = profiles.find(p => p.email && p.email.toLowerCase() === user.email.toLowerCase());
         if (profile) {
           pendingUser = { ...profile, auth_token: token, fromReset: true };
           document.getElementById('set-pw-sub').textContent = `Welcome back, ${profile.first_name || profile.name.split(' ')[0]}! Set your new password below.`;
         } else {
-          document.getElementById('set-pw-sub').textContent = `Set your new password for ${userData.email}.`;
+          document.getElementById('set-pw-sub').textContent = `Set your new password for ${user.email}.`;
         }
       }
-    }).catch(() => {});
+    } catch(e) {}
 
     // Clean the URL so the token isn't visible
     history.replaceState(null, '', window.location.pathname);
@@ -782,7 +778,17 @@ function checkForResetToken() {
 }
 
 // ── INIT ──
-loadProfiles().then(() => {
+loadProfiles().then(async () => {
+  // If user already has a valid session, skip login and go to app
+  const { data: { session } } = await _sb.auth.getSession();
+  if (session && session.user) {
+    const profile = profiles.find(p => p.email && p.email.toLowerCase() === session.user.email?.toLowerCase());
+    if (profile) {
+      completeLogin(profile, session.access_token);
+      return;
+    }
+  }
+  // Otherwise check for recovery/invite tokens
   checkForResetToken();
 });
 </script>
