@@ -1,11 +1,18 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// ServiceBridge Auth Guard v1.0
+// ServiceBridge Auth Guard v1.1
 // Drop-in authentication module for all ServiceBridge pages.
-// Uses Supabase Auth (JWT validation) — replaces legacy PIN/sessionStorage auth.
 //
-// USAGE: Include this <script> block in the <head> of every protected page,
+// Supports TWO auth modes:
+//   1. Supabase Auth (JWT) — from email/password login (preferred)
+//   2. Legacy sb_rep sessionStorage — from PIN login (backward-compat)
+//
+// The guard checks for a Supabase session first. If none exists, it falls
+// back to the sb_rep key in sessionStorage. If neither exists, redirect
+// to login.html.
+//
+// USAGE: Include this <script> in the <head> of every protected page,
 // right after the Supabase JS SDK import. Then call:
-//   const { currentUser, session, sbFetch } = await SB_AUTH.init({ requiredRole: 'any' });
+//   const { currentUser } = await SB_AUTH.init({ requiredRole: 'any' });
 //
 // ══════════════════════════════════════════════════════════════════════════════
 
@@ -16,6 +23,7 @@ const SB_AUTH = (function() {
   let _supabase = null;
   let _session = null;
   let _currentUser = null;
+  let _authMode = null; // 'supabase' or 'legacy'
 
   function getSupabase() {
     if (!_supabase) {
@@ -50,18 +58,22 @@ const SB_AUTH = (function() {
     }
   }
 
-  // Authenticated fetch wrapper — attaches JWT to all Supabase REST calls
+  // Authenticated fetch wrapper — attaches JWT if available, anon key otherwise
   async function sbFetch(path, options = {}) {
-    const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) {
-      redirect('login.html');
-      throw new Error('No active session');
+    let token = SB_KEY;
+    if (_authMode === 'supabase' && _session) {
+      token = _session.access_token;
+    } else {
+      try {
+        const sb = getSupabase();
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) token = session.access_token;
+      } catch(e) {}
     }
     const url = path.startsWith('http') ? path : `${SB_URL}${path}`;
     const headers = {
       'apikey': SB_KEY,
-      'Authorization': 'Bearer ' + session.access_token,
+      'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
       ...(options.headers || {})
     };
@@ -72,7 +84,9 @@ const SB_AUTH = (function() {
     const { requiredRole = 'any', onReady = null } = opts;
     const sb = getSupabase();
 
-    // ── 1. Check for valid Supabase Auth session ──
+    // ══════════════════════════════════════════════════════════
+    // AUTH PATH 1: Check for valid Supabase Auth session (JWT)
+    // ══════════════════════════════════════════════════════════
     let session = null;
     try {
       const { data, error } = await sb.auth.getSession();
@@ -83,145 +97,172 @@ const SB_AUTH = (function() {
       session = null;
     }
 
-    // ── 2. No session → redirect to login ──
-    if (!session || !session.user) {
-      // Clean up any legacy session artifacts
-      sessionStorage.removeItem('sb_session');
-      sessionStorage.removeItem('sb_rep');
-      redirect('login.html');
-      // Return a never-resolving promise to prevent page JS from executing
-      return new Promise(() => {});
-    }
+    if (session && session.user) {
+      _session = session;
+      _authMode = 'supabase';
 
-    _session = session;
-
-    // ── 3. Fetch user profile from user_profiles ──
-    let profile = null;
-    try {
-      const res = await fetch(`${SB_URL}/rest/v1/user_profiles?auth_id=eq.${session.user.id}&select=*&limit=1`, {
-        headers: {
-          'apikey': SB_KEY,
-          'Authorization': 'Bearer ' + session.access_token,
-        }
-      });
-      const rows = await res.json();
-      if (rows && rows.length > 0) {
-        profile = rows[0];
-      }
-    } catch (e) {
-      console.warn('[SB_AUTH] Profile fetch failed:', e.message);
-    }
-
-    // ── 4. Fallback: try matching by email if auth_id not linked yet ──
-    if (!profile) {
+      // Fetch user profile from user_profiles by auth_id
+      let profile = null;
       try {
-        const email = session.user.email;
-        if (email) {
-          const res = await fetch(`${SB_URL}/rest/v1/user_profiles?email=ilike.${encodeURIComponent(email)}&select=*&limit=1`, {
-            headers: {
-              'apikey': SB_KEY,
-              'Authorization': 'Bearer ' + session.access_token,
-            }
-          });
-          const rows = await res.json();
-          if (rows && rows.length > 0) {
-            profile = rows[0];
-            // Link auth_id for future lookups
-            fetch(`${SB_URL}/rest/v1/user_profiles?id=eq.${profile.id}`, {
-              method: 'PATCH',
-              headers: {
-                'apikey': SB_KEY,
-                'Authorization': 'Bearer ' + session.access_token,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal',
-              },
-              body: JSON.stringify({ auth_id: session.user.id })
-            }).catch(() => {});
-          }
-        }
+        const res = await fetch(`${SB_URL}/rest/v1/user_profiles?auth_id=eq.${session.user.id}&select=*&limit=1`, {
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + session.access_token }
+        });
+        const rows = await res.json();
+        if (rows && rows.length > 0) profile = rows[0];
       } catch (e) {
-        console.warn('[SB_AUTH] Email profile fallback failed:', e.message);
+        console.warn('[SB_AUTH] Profile fetch failed:', e.message);
+      }
+
+      // Fallback: match by email
+      if (!profile) {
+        try {
+          const email = session.user.email;
+          if (email) {
+            const res = await fetch(`${SB_URL}/rest/v1/user_profiles?email=ilike.${encodeURIComponent(email)}&select=*&limit=1`, {
+              headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + session.access_token }
+            });
+            const rows = await res.json();
+            if (rows && rows.length > 0) {
+              profile = rows[0];
+              // Link auth_id for future lookups
+              fetch(`${SB_URL}/rest/v1/user_profiles?id=eq.${profile.id}`, {
+                method: 'PATCH',
+                headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + session.access_token, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ auth_id: session.user.id })
+              }).catch(() => {});
+            }
+          }
+        } catch (e) {
+          console.warn('[SB_AUTH] Email fallback failed:', e.message);
+        }
+      }
+
+      // Fallback: match by name
+      if (!profile) {
+        try {
+          const meta = session.user.user_metadata || {};
+          const fullName = meta.full_name || meta.name || '';
+          if (fullName) {
+            const res = await fetch(`${SB_URL}/rest/v1/user_profiles?name=ilike.${encodeURIComponent(fullName)}&select=*&limit=1`, {
+              headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + session.access_token }
+            });
+            const rows = await res.json();
+            if (rows && rows.length > 0) profile = rows[0];
+          }
+        } catch (e) {}
+      }
+
+      // Build currentUser from Supabase session + profile
+      const email = session.user.email || '';
+      const meta = session.user.user_metadata || {};
+      const name = profile?.name || meta.full_name || meta.name || email.split('@')[0] || 'User';
+      const role = normalizeRole(profile?.role || meta.role);
+
+      _currentUser = {
+        id: session.user.id,
+        email: email,
+        name: name,
+        first: name.split(' ')[0],
+        role: role,
+        initials: makeInitials(name),
+        profile_id: profile?.id || null,
+        phone: profile?.phone || meta.phone || '',
+        title: profile?.title || '',
+        avatar_color: profile?.avatar_color || null,
+      };
+
+      // Also sync to sb_rep for any legacy code that reads it
+      sessionStorage.setItem('sb_rep', JSON.stringify({
+        name: _currentUser.name,
+        initials: _currentUser.initials,
+        role: _currentUser.role,
+        title: _currentUser.title,
+        email: _currentUser.email,
+      }));
+
+    } else {
+
+      // ══════════════════════════════════════════════════════════
+      // AUTH PATH 2: Fallback to legacy sb_rep sessionStorage
+      // ══════════════════════════════════════════════════════════
+      const sbRep = sessionStorage.getItem('sb_rep');
+      if (sbRep) {
+        try {
+          const rep = JSON.parse(sbRep);
+          if (rep && rep.name) {
+            _authMode = 'legacy';
+            _session = null;
+            _currentUser = {
+              id: null,
+              email: rep.email || '',
+              name: rep.name,
+              first: rep.name.split(' ')[0],
+              role: normalizeRole(rep.role),
+              initials: rep.initials || makeInitials(rep.name),
+              profile_id: null,
+              phone: '',
+              title: rep.title || '',
+              avatar_color: null,
+            };
+            console.info('[SB_AUTH] Using legacy session for:', rep.name);
+          }
+        } catch(e) {
+          console.warn('[SB_AUTH] Could not parse sb_rep:', e.message);
+        }
+      }
+
+      // ══════════════════════════════════════════════════════════
+      // NO AUTH AT ALL → redirect to login
+      // ══════════════════════════════════════════════════════════
+      if (!_currentUser) {
+        sessionStorage.removeItem('sb_session');
+        sessionStorage.removeItem('sb_rep');
+        redirect('login.html');
+        return new Promise(() => {});
       }
     }
 
-    // ── 5. Fallback: try matching by name from user metadata ──
-    if (!profile) {
-      try {
-        const meta = session.user.user_metadata || {};
-        const fullName = meta.full_name || meta.name || '';
-        if (fullName) {
-          const res = await fetch(`${SB_URL}/rest/v1/user_profiles?full_name=ilike.${encodeURIComponent(fullName)}&select=*&limit=1`, {
-            headers: {
-              'apikey': SB_KEY,
-              'Authorization': 'Bearer ' + session.access_token,
-            }
-          });
-          const rows = await res.json();
-          if (rows && rows.length > 0) {
-            profile = rows[0];
-          }
-        }
-      } catch (e) {}
-    }
-
-    // ── 6. Build standardized currentUser ──
-    const email = session.user.email || '';
-    const meta = session.user.user_metadata || {};
-    const name = profile?.full_name || profile?.name || meta.full_name || meta.name || email.split('@')[0] || 'User';
-    const role = normalizeRole(profile?.role || meta.role);
-    const first = name.split(' ')[0];
-
-    _currentUser = {
-      id: session.user.id,
-      email: email,
-      name: name,
-      first: first,
-      role: role,
-      initials: makeInitials(name),
-      profile_id: profile?.id || null,
-      phone: profile?.phone || meta.phone || '',
-      title: profile?.title || '',
-      avatar_color: profile?.avatar_color || null,
-    };
-
-    // ── 7. Role-based access check ──
+    // ── Role-based access check ──
     if (requiredRole !== 'any') {
       const allowed = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
       const normalizedAllowed = allowed.map(r => normalizeRole(r));
       if (!normalizedAllowed.includes(_currentUser.role)) {
-        // Not authorized for this page → redirect to home
         redirect('app.html');
         return new Promise(() => {});
       }
     }
 
-    // ── 8. Expose globally for legacy page code ──
+    // ── Expose globally for page code ──
     window.currentUser = _currentUser;
     window.sbSession = _session;
     window.sbFetch = sbFetch;
     window.SB_URL = SB_URL;
     window.SB_KEY = SB_KEY;
 
-    // ── 9. Set up sign-out function ──
+    // ── Sign-out function ──
     window.signOut = async function() {
       sessionStorage.removeItem('sb_session');
       sessionStorage.removeItem('sb_rep');
-      await sb.auth.signOut();
+      if (_authMode === 'supabase') {
+        try { await sb.auth.signOut(); } catch(e) {}
+      }
       redirect('login.html');
     };
 
-    // ── 10. Set up auth state listener for token refresh ──
-    sb.auth.onAuthStateChange((event, newSession) => {
-      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
-        if (!newSession) {
-          redirect('login.html');
-        } else {
-          _session = newSession;
+    // ── Auth state listener (Supabase mode only) ──
+    if (_authMode === 'supabase') {
+      sb.auth.onAuthStateChange((event, newSession) => {
+        if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          if (!newSession) {
+            redirect('login.html');
+          } else {
+            _session = newSession;
+          }
         }
-      }
-    });
+      });
+    }
 
-    // ── 11. Callback ──
+    // ── Callback ──
     if (onReady && typeof onReady === 'function') {
       onReady(_currentUser, _session);
     }
@@ -229,7 +270,7 @@ const SB_AUTH = (function() {
     return { currentUser: _currentUser, session: _session, sbFetch, supabase: sb };
   }
 
-  // ── Public helper: get auth headers for raw fetch calls ──
+  // Public helper: get auth headers for raw fetch calls
   function getHeaders(extra = {}) {
     return {
       'apikey': SB_KEY,
@@ -239,5 +280,13 @@ const SB_AUTH = (function() {
     };
   }
 
-  return { init, sbFetch, getHeaders, getSupabase, get currentUser() { return _currentUser; }, get session() { return _session; } };
+  return {
+    init,
+    sbFetch,
+    getHeaders,
+    getSupabase,
+    get currentUser() { return _currentUser; },
+    get session() { return _session; },
+    get authMode() { return _authMode; }
+  };
 })();
